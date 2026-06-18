@@ -27,7 +27,7 @@ class MessageBus:
         else:
             queue = self._queues.get(message.recipient)
             if queue is None:
-                raise ValueError(f"No subscriber for agent: {message.recipient}")
+                queue = self.subscribe(message.recipient)
             await queue.put(message)
 
     async def send_and_wait(
