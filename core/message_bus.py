@@ -46,10 +46,11 @@ class MessageBus:
         timeout: float = 30.0,
     ) -> Message:
         queue = self.subscribe("orchestrator")
-        deadline = asyncio.get_event_loop().time() + timeout
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + timeout
 
         while True:
-            remaining = deadline - asyncio.get_event_loop().time()
+            remaining = deadline - loop.time()
             if remaining <= 0:
                 raise asyncio.TimeoutError()
 
