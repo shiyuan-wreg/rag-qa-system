@@ -1,5 +1,38 @@
 # 更新日志
 
+## [v2.0.0] - 2026-06-18
+
+### 新增
+
+- **Nexus Multi-Agent 内核（Phase 1）**
+  - `core/llm.py`：统一 LLM Client，默认通义千问，预留 Kimi/DeepSeek/OpenAI 兼容接口
+  - `core/message_bus.py`：内存异步消息总线，支持发布/订阅、send-and-wait、超时控制
+  - `core/message.py`：标准化 Message 数据结构
+  - `core/session.py`：任务状态跟踪
+  - `core/agents/base.py`：Agent 基类与消息循环
+  - `core/agents/orchestrator.py`：Orchestrator 协调器，串联完整工作流
+  - `core/agents/planner.py`：Planner 规划器，将用户需求拆解为执行步骤
+  - `core/agents/retriever.py`：Retriever 检索器（Phase 1 mock）
+  - `core/agents/executor.py`：Executor 执行器（Phase 1 mock）
+  - `core/agents/summarizer.py`：Summarizer 总结器
+  - `core/agents/critic.py`：Critic 评估器，多维度回答质量评分
+  - `main.py`：命令行入口，启动所有 Agent 并交互
+  - 完整的 pytest 测试覆盖（14 个新测试）
+
+### 架构调整
+
+- 将原有 RAG + Function Calling 两个独立 demo 重构为 Nexus Agent 系统的基础模块
+- 旧 demo 代码迁移至 `legacy/` 目录备份
+- 新增 `docs/superpowers/specs/` 设计文档和 `docs/superpowers/plans/` 实现计划
+
+### 技术栈扩展
+
+- Python 3.12 + LangChain + 通义千问 API + Chroma + FastAPI
+- asyncio 异步消息总线
+- pytest + pytest-asyncio 测试框架
+
+---
+
 ## [v1.1.0] - 2026-06-05
 
 ### 新增
