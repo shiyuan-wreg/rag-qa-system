@@ -4,6 +4,9 @@
 # 向量数据库（会自动生成，不需要上传）
 chroma_db/
 
+# Claude Code worktrees
+.claude/
+
 # Python
 __pycache__/
 *.py[cod]
