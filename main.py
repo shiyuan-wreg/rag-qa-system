@@ -1,129 +1,72 @@
-"""
-智能文档任务 Agent - 命令行版
-==============================
-运行方式：
-    venv/Scripts/python.exe main.py
+"""Nexus Phase 1 - Command line entry point."""
 
-支持命令：
-    /clear  - 清空对话历史
-    /history - 查看对话历史
-    /eval   - 运行测试用例评估
-    /quit   - 退出
-"""
+import asyncio
 
-import os
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
-from core.agent import Agent
-from core.rag_tool import init_rag_tool, search_docs
-from core.tools import TOOL_MAP
-from eval.evaluator import run_test_cases
-
-API_KEY = os.environ.get("DASHSCOPE_API_KEY", "")
+from core.agents.critic import CriticAgent
+from core.agents.executor import ExecutorAgent
+from core.agents.orchestrator import OrchestratorAgent
+from core.agents.planner import PlannerAgent
+from core.agents.retriever import RetrieverAgent
+from core.agents.summarizer import SummarizerAgent
+from core.config import Config
+from core.llm import LLMClient
+from core.message_bus import MessageBus
 
 
-def print_banner():
+def create_llm_client():
+    if Config.LLM_PROVIDER == "qwen":
+        return LLMClient(
+            provider="qwen",
+            model=Config.LLM_MODEL,
+            api_key=Config.DASHSCOPE_API_KEY,
+        )
+    else:
+        raise ValueError(f"Unsupported provider: {Config.LLM_PROVIDER}")
+
+
+async def main():
     print("=" * 60)
-    print("基于 RAG + Function Calling 的智能文档任务 Agent")
-    print("=" * 60)
-    print("\n支持的功能：")
-    print("  - 知识库问答: Python 中列表和元组有什么区别？")
-    print("  - 代码执行: 帮我算 (15 + 27) * 3")
-    print("  - 文件读取: 读取 docs/python_guide.txt 文件")
-    print("  - 目录查看: 列出当前目录下的文件")
-    print("\n命令: /clear 清空历史, /history 查看历史, /eval 评估, /quit 退出")
+    print("Nexus Phase 1 - Multi-Agent Workflow Assistant")
     print("=" * 60)
 
-
-def main():
-    print_banner()
-
-    if not API_KEY:
-        print("\n错误: 请先配置 DASHSCOPE_API_KEY")
+    if not Config.DASHSCOPE_API_KEY:
+        print("\nError: DASHSCOPE_API_KEY not set. Please check your .env file.")
         return
 
-    # 初始化 RAG 工具
-    print("\n[+] 正在初始化 RAG 知识库...")
-    init_rag_tool()
+    bus = MessageBus()
+    llm = create_llm_client()
 
-    # 注册 RAG 工具到工具映射
-    TOOL_MAP["search_docs"] = search_docs
+    orchestrator = OrchestratorAgent(bus, llm)
+    planner = PlannerAgent(bus, llm)
+    retriever = RetrieverAgent(bus, llm)
+    executor = ExecutorAgent(bus, llm)
+    summarizer = SummarizerAgent(bus, llm)
+    critic = CriticAgent(bus, llm)
 
-    agent = Agent()
+    agents = [orchestrator, planner, retriever, executor, summarizer, critic]
+    tasks = [asyncio.create_task(agent.run()) for agent in agents]
 
-    while True:
-        try:
-            user_input = input("\n你: ").strip()
-        except (KeyboardInterrupt, EOFError):
-            print("\n再见！")
-            break
+    print("\nAgents started. Type your question or '/quit' to exit.\n")
 
-        if not user_input:
-            continue
+    try:
+        while True:
+            query = input("You: ").strip()
+            if query.lower() in ("/quit", "/exit", "quit", "exit"):
+                break
+            if not query:
+                continue
 
-        # 特殊命令
-        if user_input == "/quit":
-            print("再见！")
-            break
-        elif user_input == "/clear":
-            agent.clear_history()
-            print("[Agent] 对话历史已清空")
-            continue
-        elif user_input == "/history":
-            print_history(agent)
-            continue
-        elif user_input == "/eval":
-            run_evaluation(agent)
-            continue
+            print("\nNexus: thinking...\n")
+            result = await orchestrator.process(query)
 
-        # 正常对话
-        print("Agent: ", end="", flush=True)
-        result = agent.chat(user_input)
-        print(result["answer"])
-
-        if result.get("tool_calls"):
-            print(f"\n[本次调用工具数: {len(result['tool_calls'])}]")
-
-
-def print_history(agent):
-    """打印对话历史。"""
-    print("\n对话历史:")
-    for msg in agent.get_history():
-        role = msg["role"]
-        content = msg.get("content", "")
-        if role == "user":
-            print(f"  用户: {content}")
-        elif role == "assistant":
-            if "tool_calls" in msg:
-                print(f"  模型(调用工具):")
-                for tc in msg["tool_calls"]:
-                    print(f"    → {tc['function']['name']}({tc['function']['arguments']})")
-            else:
-                print(f"  模型: {content}")
-        elif role == "tool":
-            print(f"  工具结果: {content[:100]}{'...' if len(content) > 100 else ''}")
-
-
-def run_evaluation(agent):
-    """运行测试用例评估。"""
-    test_cases = [
-        {"query": "Python 中列表和元组有什么区别？"},
-        {"query": "帮我算一下 (15 + 27) * 3"},
-        {"query": "docs 目录下有什么文件？"},
-    ]
-
-    print("\n[+] 开始运行评估...")
-    result = run_test_cases(agent.chat, test_cases)
-
-    print(f"\n平均得分: {result['average_score']}")
-    for item in result["results"]:
-        print(f"\n问题: {item['query']}")
-        print(f"回答: {item['answer'][:100]}{'...' if len(item['answer']) > 100 else ''}")
-        print(f"得分: {item['scores']}")
+            print(f"Answer: {result['answer']}\n")
+            print(f"Plan: {result['plan']}\n")
+            print(f"Critique: {result['critique']}\n")
+    finally:
+        for agent in agents:
+            agent.stop()
+        await asyncio.gather(*tasks, return_exceptions=True)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
