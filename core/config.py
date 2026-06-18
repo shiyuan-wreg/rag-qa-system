@@ -1,0 +1,13 @@
+"""Configuration management."""
+
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+class Config:
+    LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "qwen")
+    LLM_MODEL = os.environ.get("LLM_MODEL", "qwen-turbo")
+    DASHSCOPE_API_KEY = os.environ.get("DASHSCOPE_API_KEY", "")
