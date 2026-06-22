@@ -65,3 +65,55 @@
 - 设计文档：`docs/superpowers/specs/2026-06-18-nexus-personal-ai-workflow-agent-design.md`
 - 实现计划：`docs/superpowers/plans/2026-06-18-phase1-multi-agent-kernel.md`
 - 更新日志：`CHANGELOG.md`
+
+---
+
+## 2026-06-22
+
+### 今日目标
+
+把分散的多个 Web 项目整合为统一作品集门户「个人集成学习网站」,完成 Phase 1。
+
+### 完成内容(分支 feat/portfolio-phase1,13 提交,20 测试通过)
+
+- ✅ 设计 + 计划文档(spec / plan),brainstorming→writing-plans→subagent-driven 全流程
+- ✅ 清理:抽离 `agent-console-ai`(独立到桌面成自有仓库)、删除 `legacy/`
+- ✅ monorepo 重组:`backends/`(rag_app, fc_app)、`frontends/`(portfolio, nexus-learning-web)、`deploy/`
+- ✅ React 门户外壳:首页作品网格 + 导航 + iframe demo 页 + 学习跳转 + 个人页
+- ✅ Dockerfile(rag/fc)+ nginx 反代 + docker-compose,本地一键 `up`
+- ✅ 本地跑通:/、/me、/rag/、/fc/、/learn/ 全 200;子路径反代验证通过
+
+### 关键决策
+
+1. **整合方案 C**(统一外壳 + iframe):快速上线、保留已有成果、可演进到方案 A。
+2. **首页/个人页不放个人信息**(姓名/自我介绍/学校),要"普通网站"观感。
+3. **agent-console-ai 独立**(鸿蒙课设):不并入,需问答能力走 HTTP API 调用沿用。
+4. **纯净 Ubuntu + Docker** 部署路线(不用宝塔),练硬技能;服务器(首尔免备案)+域名已购。
+
+### 遇到的问题与修复
+
+1. **node_modules/dist 被误提交**(portfolio 缺 .gitignore,68MB):reset 重做成单干净提交 + 补 .gitignore + 根级安全网。
+2. **子路径反代坑**:RAG/FC 内联前端往绝对 `/chat` 提交,挂 `/rag/` 下会失效;改为相对路径(chat/clear/eval)。
+3. **Windows CRLF**:`.sh`/Dockerfile 被转 CRLF 会导致 bash/容器报错;加 `.gitattributes` 强制 LF。
+4. **Docker Desktop 未启动 + 国内拉镜像超时**:手动启动引擎 + 预拉 nginx/python 基础镜像。
+5. **agent-console-ai 残留目录被进程占用删不掉**:桌面副本已安全提交,待释放后手动删。
+
+### 测试状态
+
+```bash
+20 passed in 4.86s
+```
+
+### 下一步
+
+- 决定 feat/portfolio-phase1 是否合并 master
+- Phase 2:Nexus Web 后端(SSE 多智能体可视化)
+- Phase 3:cs-quiz 集成;Phase 4:部署首尔服务器
+
+### 相关文档
+
+- 交接状态:`docs/PROJECT-STATE.md`(重进先读)
+- 设计:`docs/superpowers/specs/2026-06-22-personal-portfolio-integration-design.md`
+- 计划:`docs/superpowers/plans/2026-06-22-portfolio-phase1-monorepo-and-shell.md`
+- 学习:`docs/learning/portfolio-integration-guide.md`
+- 运行:`deploy/README.md`

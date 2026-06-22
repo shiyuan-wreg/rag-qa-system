@@ -274,4 +274,49 @@ Critic    正在评分……  得分 0.85   ✓
 
 ---
 
+## 11. Phase 1 实操回顾(把踩的坑变成学习案例)
+
+Phase 1 已经完成,整套门户在本地 `docker compose` 跑起来了。下面把实现过程中真实遇到的问题拎出来——这些就是面试时能讲的"工程细节"。
+
+### 11.1 现在你能动手看的东西
+
+```bash
+# 1. 启动 Docker Desktop(等引擎就绪)
+# 2. 构建前端
+bash deploy/build-frontends.sh
+# 3. 起全部容器
+docker compose -f deploy/docker-compose.yml up -d --build
+# 4. 浏览器 http://127.0.0.1:8080
+```
+看完 `docker compose ps`(看三个容器)、`docker logs deploy-rag-1`(看后端日志)、`docker logs deploy-nginx-1`,再对照 `deploy/nginx/nginx.conf` 理解请求怎么被分发。
+
+### 11.2 坑 1:node_modules 被提交进 git(68MB)
+
+新建的 `frontends/portfolio` 没有 `.gitignore`,`npm install` 后 `git add` 把 3700+ 个依赖文件全提交了。
+- **教训**:任何前端工程,建好第一件事就是加 `.gitignore`(node_modules/、dist/)。
+- **怎么修的**:因为分支没推送过,用 `git reset --mixed` 把那两个臃肿提交退回,补 `.gitignore` 后重新只提交源码。学到:`git reset --soft/--mixed/--hard` 的区别。
+
+### 11.3 坑 2:子路径反向代理(最值得讲的一个)
+
+RAG/FC 的网页里 JS 是往**绝对路径** `/chat` 发请求的。直接访问后端(8001)没问题,但一旦经 Nginx 挂到 `/rag/` 子路径下(在 iframe 里),浏览器在 `/rag/` 页面发 `/chat` 会打到**站点根**而不是 `/rag/chat`,功能就废了。
+- **修法**:把 fetch 路径从 `/chat` 改成相对的 `chat`。浏览器在 `/rag/` 下解析相对路径 `chat` → `/rag/chat` → Nginx 的 `location /rag/ { proxy_pass http://rag:8001/; }` 去掉前缀 → 后端收到 `/chat`。
+- **关键知识点**:`proxy_pass` 结尾带不带 `/` 决定要不要剥前缀;相对 URL 相对"当前文档路径"解析(所以 iframe 的 src 必须带结尾斜杠 `/rag/`)。
+
+### 11.4 坑 3:Windows 换行符(CRLF)
+
+Git 在 Windows 默认把 `.sh`、Dockerfile 检出成 CRLF。bash 执行带 `\r` 的脚本会报 `'\r': command not found`,Linux 容器里也可能出错。
+- **修法**:加 `.gitattributes`,对 `*.sh`/`Dockerfile`/`*.conf` 强制 `eol=lf`。这是跨平台协作的标准做法。
+
+### 11.5 坑 4:Docker 环境
+
+- Docker CLI 装了不代表引擎在跑——**Docker Desktop 必须先启动**(否则报找不到 `dockerDesktopLinuxEngine` 管道)。
+- 国内拉 Docker Hub 镜像易超时:先 `docker pull nginx:1.27-alpine`、`docker pull python:3.12-slim` 预缓存,或在 Docker Desktop 配镜像加速器。
+- 2G 内存小服务器:别在本机跑大模型,走云端 API;加 swap。
+
+### 11.6 这次用到的工程流程(也是能讲的)
+
+需求脑暴(brainstorming)→ 写设计文档(spec)→ 写实现计划(plan,拆成可验收任务)→ 子代理逐任务实现 + 评审 → 整分支总评审 → 收尾。每个任务 TDD/验证 + 频繁提交。这套"先设计后实现、带评审关卡"的习惯,本身就是工程素养。
+
+---
+
 > 本文档由 Claude 于 2026-06-22 创建。后续设计或实现有变动时同步更新。

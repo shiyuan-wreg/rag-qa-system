@@ -1,5 +1,30 @@
 # 更新日志
 
+## [v2.1.0] - 2026-06-22
+
+### 新增
+
+- **个人集成学习网站(作品集门户)Phase 1**
+  - 整合多个 Web 项目为统一门户,方案 C(统一 React 外壳 + iframe 嵌入)
+  - monorepo 重组:`backends/`(rag_app, fc_app)、`frontends/`(portfolio, nexus-learning-web)、`deploy/`
+  - `frontends/portfolio`:React+Vite+TS+Tailwind 门户外壳(首页/导航/AI 作品 iframe 页/学习跳转/个人页)
+  - `deploy/`:Dockerfile(rag/fc)+ nginx 反向代理 + docker-compose 编排 + 前端构建脚本
+  - 本地 `docker compose up` 一键跑通,Nginx 8080 统一入口反代各后端
+  - 设计文档、实现计划、配套学习文档、本地运行指南
+
+### 架构调整
+
+- 旧 `app.py` → `backends/rag_app/main.py`;旧 `legacy/agent_app.py` → `backends/fc_app/main.py`
+- 删除 `legacy/`(保留在 git 历史);抽离 `agent-console-ai`(独立课程设计项目)
+- RAG/FC 内联前端改用相对 fetch 路径以适配子路径反代
+- 新增 `.gitattributes` 强制 shell/Dockerfile/conf 用 LF;`.gitignore` 增加前端构建产物安全网
+
+### 技术栈扩展
+
+- Nginx + Docker + docker-compose;React Router
+
+---
+
 ## [v2.0.0] - 2026-06-18
 
 ### 新增
