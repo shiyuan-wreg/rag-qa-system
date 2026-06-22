@@ -1,13 +1,13 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-06-22
+> 最近更新:2026-06-22(分支已合并入 master,清理收尾)
 
 ---
 
 ## 一句话现状
 
-ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;工作在分支 `feat/portfolio-phase1`(13 个提交,20 测试通过),**尚未合并到 master**。
+ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`(线性历史,分支已删除)**。`master` 本地领先 `origin/master` 36 提交,**尚未推送**。
 
 ---
 
@@ -41,8 +41,8 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 
 ## 待处理 / 下一步(按优先级)
 
-1. **决定分支去向**:`feat/portfolio-phase1` 是否合并回 master(finishing-a-development-branch 的 4 选项还没选)。建议合并以consolidate。
-2. **删 agent-console-ai 残留目录**:`ai-demos/agent-console-ai` 物理残留被进程占用删不掉;桌面独立副本(`C:/Users/hzs17/Desktop/agent-console-ai`,commit d02f65d)已完整。关掉占用程序或重启后 `rm -rf` 即可。
+1. **~~决定分支去向~~ ✅ 已完成**:`feat/portfolio-phase1` 已合并入 `master`(线性历史/快进,分支已删)。
+2. **删 agent-console-ai 残留目录**:`ai-demos/agent-console-ai` 现已是**空目录**(内容已清),但目录节点仍被某进程(疑似 DevEco Studio)句柄锁定,`rm`/`Remove-Item` 均报 busy。未被 git 跟踪,无功能影响。**重启一次即可 `rm -rf` 清除**。桌面独立副本(`C:/Users/hzs17/Desktop/agent-console-ai`,commit d02f65d,1515 文件)已完整。
 3. **Phase 2**:Nexus Web 后端(FastAPI + SSE 多智能体可视化)→ `backends/nexus_app`,门户加 `/nexus`。
 4. **Phase 3**:cs-quiz-app 完整集成(Fastify+SQLite 容器 + `/quiz` 静态前端);个人页目前只有占位链接。
 5. **Phase 4**:部署到首尔服务器(Ubuntu + swap + Docker + 域名 A 记录 + Let's Encrypt HTTPS)。

@@ -117,3 +117,19 @@
 - 计划:`docs/superpowers/plans/2026-06-22-portfolio-phase1-monorepo-and-shell.md`
 - 学习:`docs/learning/portfolio-integration-guide.md`
 - 运行:`deploy/README.md`
+
+---
+
+## 2026-06-22(收尾·任务 A)
+
+### 做了什么
+- 核实 git 实况:`feat/portfolio-phase1` 已**合并入 `master`**(线性/快进,分支已删),存档文档原写"尚未合并"系过期 → 已修正 `PROJECT-STATE.md`。
+- `agent-console-ai/` 残留目录已是**空目录**,但被进程句柄锁定(疑 DevEco Studio),`rm`/`Remove-Item` 均报 busy;未被 git 跟踪、无功能影响,**重启后 `rm -rf` 即可清**。桌面副本 d02f65d(1515 文件)完整。
+
+### 状态
+- `master` 本地领先 `origin/master` 36 提交,**未推送**(待用户确认对外动作)。
+- docker stack 仍关闭。
+
+### 下一步
+- Phase 2:Nexus Web 后端(`backends/nexus_app`,FastAPI + SSE 多智能体可视化)。
+- 重启后清 `agent-console-ai/` 空残留;按需 `git push`。
