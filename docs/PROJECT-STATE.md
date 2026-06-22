@@ -57,7 +57,7 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 - **首页/个人页不放姓名、自我介绍、学校**(要"普通网站"观感);站点标题「个人集成学习网站」。
 - **本地优先**:先本地 docker-compose 跑通,再部署服务器(服务器+域名已购,韩国首尔,免备案)。
 - **系统镜像走纯净 Ubuntu + Docker**(不用宝塔),练部署硬技能。
-- **agent-console-ai 是独立课程设计(鸿蒙前端),不并入 ai-demos**;如需 ai-demos 的 agent 问答能力,走 **HTTP API 调用沿用**(鸿蒙端指向 ai-demos 部署的 /rag 或 /fc 接口),不合并代码/仓库。
+- **agent-console-ai 是独立课程设计(鸿蒙前端),不并入 ai-demos**;如需 ai-demos 的 agent 问答能力,走 **HTTP API 调用沿用**(鸿蒙端指向 ai-demos 部署的 /rag 或 /fc 接口),不合并代码/仓库。对接契约文档:`docs/api-integration-for-harmonyos.md`(给鸿蒙端开发者/AI 阅读)。
 
 ---
 
