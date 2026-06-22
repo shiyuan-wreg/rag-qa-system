@@ -7,8 +7,8 @@
     POST /eval    - 运行测试用例评估
     GET  /        - 前端页面
 
-运行方式：
-    venv/Scripts/python.exe -m uvicorn app:app --reload --port 8000
+运行方式（从仓库根目录）：
+    venv/Scripts/python.exe -m uvicorn backends.rag_app.main:app --reload --port 8001
 """
 
 import os

@@ -90,33 +90,31 @@
 
 ```
 ai-demos/
-├── main.py                 # 命令行版入口
-├── app.py                  # FastAPI Web 服务
+├── main.py                 # Nexus 多智能体命令行入口
 ├── requirements.txt
 ├── .env.example
-├── core/                   # Agent 核心
-│   ├── agent.py            # Agent 核心循环
-│   ├── tools.py            # 工具函数定义
-│   └── rag_tool.py         # RAG 检索工具封装
-├── rag/                    # RAG 模块
-│   ├── loader.py           # 文档加载
-│   ├── splitter.py         # 文本切分
-│   ├── vectorstore.py      # 向量数据库
-│   └── retriever.py        # 检索器
-├── eval/                   # 评估模块
-│   └── evaluator.py        # 回答质量评估
+├── backends/               # Web 后端(各自容器化)
+│   ├── rag_app/main.py     # RAG 问答 FastAPI 服务
+│   └── fc_app/main.py      # Function Calling FastAPI 服务
+├── frontends/              # 前端
+│   ├── portfolio/          # 统一门户外壳(React+Vite+TS+Tailwind)
+│   └── nexus-learning-web/ # Nexus 交互式学习站
+├── deploy/                 # 部署:docker-compose + nginx + 脚本
+│   ├── docker-compose.yml
+│   ├── nginx/nginx.conf
+│   ├── build-frontends.sh
+│   └── README.md           # 本地运行步骤
+├── core/                   # Nexus 内核
+│   ├── agents/             # Orchestrator/Planner/Retriever/Executor/Summarizer/Critic
+│   ├── llm.py message_bus.py message.py session.py config.py
+│   ├── agent.py tools.py rag_tool.py   # RAG demo 依赖的单体 Agent
+├── rag/                    # RAG 模块(loader/splitter/vectorstore/retriever)
+├── eval/                   # 回答质量评估
 ├── tests/                  # 单元测试
-│   ├── test_tools.py
-│   └── test_agent.py
-├── docs/                   # 知识库文档
-│   └── python_guide.txt
-└── legacy/                 # 原 demo 代码备份
-    ├── old_agent.py
-    ├── old_agent_app.py
-    ├── old_app.py
-    ├── old_rag.py
-    └── step*.py
+└── docs/                   # 文档(specs/plans/learning/career + 知识库)
 ```
+
+> 说明:旧的 `app.py` 已迁入 `backends/rag_app/main.py`,旧 `legacy/` demo 已删除(保留在 git 历史)。本地一键启动见 `deploy/README.md`。
 
 ---
 

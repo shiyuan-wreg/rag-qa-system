@@ -27,3 +27,7 @@ ENV/
 # 系统文件
 .DS_Store
 Thumbs.db
+
+# 前端依赖与构建产物(各 frontends/* 另有自己的 .gitignore,此处为根级安全网)
+**/node_modules/
+**/dist/

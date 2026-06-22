@@ -5,10 +5,10 @@ Function Calling Agent - FastAPI 版
     POST /chat       - 发送消息，返回 Agent 回答
     GET  /           - 前端页面
 
-运行方式:
-    venv\Scripts\python.exe -m uvicorn agent_app:app --reload --port 8001
+运行方式(从仓库根目录):
+    venv\Scripts\python.exe -m uvicorn backends.fc_app.main:app --reload --port 8002
 
-然后浏览器打开: http://127.0.0.1:8001
+然后浏览器打开: http://127.0.0.1:8002
 """
 
 import json
