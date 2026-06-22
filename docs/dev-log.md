@@ -133,3 +133,26 @@
 ### 下一步
 - Phase 2:Nexus Web 后端(`backends/nexus_app`,FastAPI + SSE 多智能体可视化)。
 - 重启后清 `agent-console-ai/` 空残留;按需 `git push`。
+
+---
+
+## 2026-06-22(部署启动·未完结)
+
+### 做了什么
+- 修正部署配置,支持生产 HTTPS:
+  - `deploy/docker-compose.yml`:nginx 暴露 80/443,挂载 `/etc/letsencrypt`,新增 certbot 自动续期容器
+  - `deploy/nginx/nginx.conf`:HTTP→HTTPS 跳转、443 SSL 配置、转发头
+  - 新增 `deploy/init-ssl.sh`:首次 certbot standalone 申请证书
+- 本地提交并推送 `master` 到 GitHub:本地领先 origin 37 提交 → 已同步(`1b7fc3b`)。
+
+### 阻塞
+- 服务器 SSH 登录凭证未拿到。用户创建了密钥对,但尚未提供私钥文件(`.pem`)路径;备用方案是回阿里云控制台重置 root 密码。
+
+### 待继续
+1. 拿到 SSH 私钥文件路径或 root 密码
+2. SSH 登录 8.213.145.110,安装 Docker + Docker Compose
+3. `git clone` 到 `/opt/ai-demos`
+4. 上传 `.env`(含 `DASHSCOPE_API_KEY`)
+5. 运行 `bash deploy/init-ssl.sh hzs1716775963@126.com`
+6. `bash deploy/build-frontends.sh` + `docker compose -f deploy/docker-compose.yml up -d --build`
+7. 验证 `https://www.shiyuan-wreg.cloud`
