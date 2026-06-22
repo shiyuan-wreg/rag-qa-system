@@ -258,7 +258,7 @@ HTML_PAGE = """
             try {
                 const form = new FormData();
                 form.append('query', text);
-                const res = await fetch('/chat', { method: 'POST', body: form });
+                const res = await fetch('chat', { method: 'POST', body: form });
                 const data = await res.json();
 
                 loading.remove();
@@ -277,7 +277,7 @@ HTML_PAGE = """
         }
 
         async function clearHistory() {
-            await fetch('/clear', { method: 'POST' });
+            await fetch('clear', { method: 'POST' });
             messages.innerHTML = `
                 <div class="welcome">
                     <div style="font-size:40px;margin-bottom:10px;">🤖</div>
@@ -295,7 +295,7 @@ HTML_PAGE = """
             messages.appendChild(loading);
 
             try {
-                const res = await fetch('/eval', { method: 'POST' });
+                const res = await fetch('eval', { method: 'POST' });
                 const data = await res.json();
                 loading.remove();
 

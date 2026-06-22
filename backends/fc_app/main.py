@@ -1,4 +1,4 @@
-"""
+r"""
 Function Calling Agent - FastAPI 版
 ====================================
 接口:
@@ -421,7 +421,7 @@ AGENT_HTML = """
             try {
                 const form = new FormData();
                 form.append('query', text);
-                const res = await fetch('/chat', { method: 'POST', body: form });
+                const res = await fetch('chat', { method: 'POST', body: form });
                 const data = await res.json();
 
                 loading.remove();
@@ -440,7 +440,7 @@ AGENT_HTML = """
         }
 
         async function clearHistory() {
-            await fetch('/clear', { method: 'POST' });
+            await fetch('clear', { method: 'POST' });
             messages.innerHTML = `
                 <div class="welcome">
                     <div style="font-size:40px;margin-bottom:10px;">&#129302;</div>
