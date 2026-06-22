@@ -68,6 +68,8 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 - 国内拉 Docker Hub 镜像易超时:先 `docker pull nginx:1.27-alpine` 和 `python:3.12-slim` 预缓存,或配镜像加速器。
 - LLM 用通义千问(dashscope),`DASHSCOPE_API_KEY` 在仓库根 `.env`(未跟踪)。
 - SDD 进度账本:`.git/sdd/progress.md`。
+- **远程**:`origin` = github `shiyuan-wreg/rag-qa-system.git`;**本地已提交但未推送**(到 2026-06-22 为止)——需要时再 `git push`(对外动作,需用户确认)。
+- **docker stack 当前已关闭**(2026-06-22 存档时 `compose down`);恢复运行见 `deploy/README.md`(build-frontends + compose up)。
 
 ---
 
