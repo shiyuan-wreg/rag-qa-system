@@ -17,7 +17,7 @@ import traceback
 
 import dashscope
 from dotenv import load_dotenv
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Body
 from fastapi.responses import HTMLResponse
 
 load_dotenv()
@@ -235,6 +235,18 @@ def clear():
     """清空对话历史"""
     agent.messages = []
     return {"message": "对话历史已清空"}
+
+
+@app.post("/execute")
+def execute(tool: str = Body(...), args: dict = Body(default_factory=dict)):
+    handler = TOOL_MAP.get(tool)
+    if handler is None:
+        return {"result": f"错误: 未知工具 '{tool}'"}
+    try:
+        result = handler(**args)
+        return {"result": result}
+    except Exception as e:
+        return {"result": f"工具执行失败: {e}"}
 
 
 # ==================== 前端页面 ====================
