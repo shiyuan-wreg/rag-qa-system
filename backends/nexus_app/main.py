@@ -5,8 +5,9 @@ import json
 import uuid
 from typing import Any, AsyncGenerator, Dict
 
-from fastapi import FastAPI, Form
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi import FastAPI, Form, Request
+from fastapi.responses import StreamingResponse
+from fastapi.templating import Jinja2Templates
 
 from core.agents.orchestrator import OrchestratorAgent
 from core.agents.planner import PlannerAgent
@@ -19,6 +20,9 @@ from core.message_bus import MessageBus
 from core.config import Config
 
 app = FastAPI(title="Nexus Multi-Agent API")
+
+# Templates
+templates = Jinja2Templates(directory="backends/nexus_app/templates")
 
 # Global state
 bus = MessageBus()
@@ -54,43 +58,9 @@ async def shutdown():
     await asyncio.gather(*agent_tasks, return_exceptions=True)
 
 
-@app.get("/", response_class=HTMLResponse)
-async def root():
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head><title>Nexus Chat</title></head>
-    <body>
-        <h1>Nexus Multi-Agent Chat</h1>
-        <div id="chat"></div>
-        <form id="form">
-            <input type="text" id="query" name="query" placeholder="Ask something...">
-            <button type="submit">Send</button>
-        </form>
-        <script>
-            const form = document.getElementById('form');
-            const chat = document.getElementById('chat');
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const query = document.getElementById('query').value;
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'query=' + encodeURIComponent(query)
-                });
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                while (true) {
-                    const {done, value} = await reader.read();
-                    if (done) break;
-                    const chunk = decoder.decode(value);
-                    chat.innerHTML += '<pre>' + chunk + '</pre>';
-                }
-            });
-        </script>
-    </body>
-    </html>
-    """
+@app.get("/")
+async def root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/health")
