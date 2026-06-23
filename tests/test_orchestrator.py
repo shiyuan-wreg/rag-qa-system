@@ -48,7 +48,9 @@ async def test_orchestrator_process_stream():
     # Assert expected event types
     types = [e["type"] for e in events]
     assert "agent_thought" in types
+    assert "planner_thought" in types
     assert "tool_call" in types
+    assert "tool_result" in types
     assert "final_answer" in types
 
     orchestrator.stop()
