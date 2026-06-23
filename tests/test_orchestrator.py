@@ -17,6 +17,51 @@ from core.message_bus import MessageBus
 
 
 @pytest.mark.asyncio
+async def test_orchestrator_process_stream():
+    bus = MessageBus()
+    llm = LLMClient(provider="qwen", model="qwen-turbo", api_key="fake")
+
+    orchestrator = OrchestratorAgent(bus, llm)
+    planner = PlannerAgent(bus, llm)
+    retriever = RetrieverAgent(bus, llm)
+    executor = ExecutorAgent(bus, llm)
+    summarizer = SummarizerAgent(bus, llm)
+    critic = CriticAgent(bus, llm)
+
+    # Mock planner and summarizer to avoid LLM calls
+    planner.think = async_mock_planner_think
+    summarizer.think = async_mock_summarizer_think
+
+    tasks = [
+        asyncio.create_task(orchestrator.run()),
+        asyncio.create_task(planner.run()),
+        asyncio.create_task(retriever.run()),
+        asyncio.create_task(executor.run()),
+        asyncio.create_task(summarizer.run()),
+        asyncio.create_task(critic.run()),
+    ]
+
+    events = []
+    async for event in orchestrator.process_stream("测试问题"):
+        events.append(event)
+
+    # Assert expected event types
+    types = [e["type"] for e in events]
+    assert "agent_thought" in types
+    assert "tool_call" in types
+    assert "final_answer" in types
+
+    orchestrator.stop()
+    planner.stop()
+    retriever.stop()
+    executor.stop()
+    summarizer.stop()
+    critic.stop()
+
+    await asyncio.gather(*[asyncio.wait_for(t, timeout=2.0) for t in tasks])
+
+
+@pytest.mark.asyncio
 async def test_orchestrator_simple_workflow():
     bus = MessageBus()
     llm = LLMClient(provider="qwen", model="qwen-turbo", api_key="fake")

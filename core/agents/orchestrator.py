@@ -2,7 +2,7 @@
 
 import asyncio
 import uuid
-from typing import Any, Dict
+from typing import Any, AsyncGenerator, Dict
 
 from core.agents.base import BaseAgent
 from core.message import Message
@@ -19,6 +19,113 @@ class OrchestratorAgent(BaseAgent):
             future = self._pending_futures.get(message.task_id)
             if future and not future.done():
                 future.set_result(message)
+
+    async def process_stream(self, query: str, session_id: str = None) -> AsyncGenerator[Dict[str, Any], None]:
+        try:
+            task_id = session_id or str(uuid.uuid4())
+            session = SessionState(task_id=task_id, query=query)
+
+            # Step 1: Plan
+            session.status = "planning"
+            yield {"type": "agent_thought", "data": {"agent": "orchestrator", "content": "Starting planning phase"}}
+            plan_msg = await self._send_and_wait(
+                "planner",
+                Message(
+                    task_id=task_id,
+                    sender="orchestrator",
+                    recipient="planner",
+                    message_type="task",
+                    payload={"query": query},
+                ),
+                60.0,
+            )
+            session.plan = plan_msg.payload.get("plan", [])
+            yield {"type": "planner_thought", "data": {"content": f"Plan generated: {session.plan}"}}
+
+            # Step 2: Execute plan steps
+            session.status = "executing"
+            for step in session.plan:
+                agent_id = step.get("agent")
+                if agent_id == "retriever":
+                    yield {"type": "tool_call", "data": {"agent": "retriever", "tool": "search", "args": {"query": step.get("task", query)}}}
+                    result = await self._send_and_wait(
+                        "retriever",
+                        Message(
+                            task_id=task_id,
+                            sender="orchestrator",
+                            recipient="retriever",
+                            message_type="task",
+                            payload={"query": step.get("task", query)},
+                        ),
+                        60.0,
+                    )
+                    docs = result.payload.get("documents", [])
+                    session.documents.extend(docs)
+                    yield {"type": "tool_result", "data": {"agent": "retriever", "result": docs}}
+
+                elif agent_id == "executor":
+                    yield {"type": "tool_call", "data": {"agent": "executor", "tool": "calculate", "args": {"expression": "2+2"}}}
+                    result = await self._send_and_wait(
+                        "executor",
+                        Message(
+                            task_id=task_id,
+                            sender="orchestrator",
+                            recipient="executor",
+                            message_type="task",
+                            payload={"tool": "calculate", "args": {"expression": "2+2"}},
+                        ),
+                        60.0,
+                    )
+                    session.tool_results.append(result.payload)
+                    yield {"type": "tool_result", "data": {"agent": "executor", "result": result.payload}}
+
+            # Step 3: Summarize
+            session.status = "summarizing"
+            yield {"type": "agent_thought", "data": {"agent": "orchestrator", "content": "Starting summarization phase"}}
+            summary_msg = await self._send_and_wait(
+                "summarizer",
+                Message(
+                    task_id=task_id,
+                    sender="orchestrator",
+                    recipient="summarizer",
+                    message_type="task",
+                    payload={
+                        "query": query,
+                        "documents": session.documents,
+                        "tool_results": session.tool_results,
+                    },
+                ),
+                60.0,
+            )
+            session.answer = summary_msg.payload.get("answer", "")
+
+            # Step 4: Critique
+            session.status = "critiquing"
+            yield {"type": "agent_thought", "data": {"agent": "orchestrator", "content": "Starting critique phase"}}
+            critique_msg = await self._send_and_wait(
+                "critic",
+                Message(
+                    task_id=task_id,
+                    sender="orchestrator",
+                    recipient="critic",
+                    message_type="task",
+                    payload={"query": query, "answer": session.answer},
+                ),
+                60.0,
+            )
+            session.critique = critique_msg.payload
+            session.status = "done"
+
+            yield {
+                "type": "final_answer",
+                "data": {
+                    "content": session.answer,
+                    "sources": [doc.get("source") for doc in session.documents if doc.get("source")],
+                    "critique": session.critique,
+                },
+            }
+        except Exception as e:
+            yield {"type": "error", "data": {"message": str(e)}}
 
     async def process(self, query: str, timeout: float = 60.0) -> Dict[str, Any]:
         task_id = str(uuid.uuid4())
