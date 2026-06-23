@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}控制台 - DocHub{% endblock %}
+{% block content %}
+<h1>DocHub 控制台</h1>
+<form method="post" action="/logout" class="logout-form">
+  <button type="submit">退出登录</button>
+</form>
+
+<section>
+  <h2>上传 Markdown 文件</h2>
+  <form method="post" action="/api/convert/upload" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".md" required>
+    <button type="submit">转换</button>
+  </form>
+</section>
+
+{% if allow_path %}
+<section>
+  <h2>转换本地目录</h2>
+  <form method="post" action="/api/convert/path">
+    <input type="text" name="path" placeholder="C:/Users/.../notes" required>
+    <button type="submit">转换</button>
+  </form>
+</section>
+{% endif %}
+
+<section>
+  <h2>最近任务</h2>
+  <ul>
+    {% for job in jobs %}
+    <li>{{ job.job_id }} - {{ job.source_type }} - {{ job.source_name }} - {{ job.status }}</li>
+    {% else %}
+    <li>暂无任务</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section>
+  <h2>浏览文档</h2>
+  <a href="/doctomd/browse/">打开总目录</a>
+</section>
+{% endblock %}
