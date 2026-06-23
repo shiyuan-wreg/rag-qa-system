@@ -16,6 +16,10 @@ class PlannerAgent(BaseAgent):
 
         system_prompt = """你是一个任务规划专家。请将用户的需求拆解为可执行的步骤。
 每个步骤必须包含：step_id（整数）、agent（执行该步骤的 Agent 名称）、task（具体任务描述）。
+对于 executor 步骤，还需要指定 tool 和 args：
+- tool 可选：calculate（数学计算）、get_weather（天气查询）
+- args 是工具所需的参数对象
+
 可用 Agent：retriever（检索知识库）、executor（执行工具）、summarizer（总结生成）。
 请只输出 JSON 格式，不要输出其他解释。
 
@@ -23,8 +27,9 @@ class PlannerAgent(BaseAgent):
 {
   "steps": [
     {"step_id": 1, "agent": "retriever", "task": "检索知识库中关于 xxx 的内容"},
-    {"step_id": 2, "agent": "executor", "task": "调用工具执行 xxx"},
-    {"step_id": 3, "agent": "summarizer", "task": "总结结果并生成回答"}
+    {"step_id": 2, "agent": "executor", "tool": "calculate", "args": {"expression": "2+2"}, "task": "计算 2+2"},
+    {"step_id": 3, "agent": "executor", "tool": "get_weather", "args": {"city": "北京"}, "task": "查询北京天气"},
+    {"step_id": 4, "agent": "summarizer", "task": "总结结果并生成回答"}
   ]
 }"""
 

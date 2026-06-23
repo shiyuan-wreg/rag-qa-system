@@ -1,8 +1,9 @@
 """Orchestrator Agent: coordinates all other agents."""
 
 import asyncio
+import re
 import uuid
-from typing import Any, AsyncGenerator, Dict
+from typing import Any, AsyncGenerator, Dict, Tuple
 
 from core.agents.base import BaseAgent
 from core.message import Message
@@ -64,9 +65,8 @@ class OrchestratorAgent(BaseAgent):
                     yield {"type": "tool_result", "data": {"agent": "retriever", "result": docs}}
 
                 elif agent_id == "executor":
-                    # Phase 2 simplification: use step["task"] as the expression for calculate tool
-                    expression = step.get("task", "2+2")
-                    yield {"type": "tool_call", "data": {"agent": "executor", "tool": "calculate", "args": {"expression": expression}}}
+                    tool, args = self._resolve_executor_call(step, query)
+                    yield {"type": "tool_call", "data": {"agent": "executor", "tool": tool, "args": args}}
                     result = await self._send_and_wait(
                         "executor",
                         Message(
@@ -74,7 +74,7 @@ class OrchestratorAgent(BaseAgent):
                             sender="orchestrator",
                             recipient="executor",
                             message_type="task",
-                            payload={"tool": "calculate", "args": {"expression": expression}},
+                            payload={"tool": tool, "args": args},
                         ),
                         60.0,
                     )
@@ -168,8 +168,7 @@ class OrchestratorAgent(BaseAgent):
                 session.documents.extend(result.payload.get("documents", []))
 
             elif agent_id == "executor":
-                # Phase 2 simplification: use step["task"] as the expression for calculate tool
-                expression = step.get("task", "2+2")
+                tool, args = self._resolve_executor_call(step, query)
                 result = await self._send_and_wait(
                     "executor",
                     Message(
@@ -177,7 +176,7 @@ class OrchestratorAgent(BaseAgent):
                         sender="orchestrator",
                         recipient="executor",
                         message_type="task",
-                        payload={"tool": "calculate", "args": {"expression": expression}},
+                        payload={"tool": tool, "args": args},
                     ),
                     timeout,
                 )
@@ -238,3 +237,45 @@ class OrchestratorAgent(BaseAgent):
             return result
         finally:
             self._pending_futures.pop(message.task_id, None)
+
+    def _resolve_executor_call(self, step: Dict[str, Any], query: str) -> Tuple[str, Dict[str, Any]]:
+        """Determine which tool to call and with what args.
+
+        Uses explicit tool/args from planner if present; otherwise falls back to
+        inferring from task/query text for legacy/Phase 2 plans.
+        """
+        tool = step.get("tool")
+        args = step.get("args")
+        if tool and isinstance(args, dict):
+            return tool, args
+
+        task = step.get("task", "")
+        combined = f"{query} {task}".lower()
+
+        # Weather query
+        if any(k in combined for k in ("天气", "weather", "温度", "气温")):
+            return "get_weather", {"city": self._extract_city(query, task)}
+
+        # Math calculation
+        return "calculate", {"expression": self._extract_expression(query, task)}
+
+    def _extract_city(self, query: str, task: str) -> str:
+        known_cities = ["北京", "上海", "广州", "深圳", "杭州"]
+        for text in (query, task):
+            if not text:
+                continue
+            for city in known_cities:
+                if city in text:
+                    return city
+        return "北京"
+
+    def _extract_expression(self, query: str, task: str) -> str:
+        for text in (task, query):
+            if not text:
+                continue
+            # Keep digits, decimal points, operators, parens, spaces
+            cleaned = re.sub(r"[^\d+\-*/().\s]", "", text)
+            cleaned = re.sub(r"\s+", " ", cleaned).strip()
+            if cleaned and any(op in cleaned for op in "+-*/"):
+                return cleaned
+        return "0"
