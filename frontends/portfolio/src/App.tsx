@@ -15,6 +15,7 @@ export default function App() {
         <Route path="/fc" element={<Demo slug="fc" src="/fc/" />} />
         <Route path="/nexus" element={<Demo slug="nexus" src="/nexus/" />} />
         <Route path="/learn" element={<Learn />} />
+        <Route path="/doctomd" element={<Demo slug="doctomd" src="/doctomd/" />} />
         <Route path="/me" element={<Me />} />
       </Routes>
     </div>

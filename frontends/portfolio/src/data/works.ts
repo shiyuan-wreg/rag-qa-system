@@ -16,4 +16,6 @@ export const WORKS: Work[] = [
     tech: ['Multi-Agent', 'FastAPI', 'SSE', '通义千问'], path: '/nexus' },
   { slug: 'learn', title: 'Nexus 交互式学习站', desc: 'LLM/Agent/RAG 的交互式课程与测验。',
     tech: ['React', 'Vite', 'TypeScript'], path: '/learn' },
+  { slug: 'doctomd', title: 'DocHub Markdown 文档站', desc: '把 Markdown 文集一键转成可浏览的 HTML 文档站。',
+    tech: ['FastAPI', 'Markdown', 'Jinja2'], path: '/doctomd' },
 ]
