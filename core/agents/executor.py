@@ -1,34 +1,26 @@
-"""Executor Agent: executes tools (mocked in Phase 1)."""
+"""Executor Agent: executes tools via HTTP call to fc_app."""
 
-import ast
-import operator
+import httpx
 
 from core.agents.base import BaseAgent
+from core.config import Config
 from core.message import Message
 
 
 class ExecutorAgent(BaseAgent):
     """
-    Phase 1 mock executor.
-    In Phase 2, this will connect to the real Tool Registry.
+    Phase 2 executor.
+    Calls fc_app /execute endpoint over HTTP.
     """
 
     def __init__(self, bus, llm):
         super().__init__("executor", bus, llm)
-        self._tools = {
-            "calculate": self._calculate,
-            "read_file": self._read_file,
-        }
 
     async def handle_message(self, message: Message) -> None:
         tool_name = message.payload.get("tool", "")
         args = message.payload.get("args", {})
 
-        handler = self._tools.get(tool_name)
-        if handler is None:
-            result = f"Error: unknown tool '{tool_name}'"
-        else:
-            result = handler(**args)
+        result = await self._execute(tool_name, args)
 
         await self.send_message(
             recipient=message.sender,
@@ -37,26 +29,15 @@ class ExecutorAgent(BaseAgent):
             task_id=message.task_id,
         )
 
-    def _calculate(self, expression: str) -> str:
+    async def _execute(self, tool: str, args: dict) -> str:
         try:
-            tree = ast.parse(expression, mode='eval')
-            result = self._eval_node(tree.body)
-            return str(result)
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    f"{Config.FC_URL}/execute",
+                    json={"tool": tool, "args": args},
+                )
+                response.raise_for_status()
+                data = response.json()
+                return data.get("result", "")
         except Exception as e:
-            return f"Error: {e}"
-
-    def _eval_node(self, node):
-        if isinstance(node, ast.Constant):
-            return node.value
-        if isinstance(node, ast.BinOp):
-            ops = {
-                ast.Add: operator.add,
-                ast.Sub: operator.sub,
-                ast.Mult: operator.mul,
-                ast.Div: operator.truediv,
-            }
-            return ops[type(node.op)](self._eval_node(node.left), self._eval_node(node.right))
-        raise ValueError(f"Unsupported node: {type(node).__name__}")
-
-    def _read_file(self, path: str) -> str:
-        return f"[Mock] Content of {path}"
+            return f"工具执行失败：{e}"
