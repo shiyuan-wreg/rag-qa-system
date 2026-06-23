@@ -7,7 +7,7 @@
 
 ## 一句话现状
 
-ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`(线性历史,分支已删除)**。`master` 本地领先 `origin/master` 36 提交,**尚未推送**。
+ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`**。**Nexus Phase 2 已完成并合并入 `master`**(worktree-nexus-phase2 分支,14 个提交,39 测试通过),新增 `/nexus/` Multi-Agent 工作流助手(FastAPI + SSE + 通义千问),集成 rag_app/fc_app HTTP 调用。`master` 本地领先 `origin/master` 25 提交,**尚未推送**;Docker compose 验证待 Docker Desktop 启动。
 
 ---
 
@@ -44,12 +44,12 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 ## 待处理 / 下一步(按优先级)
 
 1. **~~决定分支去向~~ ✅ 已完成**:`feat/portfolio-phase1` 已合并入 `master`(线性历史/快进,分支已删)。
-2. **删 agent-console-ai 残留目录**:`ai-demos/agent-console-ai` 现已是**空目录**(内容已清),但目录节点仍被某进程(疑似 DevEco Studio)句柄锁定,`rm`/`Remove-Item` 均报 busy。未被 git 跟踪,无功能影响。**重启一次即可 `rm -rf` 清除**。桌面独立副本(`C:/Users/hzs17/Desktop/agent-console-ai`,commit d02f65d,1515 文件)已完整。
-3. **Phase 2 实现计划已确认:Nexus Web 后端** ✅ 设计文档 `docs/superpowers/specs/2026-06-23-nexus-phase2-design.md`,实现计划 `docs/superpowers/plans/2026-06-23-nexus-phase2.md` 均已就绪;等待执行。
+2. **~~删 agent-console-ai 残留目录~~ ✅ 已解决**:目录已删除,无残留。
+3. **~~Phase 2 实现计划已确认:Nexus Web 后端~~ ✅ 已完成**:Nexus Phase 2 已实现并合并入 `master`,包括 FastAPI SSE 后端、chat 前端、fc_app `/execute`、Docker/compose/nginx/portfolio 集成;本地测试 39 通过(除 rag 测试),Docker compose 验证待 Docker Desktop 启动。
 4. **DocHub 实现计划已确认:Markdown 文档站** ✅ 设计文档 `docs/superpowers/specs/2026-06-23-dochub-design.md`,实现计划 `docs/superpowers/plans/2026-06-23-dochub.md` 均已就绪;等待执行。
-4. **Phase 3**:cs-quiz-app 完整集成(Fastify+SQLite 容器 + `/quiz` 静态前端);个人页目前只有占位链接。
-5. **Phase 4**:部署到首尔服务器(Ubuntu + swap + Docker + 域名 A 记录 + Let's Encrypt HTTPS)。
-6. **后续**:博客;把 demo 由 iframe 逐个重写为原生 React(演进到方案 A)。
+5. **Phase 3**:cs-quiz-app 完整集成(Fastify+SQLite 容器 + `/quiz` 静态前端);个人页目前只有占位链接。
+6. **Phase 4**:部署到首尔服务器(Ubuntu + swap + Docker + 域名 A 记录 + Let's Encrypt HTTPS)。
+7. **后续**:博客;把 demo 由 iframe 逐个重写为原生 React(演进到方案 A)。
 
 ---
 
