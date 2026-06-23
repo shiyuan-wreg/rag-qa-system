@@ -24,3 +24,27 @@ def test_protected_jobs_redirects_when_not_logged_in():
     response = client.get("/api/jobs", follow_redirects=False)
     assert response.status_code == 307
     assert "/login" in response.headers["location"]
+
+
+import tempfile
+from pathlib import Path
+
+
+def test_upload_md_file_conversion(tmp_path, monkeypatch):
+    client = TestClient(app)
+
+    # Login first
+    response = client.post("/login", data={"password": "test-password"}, follow_redirects=False)
+    assert response.status_code == 303
+    cookies = response.cookies
+
+    # Upload file
+    md_content = b"# Test\n\nHello world."
+    response = client.post(
+        "/api/convert/upload",
+        files={"file": ("test.md", md_content, "text/markdown")},
+        cookies=cookies,
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "/browse/" in response.headers["location"]

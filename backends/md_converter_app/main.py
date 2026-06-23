@@ -1,6 +1,9 @@
 """FastAPI app for DocHub."""
 
-from fastapi import FastAPI, Request, Form
+from datetime import datetime, timezone
+from pathlib import Path
+
+from fastapi import FastAPI, Request, Form, File, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -8,6 +11,7 @@ from fastapi.templating import Jinja2Templates
 from auth import AuthManager
 from config import Config
 from store import JobStore
+from converter import build_global_index, convert_directory, convert_markdown_file, build_dir_index
 
 app = FastAPI(title="DocHub - Markdown 文档站")
 app.mount("/static", StaticFiles(directory="backends/md_converter_app/static"), name="static")
@@ -63,3 +67,42 @@ def list_jobs(request: Request):
     if not is_authenticated(request):
         return RedirectResponse("/login", status_code=307)
     return [{"job_id": j.job_id, "source_type": j.source_type, "source_name": j.source_name, "status": j.status} for j in job_store.list()]
+
+
+@app.post("/api/convert/upload")
+async def convert_upload(request: Request, file: UploadFile = File(...)):
+    if not is_authenticated(request):
+        return RedirectResponse("/login", status_code=307)
+
+    if not file.filename or not file.filename.lower().endswith(".md"):
+        raise HTTPException(status_code=400, detail="只支持 .md 文件")
+
+    content = await file.read()
+    if len(content) > Config.MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=400, detail="文件超过 10MB 限制")
+
+    Config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    Config.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    job = job_store.create("upload", file.filename, "")
+    job_dir = Config.UPLOAD_DIR / job.job_id
+    job_dir.mkdir(parents=True, exist_ok=True)
+
+    md_path = job_dir / file.filename
+    md_path.write_bytes(content)
+
+    out_dir = Config.OUTPUT_DIR / "uploads" / job.job_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    job_store.update_status(job.job_id, "running")
+    try:
+        convert_markdown_file(md_path, out_dir / md_path.with_suffix(".html").name, index_link="index.html")
+        build_dir_index(out_dir, list(out_dir.glob("*.html")), out_dir)
+        job.output_dir = str(out_dir.relative_to(Config.OUTPUT_DIR))
+        job_store.update_status(job.job_id, "done")
+        build_global_index(Config.OUTPUT_DIR)
+    except Exception as e:
+        job_store.update_status(job.job_id, "error", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return RedirectResponse("/doctomd/browse/", status_code=303)
