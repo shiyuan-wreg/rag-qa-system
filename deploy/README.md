@@ -29,6 +29,13 @@ docker compose -f deploy/docker-compose.yml up -d --build
 | `/rag/` | RAG 文档问答 demo |
 | `/fc/` | Function Calling demo |
 | `/learn/` | Nexus 交互式学习站 |
+| `/doctomd/` | DocHub（Markdown 转 Word） |
+
+## DocHub
+
+- 默认密码从 `.env` 的 `DOCHUB_PASSWORD` 读取（示例：`test-password`）
+- 路径转换默认关闭（`DOCHUB_ALLOW_PATH_CONVERT=false`）
+- 上传 `.md` 文件后可转换为 Word 并在线浏览
 
 ## 停止
 
