@@ -1,10 +1,5 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + "/backends/md_converter_app")
-
-from config import Config
-from models import ConversionJob
+from backends.md_converter_app.config import Config
+from backends.md_converter_app.models import ConversionJob
 
 
 def test_config_has_required_fields():

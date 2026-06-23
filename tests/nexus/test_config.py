@@ -1,9 +1,4 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + "/backends/nexus_app")
-
-from config import Config
+from backends.nexus_app.config import Config
 from core.session import SessionState
 
 
