@@ -153,3 +153,78 @@ a:hover {{ text-decoration: underline; }}
 </html>
 """
     (directory / "index.html").write_text(html, encoding="utf-8")
+
+
+def convert_directory(src_dir: Path, out_dir: Path, job_id: str) -> list[Path]:
+    """Convert all Markdown files under src_dir to out_dir, preserving structure."""
+    md_files = sorted(p for p in src_dir.rglob("*.md") if p.is_file())
+    html_files: list[Path] = []
+
+    for md in md_files:
+        rel = md.relative_to(src_dir)
+        out_path = out_dir / rel.with_suffix(".html")
+        depth = len(out_path.parent.relative_to(out_dir).parts)
+        index_link = ("../" * depth) + "index.html" if depth > 0 else "index.html"
+        convert_markdown_file(md, out_path, index_link=index_link)
+        html_files.append(out_path)
+
+    if html_files:
+        build_dir_index(out_dir, html_files, out_dir)
+
+    return html_files
+
+
+def build_global_index(output_root: Path) -> None:
+    """Build a global index of all upload and path conversion jobs."""
+    sections = []
+
+    uploads_dir = output_root / "uploads"
+    if uploads_dir.exists():
+        items = []
+        for d in sorted(uploads_dir.iterdir()):
+            if d.is_dir() and (d / "index.html").exists():
+                items.append(f'<li><a href="uploads/{d.name}/index.html">{d.name}</a></li>')
+        if items:
+            sections.append("<h2>上传的文档</h2>\n<ul>\n" + "\n".join(items) + "\n</ul>")
+
+    paths_dir = output_root / "paths"
+    if paths_dir.exists():
+        items = []
+        for d in sorted(paths_dir.iterdir()):
+            if d.is_dir() and (d / "index.html").exists():
+                items.append(f'<li><a href="paths/{d.name}/index.html">{d.name}</a></li>')
+        if items:
+            sections.append("<h2>本地路径转换</h2>\n<ul>\n" + "\n".join(items) + "\n</ul>")
+
+    html = f"""\
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocHub 文档总目录</title>
+<style>
+:root {{ color-scheme: light dark; }}
+body {{
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}}
+@media (prefers-color-scheme: dark) {{
+  body {{ color: #c9d1d9; background: #0d1117; }}
+  a {{ color: #58a6ff; }}
+}}
+h1 {{ border-bottom: 1px solid #d0d7de; padding-bottom: .3em; }}
+li {{ margin: 6px 0; }}
+a {{ text-decoration: none; }}
+a:hover {{ text-decoration: underline; }}
+</style>
+</head>
+<body>
+<h1>DocHub 文档总目录</h1>
+{chr(10).join(sections)}
+</body>
+</html>
+"""
+    (output_root / "index.html").write_text(html, encoding="utf-8")

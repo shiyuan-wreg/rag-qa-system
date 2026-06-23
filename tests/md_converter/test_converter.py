@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + "/backends/md_converter_app")
 
-from converter import convert_markdown_file, build_dir_index
+from converter import convert_markdown_file, build_dir_index, convert_directory, build_global_index
 
 
 def test_convert_markdown_file_creates_html():
@@ -36,3 +36,35 @@ def test_build_dir_index_creates_index_html():
         html = index.read_text(encoding="utf-8")
         assert "a.html" in html
         assert "b.html" in html
+
+
+def test_convert_directory_keeps_structure():
+    with tempfile.TemporaryDirectory() as tmp:
+        src = Path(tmp) / "src"
+        out = Path(tmp) / "out"
+        (src / "sub").mkdir(parents=True)
+        (src / "root.md").write_text("# Root", encoding="utf-8")
+        (src / "sub" / "nested.md").write_text("# Nested", encoding="utf-8")
+
+        html_files = convert_directory(src, out, "job-1")
+
+        assert (out / "root.html").exists()
+        assert (out / "sub" / "nested.html").exists()
+        assert len(html_files) == 2
+
+
+def test_build_global_index_lists_all_jobs():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "uploads" / "job-1").mkdir(parents=True)
+        (root / "uploads" / "job-1" / "index.html").write_text("upload job")
+        (root / "paths" / "job-2").mkdir(parents=True)
+        (root / "paths" / "job-2" / "index.html").write_text("path job")
+
+        build_global_index(root)
+
+        index = root / "index.html"
+        assert index.exists()
+        html = index.read_text(encoding="utf-8")
+        assert "uploads/job-1/index.html" in html
+        assert "paths/job-2/index.html" in html
