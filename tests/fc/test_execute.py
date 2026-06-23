@@ -7,9 +7,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "backends
 import pytest
 from fastapi.testclient import TestClient
 
-# Patch env before importing main
-os.environ.setdefault("DASHSCOPE_API_KEY", "")
-
 from fc_app.main import app
 
 client = TestClient(app)
