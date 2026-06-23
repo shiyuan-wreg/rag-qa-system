@@ -64,7 +64,9 @@ class OrchestratorAgent(BaseAgent):
                     yield {"type": "tool_result", "data": {"agent": "retriever", "result": docs}}
 
                 elif agent_id == "executor":
-                    yield {"type": "tool_call", "data": {"agent": "executor", "tool": "calculate", "args": {"expression": "2+2"}}}
+                    # Phase 2 simplification: use step["task"] as the expression for calculate tool
+                    expression = step.get("task", "2+2")
+                    yield {"type": "tool_call", "data": {"agent": "executor", "tool": "calculate", "args": {"expression": expression}}}
                     result = await self._send_and_wait(
                         "executor",
                         Message(
@@ -72,7 +74,7 @@ class OrchestratorAgent(BaseAgent):
                             sender="orchestrator",
                             recipient="executor",
                             message_type="task",
-                            payload={"tool": "calculate", "args": {"expression": "2+2"}},
+                            payload={"tool": "calculate", "args": {"expression": expression}},
                         ),
                         60.0,
                     )
@@ -122,6 +124,7 @@ class OrchestratorAgent(BaseAgent):
                     "content": session.answer,
                     "sources": [doc.get("source") for doc in session.documents if doc.get("source")],
                     "critique": session.critique,
+                    "session_id": task_id,
                 },
             }
         except Exception as e:
@@ -165,6 +168,8 @@ class OrchestratorAgent(BaseAgent):
                 session.documents.extend(result.payload.get("documents", []))
 
             elif agent_id == "executor":
+                # Phase 2 simplification: use step["task"] as the expression for calculate tool
+                expression = step.get("task", "2+2")
                 result = await self._send_and_wait(
                     "executor",
                     Message(
@@ -172,7 +177,7 @@ class OrchestratorAgent(BaseAgent):
                         sender="orchestrator",
                         recipient="executor",
                         message_type="task",
-                        payload={"tool": "calculate", "args": {"expression": "2+2"}},
+                        payload={"tool": "calculate", "args": {"expression": expression}},
                     ),
                     timeout,
                 )

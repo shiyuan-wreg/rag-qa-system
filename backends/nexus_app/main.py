@@ -2,9 +2,10 @@
 
 import asyncio
 import json
+import uuid
 from typing import Any, AsyncGenerator, Dict
 
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, StreamingResponse
 
 from core.agents.orchestrator import OrchestratorAgent
@@ -21,7 +22,7 @@ app = FastAPI(title="Nexus Multi-Agent API")
 
 # Global state
 bus = MessageBus()
-llm = LLMClient(provider=Config.LLM_PROVIDER, model=Config.LLM_MODEL, api_key=Config.DASHSCOPE_API_KEY)
+llm: LLMClient | None = None
 agents: Dict[str, Any] = {}
 agent_tasks: list = []
 sessions: Dict[str, list] = {}
@@ -29,7 +30,8 @@ sessions: Dict[str, list] = {}
 
 @app.on_event("startup")
 async def startup():
-    global agents, agent_tasks
+    global agents, agent_tasks, llm
+    llm = LLMClient(provider=Config.LLM_PROVIDER, model=Config.LLM_MODEL, api_key=Config.DASHSCOPE_API_KEY or "")
     agents = {
         "planner": PlannerAgent(bus, llm),
         "retriever": RetrieverAgent(bus, llm),
@@ -97,7 +99,7 @@ async def health():
 
 
 @app.post("/chat")
-async def chat(query: str = Form(...)):
+async def chat(query: str = Form(...), session_id: str = Form("")):
     if not Config.DASHSCOPE_API_KEY:
         async def error_stream():
             yield f"event: error\ndata: {json.dumps({'message': 'DASHSCOPE_API_KEY not set'})}\n\n"
@@ -109,10 +111,15 @@ async def chat(query: str = Form(...)):
             yield f"event: error\ndata: {json.dumps({'message': 'Agents not initialized'})}\n\n"
         return StreamingResponse(error_stream(), media_type="text/event-stream")
 
+    if not session_id:
+        session_id = str(uuid.uuid4())
+
     async def event_stream() -> AsyncGenerator[str, None]:
         try:
-            async for event in orchestrator.process_stream(query):
+            async for event in orchestrator.process_stream(query, session_id=session_id):
                 yield f"event: {event['type']}\ndata: {json.dumps(event['data'])}\n\n"
+            # Include session_id in final_answer data by patching it in sessions
+            sessions.setdefault(session_id, []).append({"query": query, "final_answer": True})
         except Exception as e:
             yield f"event: error\ndata: {json.dumps({'message': str(e)})}\n\n"
 
