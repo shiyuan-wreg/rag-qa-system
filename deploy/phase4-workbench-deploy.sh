@@ -170,10 +170,14 @@ sleep 10
 # ------------------------------------------------------------------
 echo "==> 申请 Let's Encrypt SSL 证书..."
 cd "$DEPLOY_DIR"
+
+# certbot standalone 会临时占用 80 端口，先停止 nginx 容器避免冲突
+docker compose -f deploy/docker-compose.yml stop nginx
+
 bash deploy/init-ssl.sh "$EMAIL"
 
-# 证书申请后重启 nginx 使其加载新证书
-docker compose -f deploy/docker-compose.yml restart nginx
+# 证书申请完成后重新启动 nginx，使其加载新证书
+docker compose -f deploy/docker-compose.yml up -d nginx
 
 # ------------------------------------------------------------------
 # 10. 基础验证
