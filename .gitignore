@@ -35,3 +35,9 @@ Thumbs.db
 # DocHub output directories
 backends/md_converter_app/uploads/
 backends/md_converter_app/output/
+
+# Generated learning/spec/plan HTML and temporary docx
+# (这些文件由 DocHub 或本地脚本从 Markdown 生成,源文件已跟踪)
+docs/learning/*.html
+docs/learning/*.docx
+docs/superpowers/**/*.html
