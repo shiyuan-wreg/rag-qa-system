@@ -84,15 +84,14 @@ docker compose version
 if ! command -v node &>/dev/null || [ "$(node -v | cut -d'v' -f2 | cut -d'.' -f1)" != "20" ]; then
     echo "==> 安装 Node.js ${NODE_VERSION}..."
     mkdir -p /usr/local/lib/nodejs
-    curl -fsSL "https://npmmirror.com/mirrors/node/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" \
+    # 服务器在韩国，使用 Node.js 官方分发地址
+    curl -fsSL --retry 3 --retry-delay 5 \
+        "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" \
         -o /tmp/node.tar.xz
     tar -xJf /tmp/node.tar.xz -C /usr/local/lib/nodejs
     ln -sf "/usr/local/lib/nodejs/node-v${NODE_VERSION}-linux-x64/bin/node" /usr/local/bin/node
     ln -sf "/usr/local/lib/nodejs/node-v${NODE_VERSION}-linux-x64/bin/npm" /usr/local/bin/npm
 fi
-
-# 配置 npm 国内镜像
-npm config set registry https://registry.npmmirror.com || true
 
 echo "==> Node 版本:"
 node -v
