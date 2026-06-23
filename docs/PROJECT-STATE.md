@@ -1,7 +1,7 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-06-23(Phase 2 设计文档已确认,待写实现计划)
+> 最近更新:2026-06-23(Nexus Phase 2 设计已确认;DocHub 设计已确认;均待写实现计划)
 
 ---
 
@@ -17,6 +17,7 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 
 - 设计文档(spec):`docs/superpowers/specs/2026-06-22-personal-portfolio-integration-design.md`
 - Phase 2 设计(spec):`docs/superpowers/specs/2026-06-23-nexus-phase2-design.md`
+- DocHub 设计(spec):`docs/superpowers/specs/2026-06-23-dochub-design.md`
 - 实现计划(plan):`docs/superpowers/plans/2026-06-22-portfolio-phase1-monorepo-and-shell.md`
 - 配套学习文档:`docs/learning/portfolio-integration-guide.md`(+ .docx)
 - 本地运行步骤:`deploy/README.md`
@@ -45,6 +46,7 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 1. **~~决定分支去向~~ ✅ 已完成**:`feat/portfolio-phase1` 已合并入 `master`(线性历史/快进,分支已删)。
 2. **删 agent-console-ai 残留目录**:`ai-demos/agent-console-ai` 现已是**空目录**(内容已清),但目录节点仍被某进程(疑似 DevEco Studio)句柄锁定,`rm`/`Remove-Item` 均报 busy。未被 git 跟踪,无功能影响。**重启一次即可 `rm -rf` 清除**。桌面独立副本(`C:/Users/hzs17/Desktop/agent-console-ai`,commit d02f65d,1515 文件)已完整。
 3. **Phase 2 设计已确认:Nexus Web 后端** ✅ 设计文档已写入 `docs/superpowers/specs/2026-06-23-nexus-phase2-design.md`;下一步使用 `superpowers:writing-plans` 制定详细实现计划,再开始编码。原描述:Nexus Web 后端(FastAPI + SSE 多智能体可视化)→ `backends/nexus_app`,门户加 `/nexus`。
+4. **DocHub 设计已确认:Markdown 文档站** ✅ 设计文档已写入 `docs/superpowers/specs/2026-06-23-dochub-design.md`;将 `md_to_html.py` 升级为 Web 服务并集成进 ai-demos,下一步使用 `superpowers:writing-plans` 制定详细实现计划。
 4. **Phase 3**:cs-quiz-app 完整集成(Fastify+SQLite 容器 + `/quiz` 静态前端);个人页目前只有占位链接。
 5. **Phase 4**:部署到首尔服务器(Ubuntu + swap + Docker + 域名 A 记录 + Let's Encrypt HTTPS)。
 6. **后续**:博客;把 demo 由 iframe 逐个重写为原生 React(演进到方案 A)。
