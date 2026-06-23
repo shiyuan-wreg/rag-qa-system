@@ -31,3 +31,7 @@ Thumbs.db
 # 前端依赖与构建产物(各 frontends/* 另有自己的 .gitignore,此处为根级安全网)
 **/node_modules/
 **/dist/
+
+# DocHub output directories
+backends/md_converter_app/uploads/
+backends/md_converter_app/output/
