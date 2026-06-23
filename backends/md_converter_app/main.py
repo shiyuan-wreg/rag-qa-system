@@ -1,9 +1,10 @@
 """FastAPI app for DocHub."""
 
+import shutil
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Form, File, UploadFile, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -23,11 +24,6 @@ job_store = JobStore()
 def is_authenticated(request: Request) -> bool:
     session_token = request.cookies.get("dochub_session")
     return auth_manager.verify_session(session_token)
-
-
-def require_auth(request: Request):
-    if not is_authenticated(request):
-        return RedirectResponse("/login", status_code=307)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -102,15 +98,11 @@ async def convert_upload(request: Request, file: UploadFile = File(...)):
         build_global_index(Config.OUTPUT_DIR)
     except Exception as e:
         job_store.update_status(job.job_id, "error", str(e))
-        import shutil
         shutil.rmtree(out_dir, ignore_errors=True)
         shutil.rmtree(job_dir, ignore_errors=True)
         raise HTTPException(status_code=500, detail=str(e))
 
     return RedirectResponse("/doctomd/browse/", status_code=303)
-
-
-from fastapi.responses import FileResponse
 
 
 @app.get("/browse/{path:path}", response_class=HTMLResponse)
@@ -165,6 +157,7 @@ async def convert_path(request: Request, path: str = Form(...)):
         build_global_index(Config.OUTPUT_DIR)
     except Exception as e:
         job_store.update_status(job.job_id, "error", str(e))
+        shutil.rmtree(out_dir, ignore_errors=True)
         raise HTTPException(status_code=500, detail=str(e))
 
     return RedirectResponse("/doctomd/browse/", status_code=303)
