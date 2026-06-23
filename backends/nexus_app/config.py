@@ -1,7 +1,6 @@
-"""Configuration for Nexus."""
+"""Configuration for Nexus web layer."""
 
 import os
-from pathlib import Path
 
 from dotenv import load_dotenv
 
