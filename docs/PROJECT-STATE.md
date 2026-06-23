@@ -47,8 +47,8 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 2. **~~删 agent-console-ai 残留目录~~ ✅ 已解决**:目录已删除,无残留。
 3. **~~Phase 2 实现计划已确认:Nexus Web 后端~~ ✅ 已完成**:Nexus Phase 2 已实现并合并入 `master`,包括 FastAPI SSE 后端、chat 前端、fc_app `/execute`、Docker/compose/nginx/portfolio 集成;本地测试 39 通过(除 rag 测试),Docker compose 验证待 Docker Desktop 启动。
 4. **~~DocHub 实现计划已确认:Markdown 文档站~~ ✅ 已完成**:DocHub 已实现、合并入 `master` 并推送,包括上传/路径转换、全局索引、在线浏览、密码认证、CLI、Docker/compose/nginx/portfolio 集成;本地测试 59 通过(除 rag 测试)。
-5. **Phase 3**:cs-quiz-app 完整集成(Fastify+SQLite 容器 + `/quiz` 静态前端);个人页目前只有占位链接。
-6. **Phase 4**:部署到首尔服务器(Ubuntu + swap + Docker + 域名 A 记录 + Let's Encrypt HTTPS)。
+5. **~~Phase 4~~ 已启动但阻塞**:原服务器镜像是宝塔 Linux 面板，与"纯净 Ubuntu + Docker"决策冲突，且外部 SSH 22 端口不可达。已决策**重装为 Ubuntu 22.04 LTS**，下次继续从重装后开始部署。
+6. **Phase 3**:cs-quiz-app 完整集成(Fastify+SQLite 容器 + `/quiz` 静态前端);个人页目前只有占位链接。
 7. **后续**:博客;把 demo 由 iframe 逐个重写为原生 React(演进到方案 A)。
 
 ## 当前可用路径(本地 Docker 启动后)
@@ -73,7 +73,8 @@ docker compose -f deploy/docker-compose.yml up -d --build
 
 - `master` 已推送至 `origin/master`
 - 无未合并 feature 分支
-- Docker compose 端到端验证待 Docker Desktop 启动
+- **本地 Docker 验证已通过**（访问 http://127.0.0.1:8080，所有路径 200，后端代理正常）
+- **服务器部署阻塞**：当前镜像为宝塔 Linux 面板，外部 SSH 22 不可达，与"纯净 Ubuntu + Docker"决策冲突。已决策重装 Ubuntu 22.04 LTS。
 
 ---
 

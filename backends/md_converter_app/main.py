@@ -9,14 +9,14 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from auth import AuthManager
-from config import Config
+from config import Config, APP_DIR
 from store import JobStore
 from converter import build_global_index, convert_directory, convert_markdown_file, build_dir_index
 
 app = FastAPI(title="DocHub - Markdown 文档站")
-app.mount("/static", StaticFiles(directory="backends/md_converter_app/static"), name="static")
+app.mount("/static", StaticFiles(directory=APP_DIR / "static"), name="static")
 
-templates = Jinja2Templates(directory="backends/md_converter_app/templates")
+templates = Jinja2Templates(directory=APP_DIR / "templates")
 auth_manager = AuthManager(Config.DOCHUB_PASSWORD, Config.SECRET_KEY)
 job_store = JobStore()
 
