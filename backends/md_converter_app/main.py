@@ -1,6 +1,5 @@
 """FastAPI app for DocHub."""
 
-from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Form, File, UploadFile, HTTPException
@@ -11,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 from auth import AuthManager
 from config import Config
 from store import JobStore
-from converter import build_global_index, convert_directory, convert_markdown_file, build_dir_index
+from converter import build_global_index, convert_markdown_file, build_dir_index
 
 app = FastAPI(title="DocHub - Markdown 文档站")
 app.mount("/static", StaticFiles(directory="backends/md_converter_app/static"), name="static")
@@ -103,6 +102,9 @@ async def convert_upload(request: Request, file: UploadFile = File(...)):
         build_global_index(Config.OUTPUT_DIR)
     except Exception as e:
         job_store.update_status(job.job_id, "error", str(e))
+        import shutil
+        shutil.rmtree(out_dir, ignore_errors=True)
+        shutil.rmtree(job_dir, ignore_errors=True)
         raise HTTPException(status_code=500, detail=str(e))
 
     return RedirectResponse("/doctomd/browse/", status_code=303)

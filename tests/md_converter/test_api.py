@@ -1,5 +1,7 @@
 import os
 import sys
+import tempfile
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + "/backends/md_converter_app")
 
@@ -24,10 +26,6 @@ def test_protected_jobs_redirects_when_not_logged_in():
     response = client.get("/api/jobs", follow_redirects=False)
     assert response.status_code == 307
     assert "/login" in response.headers["location"]
-
-
-import tempfile
-from pathlib import Path
 
 
 def test_upload_md_file_conversion(tmp_path, monkeypatch):
