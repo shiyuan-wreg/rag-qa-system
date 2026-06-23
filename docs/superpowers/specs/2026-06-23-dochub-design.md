@@ -68,7 +68,7 @@ nginx (80/443)
   ├── /rag/      → backends/rag_app:8001
   ├── /fc/       → backends/fc_app:8002
   ├── /nexus/    → backends/nexus_app:8003
-  └── /md/       → backends/md_converter_app:8004  ← 新增
+  └── /doctomd/       → backends/md_converter_app:8004  ← 新增
 ```
 
 ### 3.2 目录结构
@@ -294,7 +294,7 @@ md_converter:
 ### 7.3 nginx 新增 location
 
 ```nginx
-location /md/ {
+location /doctomd/ {
     proxy_pass http://md_converter:8004/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -309,10 +309,10 @@ location /md/ {
 
 ```typescript
 { slug: 'md', title: 'DocHub Markdown 文档站', desc: '把 Markdown 文集一键转成可浏览的 HTML 文档站。',
-  tech: ['FastAPI', 'Markdown', 'Jinja2'], path: '/md' }
+  tech: ['FastAPI', 'Markdown', 'Jinja2'], path: '/doctomd' }
 ```
 
-在 `App.tsx` 路由中新增 `/md` → `<DemoFrame work={...} src="/md/" />`。
+在 `App.tsx` 路由中新增 `/doctomd` → `<DemoFrame work={...} src="/doctomd/" />`。
 
 ---
 
