@@ -7,7 +7,7 @@
 
 ## 一句话现状
 
-ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`**。**Nexus Phase 2 已完成并合并入 `master`**(worktree-nexus-phase2 分支,14 个提交,39 测试通过),新增 `/nexus/` Multi-Agent 工作流助手(FastAPI + SSE + 通义千问),集成 rag_app/fc_app HTTP 调用。`master` 本地领先 `origin/master` 25 提交,**尚未推送**;Docker compose 验证待 Docker Desktop 启动。
+ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`**。**Nexus Phase 2 已完成并合并入 `master`**(14 个提交,39 测试通过),新增 `/nexus/` Multi-Agent 工作流助手(FastAPI + SSE + 通义千问)。**DocHub 已完成并合并入 `master`**(19 个提交,59 测试通过),新增 `/doctomd/` Markdown 转 HTML 文档站(上传/路径转换/在线浏览/密码保护/CLI)。`master` **已推送**到 GitHub `origin/master`。Docker compose 端到端验证待 Docker Desktop 启动。
 
 ---
 
@@ -46,10 +46,34 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 1. **~~决定分支去向~~ ✅ 已完成**:`feat/portfolio-phase1` 已合并入 `master`(线性历史/快进,分支已删)。
 2. **~~删 agent-console-ai 残留目录~~ ✅ 已解决**:目录已删除,无残留。
 3. **~~Phase 2 实现计划已确认:Nexus Web 后端~~ ✅ 已完成**:Nexus Phase 2 已实现并合并入 `master`,包括 FastAPI SSE 后端、chat 前端、fc_app `/execute`、Docker/compose/nginx/portfolio 集成;本地测试 39 通过(除 rag 测试),Docker compose 验证待 Docker Desktop 启动。
-4. **DocHub 实现计划已确认:Markdown 文档站** ✅ 设计文档 `docs/superpowers/specs/2026-06-23-dochub-design.md`,实现计划 `docs/superpowers/plans/2026-06-23-dochub.md` 均已就绪;等待执行。
+4. **~~DocHub 实现计划已确认:Markdown 文档站~~ ✅ 已完成**:DocHub 已实现、合并入 `master` 并推送,包括上传/路径转换、全局索引、在线浏览、密码认证、CLI、Docker/compose/nginx/portfolio 集成;本地测试 59 通过(除 rag 测试)。
 5. **Phase 3**:cs-quiz-app 完整集成(Fastify+SQLite 容器 + `/quiz` 静态前端);个人页目前只有占位链接。
 6. **Phase 4**:部署到首尔服务器(Ubuntu + swap + Docker + 域名 A 记录 + Let's Encrypt HTTPS)。
 7. **后续**:博客;把 demo 由 iframe 逐个重写为原生 React(演进到方案 A)。
+
+## 当前可用路径(本地 Docker 启动后)
+
+```bash
+bash deploy/build-frontends.sh
+docker compose -f deploy/docker-compose.yml up -d --build
+```
+
+访问 http://127.0.0.1:8080:
+
+| 路径 | 服务 |
+|---|---|
+| `/` | 门户首页 |
+| `/rag/` | RAG 文档问答 |
+| `/fc/` | Function Calling Agent |
+| `/nexus/` | Nexus Multi-Agent 工作流 |
+| `/doctomd/` | DocHub Markdown 文档站 |
+| `/learn/` | Nexus 交互式学习站 |
+
+## 当前状态
+
+- `master` 已推送至 `origin/master`
+- 无未合并 feature 分支
+- Docker compose 端到端验证待 Docker Desktop 启动
 
 ---
 
@@ -71,8 +95,9 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 - 国内拉 Docker Hub 镜像易超时:先 `docker pull nginx:1.27-alpine` 和 `python:3.12-slim` 预缓存,或配镜像加速器。
 - LLM 用通义千问(dashscope),`DASHSCOPE_API_KEY` 在仓库根 `.env`(未跟踪)。
 - SDD 进度账本:`.git/sdd/progress.md`。
-- **远程**:`origin` = github `shiyuan-wreg/rag-qa-system.git`;**本地已提交但未推送**(到 2026-06-22 为止)——需要时再 `git push`(对外动作,需用户确认)。
+- **远程**:`origin` = github `shiyuan-wreg/rag-qa-system.git`;**`master` 已推送**。
 - **docker stack 当前已关闭**(2026-06-22 存档时 `compose down`);恢复运行见 `deploy/README.md`(build-frontends + compose up)。
+- **所有 feature 分支已清理**:无未合并工作分支。
 
 ---
 
