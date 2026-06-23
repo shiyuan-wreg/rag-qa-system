@@ -17,6 +17,13 @@ def test_health():
     assert response.json() == {"status": "ok"}
 
 
+def test_root():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert "Nexus" in response.text
+
+
 def test_chat_sse():
     async def mock_stream(*args, **kwargs):
         yield {"type": "agent_thought", "data": {"agent": "orchestrator", "content": "Starting planning phase"}}
