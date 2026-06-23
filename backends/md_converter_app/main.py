@@ -119,6 +119,10 @@ def browse(request: Request, path: str = ""):
         return RedirectResponse("/login", status_code=307)
 
     target = Config.OUTPUT_DIR / path
+    try:
+        target.resolve().relative_to(Config.OUTPUT_DIR.resolve())
+    except (ValueError, RuntimeError):
+        raise HTTPException(status_code=400, detail="非法路径")
     if not target.exists():
         raise HTTPException(status_code=404, detail="页面不存在")
 

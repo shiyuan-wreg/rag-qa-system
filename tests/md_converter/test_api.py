@@ -58,3 +58,13 @@ def test_path_conversion_when_enabled(tmp_path, monkeypatch):
     )
     assert response.status_code == 303
     assert "/browse/" in response.headers["location"]
+
+
+def test_browse_traversal_returns_400():
+    client = TestClient(app)
+    response = client.post("/login", data={"password": "test-password"}, follow_redirects=False)
+    cookies = response.cookies
+
+    response = client.get("/browse/..%2f..%2f..%2fetc%2fpasswd", cookies=cookies)
+    assert response.status_code == 400
+    assert "非法路径" in response.text
