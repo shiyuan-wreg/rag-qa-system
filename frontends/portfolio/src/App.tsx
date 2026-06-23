@@ -13,6 +13,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/rag" element={<Demo slug="rag" src="/rag/" />} />
         <Route path="/fc" element={<Demo slug="fc" src="/fc/" />} />
+        <Route path="/nexus" element={<Demo slug="nexus" src="/nexus/" />} />
         <Route path="/learn" element={<Learn />} />
         <Route path="/me" element={<Me />} />
       </Routes>
