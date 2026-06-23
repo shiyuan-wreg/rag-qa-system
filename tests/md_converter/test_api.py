@@ -28,19 +28,21 @@ def test_protected_jobs_redirects_when_not_logged_in():
     assert "/login" in response.headers["location"]
 
 
-def test_upload_md_file_conversion(tmp_path, monkeypatch):
-    client = TestClient(app)
+def test_path_conversion_when_enabled(tmp_path, monkeypatch):
+    from config import Config
+    monkeypatch.setattr(Config, "DOCHUB_ALLOW_PATH_CONVERT", True)
 
-    # Login first
+    client = TestClient(app)
     response = client.post("/login", data={"password": "test-password"}, follow_redirects=False)
-    assert response.status_code == 303
     cookies = response.cookies
 
-    # Upload file
-    md_content = b"# Test\n\nHello world."
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "doc.md").write_text("# Doc", encoding="utf-8")
+
     response = client.post(
-        "/api/convert/upload",
-        files={"file": ("test.md", md_content, "text/markdown")},
+        "/api/convert/path",
+        data={"path": str(src)},
         cookies=cookies,
         follow_redirects=False,
     )

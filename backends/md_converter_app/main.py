@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 from auth import AuthManager
 from config import Config
 from store import JobStore
-from converter import build_global_index, convert_markdown_file, build_dir_index
+from converter import build_global_index, convert_directory, convert_markdown_file, build_dir_index
 
 app = FastAPI(title="DocHub - Markdown 文档站")
 app.mount("/static", StaticFiles(directory="backends/md_converter_app/static"), name="static")
@@ -105,6 +105,40 @@ async def convert_upload(request: Request, file: UploadFile = File(...)):
         import shutil
         shutil.rmtree(out_dir, ignore_errors=True)
         shutil.rmtree(job_dir, ignore_errors=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return RedirectResponse("/doctomd/browse/", status_code=303)
+
+
+@app.post("/api/convert/path")
+async def convert_path(request: Request, path: str = Form(...)):
+    if not is_authenticated(request):
+        return RedirectResponse("/login", status_code=307)
+
+    if not Config.DOCHUB_ALLOW_PATH_CONVERT:
+        raise HTTPException(status_code=403, detail="路径转换功能已禁用")
+
+    src_path = Path(path).resolve()
+    if not src_path.exists() or not src_path.is_dir():
+        raise HTTPException(status_code=400, detail="路径不存在或不是目录")
+
+    if ".." in src_path.parts:
+        raise HTTPException(status_code=400, detail="非法路径")
+
+    Config.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    job = job_store.create("path", src_path.name, "")
+    out_dir = Config.OUTPUT_DIR / "paths" / job.job_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    job_store.update_status(job.job_id, "running")
+    try:
+        convert_directory(src_path, out_dir, job.job_id)
+        job.output_dir = str(out_dir.relative_to(Config.OUTPUT_DIR))
+        job_store.update_status(job.job_id, "done")
+        build_global_index(Config.OUTPUT_DIR)
+    except Exception as e:
+        job_store.update_status(job.job_id, "error", str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
     return RedirectResponse("/doctomd/browse/", status_code=303)
