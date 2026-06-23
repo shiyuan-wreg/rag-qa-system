@@ -35,8 +35,8 @@ class RetrieverAgent(BaseAgent):
                     data={"query": query}
                 )
                 await response.aread()
-                response.raise_for_status()
-                result = response.json()
+                await response.raise_for_status()
+                result = await response.json()
                 answer = result.get("answer", "")
                 return [
                     {"content": answer, "source": "rag_app", "score": 0.9}

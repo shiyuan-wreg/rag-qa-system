@@ -59,8 +59,13 @@ async def test_retriever_handles_http_error():
     llm = LLMClient(provider="qwen", model="qwen-turbo", api_key="fake")
     retriever = RetrieverAgent(bus, llm)
 
-    # Mock httpx.AsyncClient.post to raise an exception
-    with patch("httpx.AsyncClient.post", side_effect=Exception("Connection refused")):
+    # Mock httpx.AsyncClient constructor consistently with happy-path test
+    mock_client = AsyncMock()
+    mock_client.post = AsyncMock(side_effect=Exception("Connection refused"))
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=None)
+
+    with patch("httpx.AsyncClient", return_value=mock_client):
         task = asyncio.create_task(retriever.run())
 
         request = Message(
@@ -69,6 +74,44 @@ async def test_retriever_handles_http_error():
             recipient="retriever",
             message_type="task",
             payload={"query": "RAG 评估"},
+        )
+
+        result = await bus.send_and_wait("retriever", request, timeout=1.0)
+        assert "documents" in result.payload
+        assert len(result.payload["documents"]) == 1
+        assert "检索失败" in result.payload["documents"][0]["content"]
+        assert result.payload["documents"][0]["source"] == "rag_app"
+        assert result.payload["documents"][0]["score"] == 0.0
+
+        retriever.stop()
+        await asyncio.wait_for(task, timeout=1.0)
+
+
+@pytest.mark.asyncio
+async def test_retriever_handles_non_2xx_status():
+    bus = MessageBus()
+    llm = LLMClient(provider="qwen", model="qwen-turbo", api_key="fake")
+    retriever = RetrieverAgent(bus, llm)
+
+    # Mock httpx.AsyncClient returning a 500 response that raises on raise_for_status()
+    mock_response = AsyncMock()
+    mock_response.aread = AsyncMock()
+    mock_response.raise_for_status = AsyncMock(side_effect=Exception("500 Internal Server Error"))
+
+    mock_client = AsyncMock()
+    mock_client.post = AsyncMock(return_value=mock_response)
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=None)
+
+    with patch("httpx.AsyncClient", return_value=mock_client):
+        task = asyncio.create_task(retriever.run())
+
+        request = Message(
+            task_id="t3",
+            sender="orchestrator",
+            recipient="retriever",
+            message_type="task",
+            payload={"query": "HTTP 500 test"},
         )
 
         result = await bus.send_and_wait("retriever", request, timeout=1.0)
