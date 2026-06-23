@@ -11,7 +11,7 @@ class LLMClient:
         self.base_url = base_url
         self._raw_client = self._create_client()
 
-    def _create_client(self):
+    def _create_client(self) -> Any:
         if self.provider == "qwen":
             import dashscope
             dashscope.api_key = self.api_key
@@ -21,6 +21,8 @@ class LLMClient:
             return OpenAI(api_key=self.api_key, base_url=self.base_url)
 
     def chat(self, messages: List[Dict], tools: Optional[List[Dict]] = None, stream: bool = False) -> Dict[str, Any]:
+        if stream:
+            raise NotImplementedError("Streaming is not yet supported")
         if self.provider == "qwen":
             response = self._raw_client.call(
                 model=self.model,
