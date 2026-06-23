@@ -110,6 +110,28 @@ async def convert_upload(request: Request, file: UploadFile = File(...)):
     return RedirectResponse("/doctomd/browse/", status_code=303)
 
 
+from fastapi.responses import FileResponse
+
+
+@app.get("/browse/{path:path}", response_class=HTMLResponse)
+def browse(request: Request, path: str = ""):
+    if not is_authenticated(request):
+        return RedirectResponse("/login", status_code=307)
+
+    target = Config.OUTPUT_DIR / path
+    if not target.exists():
+        raise HTTPException(status_code=404, detail="页面不存在")
+
+    if target.is_file():
+        return FileResponse(target)
+
+    if target.is_dir():
+        index_file = target / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        raise HTTPException(status_code=404, detail="目录索引不存在")
+
+
 @app.post("/api/convert/path")
 async def convert_path(request: Request, path: str = Form(...)):
     if not is_authenticated(request):

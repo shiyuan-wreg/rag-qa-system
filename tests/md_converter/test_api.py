@@ -28,6 +28,16 @@ def test_protected_jobs_redirects_when_not_logged_in():
     assert "/login" in response.headers["location"]
 
 
+def test_browse_global_index_when_empty():
+    client = TestClient(app)
+    response = client.post("/login", data={"password": "test-password"}, follow_redirects=False)
+    cookies = response.cookies
+
+    response = client.get("/browse/", cookies=cookies)
+    assert response.status_code == 200
+    assert "DocHub 文档总目录" in response.text
+
+
 def test_path_conversion_when_enabled(tmp_path, monkeypatch):
     from config import Config
     monkeypatch.setattr(Config, "DOCHUB_ALLOW_PATH_CONVERT", True)
