@@ -118,12 +118,12 @@ async def convert_path(request: Request, path: str = Form(...)):
     if not Config.DOCHUB_ALLOW_PATH_CONVERT:
         raise HTTPException(status_code=403, detail="路径转换功能已禁用")
 
+    if ".." in path:
+        raise HTTPException(status_code=400, detail="非法路径")
+
     src_path = Path(path).resolve()
     if not src_path.exists() or not src_path.is_dir():
         raise HTTPException(status_code=400, detail="路径不存在或不是目录")
-
-    if ".." in src_path.parts:
-        raise HTTPException(status_code=400, detail="非法路径")
 
     Config.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
