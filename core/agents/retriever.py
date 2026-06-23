@@ -1,13 +1,15 @@
-"""Retriever Agent: retrieves relevant knowledge (mocked in Phase 1)."""
+"""Retriever Agent: retrieves relevant knowledge via HTTP to rag_app."""
+
+import httpx
 
 from core.agents.base import BaseAgent
+from core.config import Config
 from core.message import Message
 
 
 class RetrieverAgent(BaseAgent):
     """
-    Phase 1 mock retriever.
-    In Phase 2, this will connect to Chroma vector store.
+    Phase 2 retriever: calls rag_app HTTP endpoint for real retrieval.
     """
 
     def __init__(self, bus, llm):
@@ -16,8 +18,7 @@ class RetrieverAgent(BaseAgent):
     async def handle_message(self, message: Message) -> None:
         query = message.payload.get("query", "")
 
-        # Mock retrieval based on keywords
-        documents = self._mock_retrieve(query)
+        documents = await self._retrieve(query)
 
         await self.send_message(
             recipient=message.sender,
@@ -26,18 +27,21 @@ class RetrieverAgent(BaseAgent):
             task_id=message.task_id,
         )
 
-    def _mock_retrieve(self, query: str) -> list:
-        query_lower = query.lower()
-        if "python" in query_lower and ("list" in query_lower or "列表" in query_lower):
+    async def _retrieve(self, query: str) -> list:
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    f"{Config.RAG_URL}/chat",
+                    data={"query": query}
+                )
+                await response.aread()
+                response.raise_for_status()
+                result = response.json()
+                answer = result.get("answer", "")
+                return [
+                    {"content": answer, "source": "rag_app", "score": 0.9}
+                ]
+        except Exception as e:
             return [
-                {"content": "列表（list）是可变序列，支持增删改。", "source": "mock_notes/python_basics.md", "score": 0.95},
-                {"content": "元组（tuple）是不可变序列，通常用于固定数据。", "source": "mock_notes/python_basics.md", "score": 0.93},
-            ]
-        elif "rag" in query_lower or "评估" in query_lower:
-            return [
-                {"content": "RAG 评估可以从正确性、相关性、完整性等维度进行。", "source": "mock_notes/rag_eval.md", "score": 0.91},
-            ]
-        else:
-            return [
-                {"content": f"关于 '{query}' 的模拟检索结果。", "source": "mock_notes/general.md", "score": 0.80},
+                {"content": f"检索失败：{e}", "source": "rag_app", "score": 0.0}
             ]
