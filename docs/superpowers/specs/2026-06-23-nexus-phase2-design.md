@@ -122,14 +122,14 @@ Critic 是 Nexus 中的"质检员"。它不看代码，只看"用户问了什么
 
 本文档假设你已了解 LLM 基础概念。如果你对以下 Web 后端相关技术不熟悉，建议先阅读对应入门资料，再回来看设计部分：
 
-| 概念 | 一句话说明 | 推荐入门资料 |
+| 概念 | 一句话说明 | 学习资料 |
 |---|---|---|
-| HTTP / REST API | 浏览器/客户端与服务器通信的标准方式 | [MDN - HTTP 概述](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview)、[RESTful API 教程 - 菜鸟](https://www.runoob.com/w3cnote/restful-style.html) |
-| FastAPI | 用 Python 快速构建 Web 后端接口的框架 | [FastAPI 官方中文文档](https://fastapi.tiangolo.com/zh/) |
-| 反向代理（nginx） | 把外部请求按路径转发给内部不同服务的"前台" | [nginx 反向代理入门 - 菜鸟](https://www.runoob.com/nginx/nginx-reverse-proxy.html) |
-| SSE | 服务器向浏览器单向实时推送数据的 HTTP 技术 | [MDN - 使用服务器发送事件](https://developer.mozilla.org/zh-CN/docs/Web/API/Server-sent_events/Using_server-sent_events) |
+| HTTP / REST API | 浏览器/客户端与服务器通信的标准方式 | [Nexus 前置技术学习文档：Web 后端基础](../../learning/nexus-prerequisites-web-backend.md) 第 1 章 |
+| FastAPI | 用 Python 快速构建 Web 后端接口的框架 | [Nexus 前置技术学习文档：Web 后端基础](../../learning/nexus-prerequisites-web-backend.md) 第 2 章 |
+| 反向代理（nginx） | 把外部请求按路径转发给内部不同服务的"前台" | [Nexus 前置技术学习文档：Web 后端基础](../../learning/nexus-prerequisites-web-backend.md) 第 3 章 |
+| SSE | 服务器向浏览器单向实时推送数据的 HTTP 技术 | [Nexus 前置技术学习文档：Web 后端基础](../../learning/nexus-prerequisites-web-backend.md) 第 4 章 |
 
-> **设计文档的定位**：说明"系统为什么这样设计、各组件如何协作"。具体技术语法和入门教程应该交给更专业的文档，上面这些链接可以帮你补齐基础。
+> **设计文档的定位**：说明"系统为什么这样设计、各组件如何协作"。具体技术语法和入门教程见独立的 [Nexus 前置技术学习文档](../../learning/nexus-prerequisites-web-backend.md)，需要时自行查阅。
 
 ---
 
