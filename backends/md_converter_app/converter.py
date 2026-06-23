@@ -155,7 +155,7 @@ a:hover {{ text-decoration: underline; }}
     (directory / "index.html").write_text(html, encoding="utf-8")
 
 
-def convert_directory(src_dir: Path, out_dir: Path, job_id: str) -> list[Path]:
+def convert_directory(src_dir: Path, out_dir: Path, _job_id: str) -> list[Path]:
     """Convert all Markdown files under src_dir to out_dir, preserving structure."""
     md_files = sorted(p for p in src_dir.rglob("*.md") if p.is_file())
     html_files: list[Path] = []

@@ -16,7 +16,6 @@ def collect_markdown_files(path: Path) -> list[Path]:
 
 def convert_paths(paths: list[Path], output_dir: Path, no_index: bool) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
-    all_html: list[Path] = []
 
     for src in paths:
         md_files = collect_markdown_files(src)
@@ -25,12 +24,10 @@ def convert_paths(paths: list[Path], output_dir: Path, no_index: bool) -> None:
             continue
 
         if src.is_file():
-            out = output_dir / src.with_suffix(".html").name
             convert_directory(src.parent, output_dir, "cli")
         else:
             out_root = output_dir / src.name
             convert_directory(src, out_root, "cli")
-            all_html.extend(p for p in out_root.rglob("*.html"))
 
     if not no_index:
         build_global_index(output_dir)
