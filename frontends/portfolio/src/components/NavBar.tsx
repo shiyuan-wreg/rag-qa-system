@@ -6,8 +6,28 @@ const ITEMS = [
   { to: '/', label: '首页' },
   { to: '/rag', label: 'AI 作品' },
   { to: '/learn', label: '学习' },
+  { to: '/changelog', label: '更新' },
   { to: '/me', label: '个人' },
 ]
+
+function MenuIcon({ open }: { open: boolean }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {open ? (
+        <>
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </>
+      ) : (
+        <>
+          <line x1="4" y1="6" x2="20" y2="6" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="18" x2="20" y2="18" />
+        </>
+      )}
+    </svg>
+  )
+}
 
 export default function NavBar() {
   const { pathname } = useLocation()
@@ -19,11 +39,11 @@ export default function NavBar() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 bg-surface border-b border-border">
-      <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="sticky top-0 z-50 bg-surface/90 backdrop-blur border-b border-border">
+      <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-accent text-accent-text flex items-center justify-center text-xs font-bold">
+            <div className="w-7 h-7 rounded-md bg-accent text-accent-text flex items-center justify-center text-xs font-bold shadow-sm">
               AI
             </div>
             <span className="font-bold text-primary">个人集成学习网站</span>
@@ -34,11 +54,16 @@ export default function NavBar() {
               <Link
                 key={it.to}
                 to={it.to}
-                className={`text-sm font-medium transition-colors ${
-                  isActive(it.to) ? 'text-primary' : 'text-tertiary hover:text-primary'
+                className={`relative text-sm font-medium transition-colors ${
+                  isActive(it.to)
+                    ? 'text-primary'
+                    : 'text-tertiary hover:text-primary'
                 }`}
               >
                 {it.label}
+                {isActive(it.to) && (
+                  <span className="absolute -bottom-[18px] left-0 right-0 h-0.5 bg-accent rounded-full" />
+                )}
               </Link>
             ))}
             <ThemeToggle />
@@ -51,7 +76,7 @@ export default function NavBar() {
               className="p-2 rounded-md text-tertiary hover:bg-surface-hover"
               aria-label="切换菜单"
             >
-              {mobileOpen ? '✕' : '☰'}
+              <MenuIcon open={mobileOpen} />
             </button>
           </div>
         </div>
@@ -65,7 +90,9 @@ export default function NavBar() {
               to={it.to}
               onClick={() => setMobileOpen(false)}
               className={`block text-sm font-medium ${
-                isActive(it.to) ? 'text-primary' : 'text-tertiary'
+                isActive(it.to)
+                  ? 'text-primary'
+                  : 'text-tertiary'
               }`}
             >
               {it.label}

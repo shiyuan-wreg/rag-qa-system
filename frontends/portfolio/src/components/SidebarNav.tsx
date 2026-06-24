@@ -17,15 +17,15 @@ export default function SidebarNav({ items, activeKey }: { items: SidebarNavItem
             key={it.key}
             to={it.to}
             className={[
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
               active
-                ? 'bg-soft text-primary'
-                : 'text-tertiary hover:bg-soft hover:text-primary',
+                ? 'bg-accent-secondary-bg text-accent-secondary-text shadow-sm'
+                : 'text-tertiary hover:bg-surface-hover hover:text-primary',
             ].join(' ')}
           >
             {it.icon && (
               <span
-                className="w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold shrink-0"
+                className="w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm"
                 style={{ backgroundColor: it.icon.bg, color: it.icon.text }}
               >
                 {it.icon.letter}

@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../components/Button'
 import WorkCard from '../components/WorkCard'
+import AnnouncementBoard from '../components/AnnouncementBoard'
 import { WORKS } from '../data/works'
-import { PAGE_CHANGELOGS } from '../data/changelogs'
 
 export default function Home() {
   const [query, setQuery] = useState('')
@@ -19,19 +19,15 @@ export default function Home() {
     )
   }, [query])
 
-  const latestHome = PAGE_CHANGELOGS.home[0]
-
   return (
     <div>
-      <section className="bg-hero border-b border-border-subtle">
-        <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 text-center">
-          {latestHome && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-secondary-bg text-accent-secondary-text text-xs font-semibold mb-6">
-              <span>v{latestHome.version}</span>
-              <span>·</span>
-              <span>{latestHome.items[0]}</span>
-            </div>
-          )}
+      <section className="relative overflow-hidden bg-hero border-b border-border-subtle">
+        <div className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(circle at 50% 120%, var(--glow-accent), transparent 45%)`,
+          }}
+        />
+        <div className="relative max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-primary tracking-tight">
             探索 AI 与 Agent 的工程实践
           </h1>
@@ -49,6 +45,8 @@ export default function Home() {
         </div>
       </section>
 
+      <AnnouncementBoard />
+
       <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <h2 className="text-xl font-bold text-primary">精选作品</h2>
@@ -57,7 +55,7 @@ export default function Home() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="搜索作品..."
-            className="w-full sm:w-64 px-3 py-2 text-sm rounded-lg border border-border bg-surface text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-link/30"
+            className="w-full sm:w-64 px-3 py-2 text-sm rounded-lg border border-border bg-soft text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-link/30 transition-shadow"
           />
         </div>
 

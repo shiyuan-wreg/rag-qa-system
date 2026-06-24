@@ -10,6 +10,7 @@ export default {
           DEFAULT: 'var(--surface-default)',
           raised: 'var(--surface-raised)',
           hover: 'var(--surface-hover)',
+          soft: 'var(--surface-soft)',
         },
         border: {
           DEFAULT: 'var(--border-default)',
@@ -35,6 +36,8 @@ export default {
       boxShadow: {
         sm: 'var(--shadow-sm)',
         md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
+        glow: 'var(--shadow-glow)',
       },
       borderRadius: {
         sm: 'var(--radius-sm)',
@@ -49,6 +52,7 @@ export default {
       },
       maxWidth: {
         content: 'var(--max-content)',
+        wide: 'var(--max-wide)',
       },
       fontFamily: {
         sans: 'var(--font-sans)',

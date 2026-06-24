@@ -18,9 +18,9 @@ export default function ThemeToggle() {
             key={t.key}
             onClick={() => setTheme(t.key)}
             className={[
-              'px-2.5 py-1 text-xs font-medium rounded-md transition-colors',
+              'px-2.5 py-1 text-xs font-medium rounded-md transition-all',
               active
-                ? 'bg-accent text-accent-text'
+                ? 'bg-accent text-accent-text shadow-sm'
                 : 'text-tertiary hover:text-primary hover:bg-surface-hover',
             ].join(' ')}
             aria-pressed={active}

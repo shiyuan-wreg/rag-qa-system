@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import Demo from './pages/Demo'
 import Learn from './pages/Learn'
 import Me from './pages/Me'
+import Changelog from './pages/Changelog'
 import PageTransition from './components/PageTransition'
 
 function DemoRoute({ slug, src }: { slug: string; src: string }) {
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/nexus" element={<DemoRoute slug="nexus" src="/nexus/" />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/doctomd" element={<DemoRoute slug="doctomd" src="/doctomd/" />} />
+          <Route path="/changelog" element={<Changelog />} />
           <Route path="/me" element={<Me />} />
         </Routes>
       </PageTransition>

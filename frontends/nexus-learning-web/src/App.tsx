@@ -3,8 +3,7 @@ import { modules, getAllLessons, getNextLessonId, getPrevLessonId } from './data
 import { useProgress } from './hooks/useProgress'
 import Sidebar from './components/Sidebar'
 import LessonContent from './components/LessonContent'
-import ProgressBar from './components/ProgressBar'
-import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 function App() {
   const allLessons = useMemo(() => getAllLessons(), [])
@@ -54,19 +53,17 @@ function App() {
         currentLessonId={currentLessonId}
         completedLessons={progress.completedLessons}
         onSelectLesson={setCurrentLessonId}
+        total={allLessons.length}
+        completed={progress.completedLessons.length}
+        wrongCount={progress.wrongQuestions.length}
+        onReset={resetProgress}
       />
 
       <div className="flex-1 flex flex-col min-h-screen"
       >
-        <ProgressBar
-          total={allLessons.length}
-          completed={progress.completedLessons.length}
-          wrongCount={progress.wrongQuestions.length}
-        />
-
         <main className="flex-1 px-8 py-6"
         >
-          <div className="max-w-5xl mx-auto"
+          <div className="max-w-6xl mx-auto"
           >
             {/* Navigation */}
             <div className="flex items-center justify-between mb-6"
@@ -78,14 +75,6 @@ function App() {
               >
                 <ChevronLeft size={18} />
                 上一节
-              </button>
-
-              <button
-                onClick={resetProgress}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-500 hover:text-danger hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <RotateCcw size={16} />
-                重置进度
               </button>
 
               <button

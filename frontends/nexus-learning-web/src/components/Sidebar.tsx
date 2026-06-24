@@ -1,4 +1,4 @@
-import { BookOpen, CheckCircle2, Circle, ChevronDown } from 'lucide-react'
+import { BookOpen, CheckCircle2, Circle, ChevronDown, Trophy, RotateCcw } from 'lucide-react'
 import type { Module, Lesson } from '../types/course'
 
 interface SidebarProps {
@@ -6,9 +6,24 @@ interface SidebarProps {
   currentLessonId: string
   completedLessons: string[]
   onSelectLesson: (lessonId: string) => void
+  total: number
+  completed: number
+  wrongCount: number
+  onReset: () => void
 }
 
-export default function Sidebar({ modules, currentLessonId, completedLessons, onSelectLesson }: SidebarProps) {
+export default function Sidebar({
+  modules,
+  currentLessonId,
+  completedLessons,
+  onSelectLesson,
+  total,
+  completed,
+  wrongCount,
+  onReset,
+}: SidebarProps) {
+  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0
+
   return (
     <aside className="w-72 bg-white border-r border-slate-200 h-screen overflow-y-auto sticky top-0">
       <div className="p-5 border-b border-slate-100">
@@ -17,6 +32,35 @@ export default function Sidebar({ modules, currentLessonId, completedLessons, on
           <span className="font-bold text-lg">Nexus 学习</span>
         </div>
         <p className="text-xs text-slate-500">从 LLM 到 Multi-Agent 工程落地</p>
+      </div>
+
+      <div className="px-5 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
+            <Trophy size={15} className="text-warning" />
+            学习进度
+          </div>
+          <span className="text-sm font-bold text-primary-600">{percentage}%</span>
+        </div>
+        <div className="w-full bg-slate-200 rounded-full h-2 mb-2">
+          <div
+            className="bg-primary-600 h-2 rounded-full transition-all duration-500"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+        <div className="flex items-center justify-between text-xs text-slate-500">
+          <span>
+            {completed}/{total} 节完成
+            {wrongCount > 0 && <span className="text-danger"> · 错题 {wrongCount}</span>}
+          </span>
+          <button
+            onClick={onReset}
+            className="flex items-center gap-1 text-slate-400 hover:text-danger transition-colors"
+          >
+            <RotateCcw size={12} />
+            重置
+          </button>
+        </div>
       </div>
 
       <nav className="p-3">
