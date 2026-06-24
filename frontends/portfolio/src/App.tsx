@@ -1,23 +1,32 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import NavBar from './components/NavBar'
 import Home from './pages/Home'
 import Demo from './pages/Demo'
 import Learn from './pages/Learn'
 import Me from './pages/Me'
+import PageTransition from './components/PageTransition'
+
+function DemoRoute({ slug, src }: { slug: string; src: string }) {
+  return <Demo slug={slug} src={src} />
+}
 
 export default function App() {
+  const { pathname } = useLocation()
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-base">
       <NavBar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/rag" element={<Demo slug="rag" src="/rag/" />} />
-        <Route path="/fc" element={<Demo slug="fc" src="/fc/" />} />
-        <Route path="/nexus" element={<Demo slug="nexus" src="/nexus/" />} />
-        <Route path="/learn" element={<Learn />} />
-        <Route path="/doctomd" element={<Demo slug="doctomd" src="/doctomd/" />} />
-        <Route path="/me" element={<Me />} />
-      </Routes>
+      <PageTransition key={pathname}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/rag" element={<DemoRoute slug="rag" src="/rag/" />} />
+          <Route path="/fc" element={<DemoRoute slug="fc" src="/fc/" />} />
+          <Route path="/nexus" element={<DemoRoute slug="nexus" src="/nexus/" />} />
+          <Route path="/learn" element={<Learn />} />
+          <Route path="/doctomd" element={<DemoRoute slug="doctomd" src="/doctomd/" />} />
+          <Route path="/me" element={<Me />} />
+        </Routes>
+      </PageTransition>
     </div>
   )
 }
