@@ -1,24 +1,28 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 export default function DemoFrame({ src, title }: { src: string; title: string }) {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading')
   const timerRef = useRef<number | null>(null)
+  const loadedRef = useRef(false)
 
   const handleLoad = () => {
     if (timerRef.current) window.clearTimeout(timerRef.current)
+    loadedRef.current = true
     setStatus('loaded')
   }
 
   const handleError = () => {
     if (timerRef.current) window.clearTimeout(timerRef.current)
+    loadedRef.current = false
     setStatus('error')
   }
 
   const startLoad = () => {
+    loadedRef.current = false
     setStatus('loading')
     if (timerRef.current) window.clearTimeout(timerRef.current)
     timerRef.current = window.setTimeout(() => {
-      if (status !== 'loaded') setStatus('error')
+      if (!loadedRef.current) setStatus('error')
     }, 8000)
   }
 
@@ -26,6 +30,13 @@ export default function DemoFrame({ src, title }: { src: string; title: string }
     startLoad()
     setStatus('loading')
   }
+
+  useEffect(() => {
+    startLoad()
+    return () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current)
+    }
+  }, [src])
 
   return (
     <div className="relative flex-1 min-h-[60vh] lg:min-h-[70vh] bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
