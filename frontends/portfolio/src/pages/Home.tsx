@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import Button from '../components/Button'
 import WorkCard from '../components/WorkCard'
 import AnnouncementBoard from '../components/AnnouncementBoard'
 import Hero from '../components/Hero'
 import { WORKS } from '../data/works'
+import { useScrollReveal } from '../hooks/useScrollReveal'
 
 export default function Home() {
   const [query, setQuery] = useState('')
+  useScrollReveal()
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -26,7 +26,7 @@ export default function Home() {
 
       <AnnouncementBoard />
 
-      <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <section data-reveal className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <h2 className="text-xl font-bold text-primary">精选作品</h2>
           <input
@@ -43,7 +43,7 @@ export default function Home() {
             没有找到匹配“{query}”的作品
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div data-reveal className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((w) => (
               <WorkCard key={w.slug} work={w} />
             ))}
