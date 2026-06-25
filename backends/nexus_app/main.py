@@ -35,7 +35,7 @@ sessions: Dict[str, list] = {}
 @app.on_event("startup")
 async def startup():
     global agents, agent_tasks, llm
-    llm = LLMClient(provider=Config.LLM_PROVIDER, model=Config.LLM_MODEL, api_key=Config.DASHSCOPE_API_KEY or "")
+    llm = LLMClient.from_config()
     agents = {
         "planner": PlannerAgent(bus, llm),
         "retriever": RetrieverAgent(bus, llm),
@@ -70,9 +70,9 @@ async def health():
 
 @app.post("/chat")
 async def chat(query: str = Form(...), session_id: str = Form("")):
-    if not Config.DASHSCOPE_API_KEY:
+    if not Config.LLM_API_KEY:
         async def error_stream():
-            yield f"event: error\ndata: {json.dumps({'message': 'DASHSCOPE_API_KEY not set'})}\n\n"
+            yield f"event: error\ndata: {json.dumps({'message': 'LLM_API_KEY not set'})}\n\n"
         return StreamingResponse(error_stream(), media_type="text/event-stream")
 
     orchestrator = agents.get("orchestrator")

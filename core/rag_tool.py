@@ -17,7 +17,8 @@ from rag.vectorstore import get_or_create_vectorstore
 from rag.retriever import retrieve
 
 
-API_KEY = os.environ.get("DASHSCOPE_API_KEY", "")
+# RAG 向量检索的 embedding 用 Jina(海外可达)
+JINA_API_KEY = os.environ.get("JINA_API_KEY", "")
 DOCS_PATH = os.environ.get("DOCS_PATH", "docs/python_guide.txt")
 VECTOR_DB_DIR = os.environ.get("VECTOR_DB_DIR", "./chroma_db")
 
@@ -33,8 +34,8 @@ class RAGTool:
 
     def _init_vectorstore(self):
         """初始化向量数据库。"""
-        if not API_KEY:
-            print("[警告] DASHSCOPE_API_KEY 未配置，RAG 工具不可用")
+        if not JINA_API_KEY:
+            print("[警告] JINA_API_KEY 未配置，RAG 工具不可用")
             return
 
         if not os.path.exists(self.docs_path):
@@ -45,7 +46,7 @@ class RAGTool:
             raw_docs = load_documents(self.docs_path)
             chunks = split_documents(raw_docs)
             self.vectorstore = get_or_create_vectorstore(
-                chunks, self.vector_db_dir, api_key=API_KEY
+                chunks, self.vector_db_dir, api_key=JINA_API_KEY
             )
             print(f"[+] RAG 工具初始化完成: {len(chunks)} 个文本块")
         except Exception as e:

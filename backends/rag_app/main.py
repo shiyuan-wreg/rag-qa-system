@@ -13,20 +13,19 @@
 
 import os
 
-import dashscope
 from dotenv import load_dotenv
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 
 load_dotenv()
 
+from core.config import Config
 from core.agent import Agent
 from core.rag_tool import init_rag_tool, search_docs
 from core.tools import TOOL_MAP
 from eval.evaluator import run_test_cases
 
-API_KEY = os.environ.get("DASHSCOPE_API_KEY", "")
-dashscope.api_key = API_KEY
+API_KEY = Config.LLM_API_KEY
 
 app = FastAPI(title="基于 RAG + Function Calling 的智能文档任务 Agent")
 

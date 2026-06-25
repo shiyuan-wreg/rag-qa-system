@@ -9,12 +9,14 @@ import os
 import re
 from typing import Any, Dict, List
 
-import dashscope
 from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.environ.get("DASHSCOPE_API_KEY", "")
+from core.config import Config
+from core.llm import LLMClient
+
+API_KEY = Config.LLM_API_KEY
 
 
 def evaluate_answer(query: str, answer: str, contexts: List[str] = None) -> Dict[str, float]:
@@ -101,12 +103,10 @@ def llm_as_judge(query: str, answer: str, contexts: List[str] = None) -> Dict[st
 """
 
     try:
-        response = dashscope.Generation.call(
-            model="qwen-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            result_format="message",
+        message = LLMClient.from_config().chat(
+            [{"role": "user", "content": prompt}],
         )
-        content = response.output.choices[0].message.content
+        content = message["content"]
 
         # 尝试解析 JSON
         try:

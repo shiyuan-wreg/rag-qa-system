@@ -15,6 +15,17 @@ class LLMClient:
         self.base_url = base_url
         self._raw_client = self._create_client()
 
+    @classmethod
+    def from_config(cls) -> "LLMClient":
+        """从 core.config.Config 读取 provider/model/key/base_url 构造客户端。"""
+        from core.config import Config
+        return cls(
+            provider=Config.LLM_PROVIDER,
+            model=Config.LLM_MODEL,
+            api_key=Config.LLM_API_KEY or "",
+            base_url=Config.LLM_BASE_URL,
+        )
+
     def _create_client(self):
         if self.provider == "qwen":
             import dashscope
@@ -33,12 +44,14 @@ class LLMClient:
                 result_format="message",
             )
         else:
-            response = self._raw_client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                tools=tools,
-                stream=stream,
-            )
+            kwargs: Dict[str, Any] = {
+                "model": self.model,
+                "messages": messages,
+                "stream": stream,
+            }
+            if tools:
+                kwargs["tools"] = tools
+            response = self._raw_client.chat.completions.create(**kwargs)
         return self._extract_content(response)
 
     def _extract_content(self, response: Any) -> Dict[str, Any]:

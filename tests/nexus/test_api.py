@@ -63,7 +63,7 @@ def test_chat_sse():
 
 
 def test_chat_sse_missing_api_key():
-    with patch("backends.nexus_app.main.Config.DASHSCOPE_API_KEY", None):
+    with patch("backends.nexus_app.main.Config.LLM_API_KEY", None):
         response = client.post("/chat", data={"query": "hello"})
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/event-stream")
@@ -79,7 +79,7 @@ def test_chat_sse_missing_api_key():
             elif subline.startswith("data: "):
                 event_data = json.loads(subline[len("data: "):])
         if event_type == "error":
-            assert "DASHSCOPE_API_KEY" in event_data.get("message", "")
+            assert "LLM_API_KEY" in event_data.get("message", "")
             break
     else:
         raise AssertionError("Expected error event not found")

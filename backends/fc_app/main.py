@@ -15,14 +15,15 @@ import json
 import os
 import traceback
 
-import dashscope
 from dotenv import load_dotenv
 from fastapi import FastAPI, Form, Body
 from fastapi.responses import HTMLResponse
 
+from core.config import Config
+from core.llm import LLMClient
+
 load_dotenv()
-API_KEY = os.environ.get("DASHSCOPE_API_KEY", "")
-dashscope.api_key = API_KEY
+API_KEY = Config.LLM_API_KEY
 
 app = FastAPI(title="Function Calling Agent")
 
@@ -110,6 +111,7 @@ TOOLS = [
 class Agent:
     def __init__(self, model: str = "qwen-turbo"):
         self.model = model
+        self.llm = LLMClient.from_config()
         self.messages = []
         self.max_turns = 5
         self.system_message = {
@@ -128,19 +130,14 @@ class Agent:
 
         for turn in range(self.max_turns):
             try:
-                response = dashscope.Generation.call(
-                    model=self.model,
-                    messages=[self.system_message] + self.messages,
+                message = self.llm.chat(
+                    [self.system_message] + self.messages,
                     tools=TOOLS,
-                    result_format="message",
                 )
-
-                choice = response.output.choices[0]
-                message = choice.message
 
                 if message.get("tool_calls"):
                     # 记录工具调用
-                    for tc in message.tool_calls:
+                    for tc in message["tool_calls"]:
                         tool_calls_log.append({
                             "name": tc["function"]["name"],
                             "arguments": json.loads(tc["function"]["arguments"]),
@@ -149,7 +146,7 @@ class Agent:
                     # 处理工具调用
                     self.messages.append({
                         "role": "assistant",
-                        "content": message.content or "",
+                        "content": message["content"] or "",
                         "tool_calls": [
                             {
                                 "id": tc["id"],
@@ -159,11 +156,11 @@ class Agent:
                                     "arguments": tc["function"]["arguments"],
                                 }
                             }
-                            for tc in message.tool_calls
+                            for tc in message["tool_calls"]
                         ]
                     })
 
-                    for tool_call in message.tool_calls:
+                    for tool_call in message["tool_calls"]:
                         tool_name = tool_call["function"]["name"]
                         tool_args = json.loads(tool_call["function"]["arguments"])
 
@@ -183,7 +180,7 @@ class Agent:
 
                     continue
                 else:
-                    answer = message.content
+                    answer = message["content"]
                     self.messages.append({"role": "assistant", "content": answer})
                     return {
                         "answer": answer,

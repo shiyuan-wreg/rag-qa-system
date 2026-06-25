@@ -9,14 +9,15 @@ import os
 import traceback
 from typing import Any, Dict, List
 
-import dashscope
 from dotenv import load_dotenv
 
 load_dotenv()
 
+from core.config import Config
+from core.llm import LLMClient
 from core.tools import TOOL_MAP, TOOLS
 
-API_KEY = os.environ.get("DASHSCOPE_API_KEY", "")
+API_KEY = Config.LLM_API_KEY
 
 
 class Agent:
@@ -33,6 +34,7 @@ class Agent:
 
     def __init__(self, model: str = "qwen-turbo"):
         self.model = model
+        self.llm = LLMClient.from_config()
         self.messages: List[Dict[str, Any]] = []
         self.max_turns = 5
         self.system_message = {
@@ -62,19 +64,14 @@ class Agent:
 
         for turn in range(self.max_turns):
             try:
-                response = dashscope.Generation.call(
-                    model=self.model,
-                    messages=[self.system_message] + self.messages,
+                message = self.llm.chat(
+                    [self.system_message] + self.messages,
                     tools=TOOLS,
-                    result_format="message",
                 )
-
-                choice = response.output.choices[0]
-                message = choice.message
 
                 if message.get("tool_calls"):
                     # 记录工具调用日志
-                    for tc in message.tool_calls:
+                    for tc in message["tool_calls"]:
                         tool_calls_log.append({
                             "name": tc["function"]["name"],
                             "arguments": json.loads(tc["function"]["arguments"]),
@@ -85,7 +82,7 @@ class Agent:
                     self._handle_tool_calls(message)
                     continue
                 else:
-                    answer = message.content
+                    answer = message["content"]
                     self.messages.append({"role": "assistant", "content": answer})
                     return {
                         "answer": answer,
