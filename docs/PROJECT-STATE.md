@@ -1,7 +1,7 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-06-25(门户外壳「黑白高级感科技风」重构已完成,worktree 内 11 个任务全部通过,本地 Docker 全路由 200,待用户最终视觉确认后合并 master 并重新部署首尔服务器)
+> 最近更新:2026-06-25(门户「黑白科技风」重构 + 第 6 个 demo IconForge 图标净化器均已完成,**已合并入 `master` 并推送 `origin/master`**(HEAD `80cf289`);本地 Docker 全路由 200;**生产服务器尚未重新部署**,待用户触发)
 
 ---
 
@@ -9,7 +9,7 @@
 
 ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`**。**Nexus Phase 2 已完成并合并入 `master`**(14 个提交,39 测试通过),新增 `/nexus/` Multi-Agent 工作流助手(FastAPI + SSE + 通义千问)。**DocHub 已完成并合并入 `master`**(19 个提交,59 测试通过),新增 `/doctomd/` Markdown 转 HTML 文档站(上传/路径转换/在线浏览/密码保护/CLI)。**Phase 4 服务器部署已完成**:项目已部署到韩国首尔阿里云轻量服务器(Ubuntu 24.04 LTS + Docker),通过 `https://www.shiyuan-wreg.cloud` 对外提供统一门户,Let's Encrypt SSL 证书已生效,所有子路径(`/rag/`、`/fc/`、`/nexus/`、`/doctomd/`、`/learn/`)及后端代理均验证通过。`master` **已推送**到 GitHub `origin/master`。
 
-**新增:门户外壳「黑白高级感科技风」重构**在隔离 worktree `feat+portfolio-ui-redesign` 完成(11 个任务 + 多轮反馈修复 + logo 和 5 个 demo 图标替换 + 第 6 个 demo IconForge,当前 HEAD `3feeae9`),默认主题改为 `mono-light`,含科技 hero(glitch 标题/打字机/假终端)、用户提供的 SVG 图标、WorkCard 纯黑白四特效选中态、全局网格/噪点质感、等宽元信息字体。本地 Docker 验证所有路由 200,stack 正在 `:8080` 运行。
+**新增:门户「黑白科技风」重构 + IconForge 图标净化器(第 6 个 demo)** 已完成并 **合并入 `master`、推送 `origin/master`(HEAD `80cf289`,从 worktree `feat+portfolio-ui-redesign` 快进合并)**。门户改版:默认主题 `mono-light`,科技 hero(glitch 标题/打字机/假终端)、用户提供的 SVG logo 与 5 个 demo 图标、WorkCard 纯黑白四特效选中态、全局网格/噪点质感、等宽元信息字体。IconForge(`/iconforge/`):无状态 FastAPI 服务(端口 8005,照搬 DocHub 接线),三操作自选(位图转矢量 Pillow+potrace / 去白边 / 彩色转黑),原生 JS 单页 UI(亮暗双预览/下载/复制);容器内 27 测试全绿(含真实 potrace),本地全栈 9 路由 200。**生产服务器尚未重新部署**——待用户触发后,服务器 `git pull` + `build-frontends` + `compose up --build`(注意 iconforge 首次构建会 apt 装 potrace)。本地起栈用 `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d --build`。
 
 ---
 
