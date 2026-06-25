@@ -13,8 +13,10 @@
 # 1. 构建前端静态产物(portfolio + 学习站)
 bash deploy/build-frontends.sh
 
-# 2. 构建并启动所有容器
-docker compose -f deploy/docker-compose.yml up -d --build
+# 2. 构建并启动所有容器（本地开发用 override 文件，避免生产 nginx 配置冲突）
+#    基础 docker-compose.yml 是生产配置（nginx.conf + 80/443 + letsencrypt）
+#    docker-compose.local.yml 覆盖为本地配置（nginx.local.conf + 8080）
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d --build
 
 # 3. 浏览器访问
 #    http://127.0.0.1:8080
@@ -30,6 +32,7 @@ docker compose -f deploy/docker-compose.yml up -d --build
 | `/fc/` | Function Calling demo |
 | `/learn/` | Nexus 交互式学习站 |
 | `/doctomd/` | DocHub（Markdown 转 HTML） |
+| `/iconforge/` | IconForge 图标净化器 |
 
 ## DocHub
 
@@ -40,7 +43,7 @@ docker compose -f deploy/docker-compose.yml up -d --build
 ## 停止
 
 ```bash
-docker compose -f deploy/docker-compose.yml down
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml down
 ```
 
 ## 常见问题
