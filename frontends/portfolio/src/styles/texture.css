@@ -45,3 +45,45 @@ body::after {
   .work-card:hover, .work-card.is-active { transform:none }
   .work-card__scan, .work-card__inner { animation:none !important }
 }
+
+/* glitch 黑白版:静止恒定轻错位 + 偶发自然爆发(两层互质时长,每次窗口~22%) */
+.glitch { position: relative; display: inline-block; }
+.glitch::before, .glitch::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%;
+  overflow: hidden; pointer-events: none; will-change: transform, clip-path, opacity; }
+.glitch::before { color: var(--text-secondary); opacity:.45; transform: translateX(-.5px); clip-path: inset(0 0 52% 0); }
+.glitch::after  { color: var(--text-tertiary);  opacity:.45; transform: translateX(.5px);  clip-path: inset(50% 0 0 0); }
+.glitch.is-on::before { animation: glA 5.7s ease-in-out infinite; }
+.glitch.is-on::after  { animation: glB 4.3s ease-in-out infinite; }
+@keyframes glA {
+  0%,5%,27%,50%,73%,100%{transform:translateX(-.5px);clip-path:inset(0 0 52% 0);opacity:.45}
+  7%{transform:translateX(-3px); clip-path:inset(14% 0 60% 0); opacity:.8}
+  11%{transform:translateX(2px); clip-path:inset(30% 0 40% 0); opacity:.6}
+  15%{transform:translateX(-2px);clip-path:inset(8% 0 66% 0); opacity:.78}
+  19%{transform:translateX(2px); clip-path:inset(22% 0 50% 0); opacity:.62}
+  23%{transform:translateX(-1px);clip-path:inset(12% 0 58% 0); opacity:.55}
+  52%{transform:translateX(-3px);clip-path:inset(6% 0 70% 0); opacity:.8}
+  56%{transform:translateX(2px); clip-path:inset(20% 0 50% 0); opacity:.6}
+  60%{transform:translateX(-2px);clip-path:inset(12% 0 58% 0); opacity:.72}
+  64%{transform:translateX(2px); clip-path:inset(28% 0 44% 0); opacity:.6}
+  68%{transform:translateX(-1px);clip-path:inset(16% 0 54% 0); opacity:.55}
+}
+@keyframes glB {
+  0%,31%,53%,73%,100%{transform:translateX(.5px);clip-path:inset(50% 0 0 0);opacity:.45}
+  33%{transform:translateX(3px); clip-path:inset(58% 0 6% 0); opacity:.8}
+  37%{transform:translateX(-2px);clip-path:inset(66% 0 18% 0); opacity:.6}
+  41%{transform:translateX(2px); clip-path:inset(54% 0 28% 0); opacity:.72}
+  45%{transform:translateX(-1px);clip-path:inset(72% 0 4% 0); opacity:.58}
+  49%{transform:translateX(2px); clip-path:inset(60% 0 14% 0); opacity:.6}
+  75%{transform:translateX(3px); clip-path:inset(56% 0 10% 0); opacity:.8}
+  79%{transform:translateX(-2px);clip-path:inset(64% 0 20% 0); opacity:.6}
+  83%{transform:translateX(2px); clip-path:inset(52% 0 30% 0); opacity:.72}
+  87%{transform:translateX(-1px);clip-path:inset(70% 0 6% 0); opacity:.58}
+  91%{transform:translateX(2px); clip-path:inset(62% 0 16% 0); opacity:.6}
+}
+.blink { display:inline-block; width:.6ch; background: currentColor; animation: blink .9s step-end infinite; }
+@keyframes blink { 50% { opacity: 0 } }
+.term { border:1px solid var(--border-default); border-radius:12px; background: var(--surface-soft); overflow:hidden; }
+.term__bar { display:flex; align-items:center; gap:7px; padding:11px 14px; border-bottom:1px solid var(--border-subtle); }
+.term__dot { width:11px; height:11px; border-radius:50%; background: var(--border-strong); display:inline-block; }
+.term__body { padding:16px 18px; line-height:1.9; }
+@media (prefers-reduced-motion: reduce) { .glitch.is-on::before, .glitch.is-on::after, .blink { animation: none } }

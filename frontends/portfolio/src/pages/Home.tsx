@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Button from '../components/Button'
 import WorkCard from '../components/WorkCard'
 import AnnouncementBoard from '../components/AnnouncementBoard'
+import Hero from '../components/Hero'
 import { WORKS } from '../data/works'
 
 export default function Home() {
@@ -21,29 +22,7 @@ export default function Home() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-hero border-b border-border-subtle">
-        <div className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(circle at 50% 120%, var(--glow-accent), transparent 45%)`,
-          }}
-        />
-        <div className="relative max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-primary tracking-tight">
-            探索 AI 与 Agent 的工程实践
-          </h1>
-          <p className="mt-5 text-base md:text-lg text-secondary max-w-2xl mx-auto leading-relaxed">
-            从 RAG、Function Calling 到 Multi-Agent 工作流，把分散的实验整合成一个可运行的作品集门户。
-          </p>
-          <div className="mt-8 flex items-center justify-center gap-3">
-            <Link to="/rag">
-              <Button>浏览作品</Button>
-            </Link>
-            <Link to="/learn">
-              <Button variant="secondary">开始学习</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <Hero />
 
       <AnnouncementBoard />
 
