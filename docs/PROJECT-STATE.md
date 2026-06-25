@@ -1,7 +1,7 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-06-25(门户「黑白科技风」重构 + 第 6 个 demo IconForge 图标净化器均已完成,**已合并入 `master` 并推送 `origin/master`**(HEAD `80cf289`);本地 Docker 全路由 200;**生产服务器尚未重新部署**,待用户触发)
+> 最近更新:2026-06-25(门户「黑白科技风」重构 + 第 6 个 demo IconForge **已部署到首尔生产服务器并验证全 8 路由 HTTPS 200**;HEAD `ee8ff6e`)
 
 ---
 
@@ -9,7 +9,15 @@
 
 ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`**。**Nexus Phase 2 已完成并合并入 `master`**(14 个提交,39 测试通过),新增 `/nexus/` Multi-Agent 工作流助手(FastAPI + SSE + 通义千问)。**DocHub 已完成并合并入 `master`**(19 个提交,59 测试通过),新增 `/doctomd/` Markdown 转 HTML 文档站(上传/路径转换/在线浏览/密码保护/CLI)。**Phase 4 服务器部署已完成**:项目已部署到韩国首尔阿里云轻量服务器(Ubuntu 24.04 LTS + Docker),通过 `https://www.shiyuan-wreg.cloud` 对外提供统一门户,Let's Encrypt SSL 证书已生效,所有子路径(`/rag/`、`/fc/`、`/nexus/`、`/doctomd/`、`/learn/`)及后端代理均验证通过。`master` **已推送**到 GitHub `origin/master`。
 
-**新增:门户「黑白科技风」重构 + IconForge 图标净化器(第 6 个 demo)** 已完成并 **合并入 `master`、推送 `origin/master`(HEAD `80cf289`,从 worktree `feat+portfolio-ui-redesign` 快进合并)**。门户改版:默认主题 `mono-light`,科技 hero(glitch 标题/打字机/假终端)、用户提供的 SVG logo 与 5 个 demo 图标、WorkCard 纯黑白四特效选中态、全局网格/噪点质感、等宽元信息字体。IconForge(`/iconforge/`):无状态 FastAPI 服务(端口 8005,照搬 DocHub 接线),三操作自选(位图转矢量 Pillow+potrace / 去白边 / 彩色转黑),原生 JS 单页 UI(亮暗双预览/下载/复制);容器内 27 测试全绿(含真实 potrace),本地全栈 9 路由 200。**生产服务器尚未重新部署**——待用户触发后,服务器 `git pull` + `build-frontends` + `compose up --build`(注意 iconforge 首次构建会 apt 装 potrace)。本地起栈用 `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d --build`。
+**新增:门户「黑白科技风」重构 + IconForge 图标净化器(第 6 个 demo)** 已完成、合并入 `master`,**并于 2026-06-25 部署到首尔生产服务器(HEAD `ee8ff6e`)**。生产 `https://www.shiyuan-wreg.cloud` 全 8 路由 HTTPS 200 验证通过。门户改版:默认主题 `mono-light`,科技 hero(glitch 标题/打字机/假终端)、用户提供的 SVG logo 与 5 个 demo 图标、WorkCard 纯黑白四特效选中态、全局网格/噪点质感、等宽元信息字体。IconForge(`/iconforge/`):无状态 FastAPI 服务(端口 8005,照搬 DocHub 接线),三操作自选(位图转矢量 Pillow+potrace / 去白边 / 彩色转黑),原生 JS 单页 UI(亮暗双预览/下载/复制)。本地起栈用 `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d --build`。
+
+**部署中修复的两个 bug(已提交推送):**
+- `2099d78` fix(portfolio): 补 `/iconforge` SPA 路由(App.tsx 漏了,点卡片空白页)。
+- `ee8ff6e` fix(portfolio): 把 `@fontsource/inter` + `@fontsource/jetbrains-mono` 写进 package.json(原先靠用户主目录幽灵 node_modules,服务器干净 clone 构建失败)。
+
+**已知待改进(2026-06-25,后面再处理):**
+1. IconForge 工具体验差(用户反馈),后续迭代净化效果。
+2. **RAG 冷启动 502**:`Agent()` 在 import 时(`backends/rag_app/main.py:38`)做阻塞式 dashscope 调用,而**服务器连不上 dashscope.aliyuncs.com**(curl 000/超时),每次 `compose up --build` 重建 rag 容器,`/rag/` 都会 502 数分钟直到超时走完才 200。改进:RAG/Agent 初始化挪出 import 路径(FastAPI startup/懒加载)+ dashscope 短超时 + `chroma_db` 持久化挂卷;并确认生产 LLM 出口(代理/region endpoint),否则 RAG 实际检索会失败。
 
 ---
 

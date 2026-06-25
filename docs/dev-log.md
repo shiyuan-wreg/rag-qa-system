@@ -1,5 +1,56 @@
 # Nexus 开发日志
 
+## 2026-06-25
+
+### 今日目标
+
+把「黑白科技风改版 + 第 6 个 demo IconForge」从 master 部署到首尔生产服务器,并修复发现的问题。
+
+### 完成内容
+
+- ✅ **修复 IconForge 点进去空白页**:根因是 `frontends/portfolio/src/App.tsx` 路由表漏了 `/iconforge` 这条 `<Route>`,WorkCard 链接到 `/iconforge` 但 React Router 匹配不到任何路由 → 渲染空白。后端、nginx、works.ts 接线都正常,唯独 SPA 路由缺失。提交 `2099d78`。
+- ✅ **修复服务器前端构建失败**:改版的 `main.tsx` 引入了 `@fontsource/inter` 和 `@fontsource/jetbrains-mono`,但没写进 `package.json`——本地能 build 是因为这两个包恰好装在用户主目录 `C:/Users/hzs17/node_modules`(npm 向上级目录解析的"幽灵依赖"),服务器干净 clone 没有父级 node_modules,`npm install` 拿不到,报 `Rollup failed to resolve import "@fontsource/inter/400.css"`。把两个依赖正式声明进 `package.json`(`^5.2.8`),提交 `ee8ff6e`。
+- ✅ **部署到首尔服务器**:`git reset --hard origin/master` → `build-frontends.sh` → `docker compose up -d --build`。IconForge 容器首次构建 apt 装 potrace 成功。
+- ✅ **生产验证**:`https://www.shiyuan-wreg.cloud` 全 8 路由 HTTPS 200(`/ /me /rag/ /fc/ /nexus/ /doctomd/ /learn/ /iconforge/`),新 portfolio bundle(`index-BNE973Ps.js`,含 iconforge 路由)已上线。
+
+### 排查记录(RAG 冷启动 502)
+
+- 部署后 `/rag/` 一度 502,排查约 16 分钟。容器 `running`、0 重启、却完全无日志(容器未设 `PYTHONUNBUFFERED`,print 被缓冲)。
+- 逐步定位:`init_rag_tool()` 在模块级(`main.py:34`)同步执行,但实测只要 1.1s——走"加载已有向量数据库"分支(`chroma.sqlite3` 已烤进镜像),不是卡点。
+- 真正的慢点在 `agent = Agent()`(`main.py:38`)构造:服务器**连不上 dashscope.aliyuncs.com**(curl 直接 000/20s 超时),Agent 初始化里的阻塞调用要慢慢超时后才放行,导致 uvicorn 迟迟不 bind 端口(期间 nginx 上游连不上 → 502)。超时走完后自动恢复,`/rag/` 现已 200。
+
+### 待改进(记录,后面再处理)
+
+1. **IconForge 工具本身体验差**(用户反馈),后续迭代净化效果/交互。
+2. **RAG 冷启动慢且脆弱**:`Agent()` 在 import 时做阻塞式 dashscope 调用,服务器又连不上 dashscope 出口 → 每次 `compose up --build` 重建容器 `/rag/` 都会 502 数分钟。改进方向:把 RAG/Agent 初始化挪出 import 路径(改 FastAPI startup 后台任务 / 懒加载),并给 dashscope 调用设短超时;`chroma_db` 持久化挂卷避免重建。
+3. **服务器到 dashscope 网络不通**:需确认生产环境 LLM 出口(是否要走代理 / 换 region endpoint),否则 RAG 实际检索会失败。
+
+---
+
+## 2026-06-24
+
+### 今日目标
+
+补全 Phase 4 部署学习文档中 SSH 代理/HTTP CONNECT 隧道的深度解释。
+
+### 完成内容
+
+- ✅ 重写 `docs/learning/phase4-deployment-learning-guide.md` 的 1.3 节（代理与 HTTP CONNECT 隧道）和 2.1 节（SSH 22 端口连接超时）。
+- ✅ 新增内容：SSH 默认不走系统代理、`CONNECT` 方法逐帧拆解、`ProxyCommand` 工作原理、直连/日本代理失败/本机代理成功的三层原因对比、常见误区澄清。
+- ✅ 同步更新对应的 `.docx` 与 `.html` 版本。
+- ✅ 自测问题从 7 题扩充到 12 题，覆盖 SSH 代理相关知识点。
+
+### 关键决策
+
+1. **文档优先深入原理，不满足于“命令能跑通”**
+   - 从用户反馈出发，把“为什么开了代理 SSH 还是失败”这个核心疑问彻底讲透。
+   - 强调 HTTP CONNECT 只是机制，真正解决问题的是“代理出口到目标服务器路由可达”。
+
+2. **保留配置文件作为可执行参考**
+   - `.claude/ssh_config` 不变，文档中继续引用，方便直接复制使用。
+
+---
+
 ## 2026-06-18
 
 ### 今日目标
