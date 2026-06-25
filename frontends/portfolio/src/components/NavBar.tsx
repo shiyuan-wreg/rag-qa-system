@@ -54,16 +54,14 @@ export default function NavBar() {
               <Link
                 key={it.to}
                 to={it.to}
-                className={`relative text-sm font-medium transition-colors ${
-                  isActive(it.to)
-                    ? 'text-primary'
-                    : 'text-tertiary hover:text-primary'
+                className={`group relative font-mono text-xs tracking-wide uppercase transition-colors ${
+                  isActive(it.to) ? 'text-primary' : 'text-tertiary hover:text-primary'
                 }`}
               >
                 {it.label}
-                {isActive(it.to) && (
-                  <span className="absolute -bottom-[18px] left-0 right-0 h-0.5 bg-accent rounded-full" />
-                )}
+                <span className={`absolute -bottom-[18px] left-0 h-px bg-accent transition-all duration-300 ${
+                  isActive(it.to) ? 'w-full' : 'w-0 group-hover:w-full'
+                }`} />
               </Link>
             ))}
             <ThemeToggle />
