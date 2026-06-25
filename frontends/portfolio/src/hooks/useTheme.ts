@@ -4,7 +4,7 @@ export type Theme = 'mono-light' | 'mono' | 'light' | 'deepblue' | 'cyber'
 
 const STORAGE_KEY = 'ai-demos-theme'
 const DEFAULT_THEME: Theme = 'mono-light'
-const ALL_THEMES: Theme[] = ['mono-light', 'mono', 'light', 'deepblue', 'cyber']
+export const ALL_THEMES: Theme[] = ['mono-light', 'mono', 'light', 'deepblue', 'cyber']
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return DEFAULT_THEME

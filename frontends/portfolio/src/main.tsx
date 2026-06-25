@@ -11,13 +11,15 @@ import '@fontsource/jetbrains-mono/400.css'
 import '@fontsource/jetbrains-mono/500.css'
 import './styles.css'
 
+import { ALL_THEMES, type Theme } from './hooks/useTheme'
+
 const stored = typeof window !== 'undefined'
-  ? (window.localStorage.getItem('ai-demos-theme') as 'light' | 'deepblue' | 'cyber' | null)
+  ? (window.localStorage.getItem('ai-demos-theme') as Theme | null)
   : null
-if (stored && ['light', 'deepblue', 'cyber'].includes(stored)) {
+if (stored && ALL_THEMES.includes(stored)) {
   document.documentElement.setAttribute('data-theme', stored)
 } else {
-  document.documentElement.setAttribute('data-theme', 'light')
+  document.documentElement.setAttribute('data-theme', 'mono-light')
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

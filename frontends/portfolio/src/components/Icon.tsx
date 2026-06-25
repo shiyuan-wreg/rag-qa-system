@@ -19,5 +19,6 @@ export default function Icon({ name, className = 'w-5 h-5', strokeWidth = 1.6 }:
   strokeWidth?: number
 }) {
   const C = MAP[name]
+  if (!C) return null
   return <C className={className} strokeWidth={strokeWidth} aria-hidden="true" />
 }

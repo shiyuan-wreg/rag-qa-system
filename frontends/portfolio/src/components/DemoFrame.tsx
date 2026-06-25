@@ -126,18 +126,6 @@ export default function DemoFrame({ src, title, index, showToolbar = true }: Dem
           style={{ opacity: status === 'loaded' ? 1 : 0 }}
         />
       </div>
-
-      <style>{`
-        .shimmer {
-          background: linear-gradient(90deg, var(--surface-hover) 25%, var(--surface-default) 50%, var(--surface-hover) 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-      `}</style>
     </div>
   )
 }
