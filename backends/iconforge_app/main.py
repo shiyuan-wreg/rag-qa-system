@@ -28,7 +28,7 @@ def index(request: Request):
 @app.post("/api/clean", response_model=CleanResponse)
 async def clean_endpoint(
     file: UploadFile = File(...),
-    ops: str = Form(...),
+    ops: str = Form(""),
     params: str = Form("{}"),
 ):
     data = await file.read()

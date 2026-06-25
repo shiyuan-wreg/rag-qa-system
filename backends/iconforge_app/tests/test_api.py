@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import json
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -14,7 +15,6 @@ def test_healthz():
     assert r.status_code == 200
     assert r.json() == {"status": "ok"}
 
-import json
 
 DIRTY_SVG = (
     '<svg viewBox="0 0 500 500">'
@@ -36,7 +36,7 @@ def test_clean_svg_dewhite_mono():
 def test_clean_empty_ops_400():
     files = {"file": ("x.svg", DIRTY_SVG, "image/svg+xml")}
     r = client.post("/api/clean", files=files, data={"ops": ""})
-    assert r.status_code in (400, 422)
+    assert r.status_code == 400
 
 def test_index_serves_html():
     r = client.get("/")
