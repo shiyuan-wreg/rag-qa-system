@@ -7,7 +7,7 @@ export default function WorkCard({ work, style }: { work: Work; style?: React.CS
   return (
     <Link
       to={work.path}
-      className="work-card group block bg-surface border border-border rounded-lg p-5 shadow-sm"
+      className="work-card group block bg-surface border border-border rounded-lg p-5 shadow-md"
       style={style}
     >
       <span className="work-card__scan" />

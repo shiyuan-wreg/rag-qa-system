@@ -146,8 +146,8 @@
   --shadow-lg: 0 0 0 1px rgba(0,0,0,0.08), 0 16px 48px rgba(0,0,0,0.08);
   --shadow-glow: 0 0 0 1px rgba(0,0,0,0.10), 0 14px 40px rgba(0,0,0,0.10);
 
-  --grid-line: rgba(0,0,0,0.045);
-  --noise-opacity: 0.02;
+  --grid-line: rgba(0,0,0,0.10);
+  --noise-opacity: 0.03;
 }
 
 /* ===== mono(黑白科技风 · 墨黑 · 暗色档) ===== */

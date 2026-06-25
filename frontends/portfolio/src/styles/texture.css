@@ -33,9 +33,9 @@ body::after {
   background: linear-gradient(180deg, var(--cold-sheen), transparent); }
 .work-card__inner { position: relative; z-index: 1; }
 .work-card:hover, .work-card:focus-visible, .work-card.is-active {
-  transform: translateY(-3px); border-color: var(--border-strong);
+  transform: translateY(-4px); border-color: var(--border-strong);
   background: var(--surface-cold);
-  box-shadow: 0 0 0 1px var(--border-strong), 0 14px 40px rgba(0,0,0,.16), 0 0 40px var(--glow-accent); }
+  box-shadow: 0 0 0 1px var(--border-strong), 0 20px 50px rgba(0,0,0,.18), 0 0 50px var(--glow-accent); }
 .work-card:hover::after, .work-card:focus-visible::after, .work-card.is-active::after { opacity: 1; }
 .work-card:hover .work-card__scan, .work-card.is-active .work-card__scan { animation: work-scan .7s ease-out 1; }
 .work-card:hover .work-card__inner, .work-card.is-active .work-card__inner { animation: work-snap .3s cubic-bezier(.2,.7,.2,1) 1; }
