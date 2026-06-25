@@ -1,1 +1,48 @@
-<!doctype html><title>IconForge</title>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IconForge 图标净化器</title>
+  <link rel="stylesheet" href="static/style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header><span class="num">06</span><h1>IconForge 图标净化器</h1>
+      <p class="sub">上传图标 → 自选净化操作 → 下载干净的单色 SVG</p></header>
+
+    <section class="panel">
+      <div class="drop" id="drop">
+        <input type="file" id="file" accept=".png,.jpg,.jpeg,.svg,image/png,image/jpeg,image/svg+xml" hidden />
+        <p id="dropText">拖拽或点击上传<br /><small>PNG / JPG / SVG</small></p>
+      </div>
+      <div class="ops">
+        <label><input type="checkbox" id="op-trace" value="trace" /> A 位图转矢量 <small>(PNG/JPG)</small></label>
+        <label><input type="checkbox" id="op-dewhite" value="dewhite" checked /> B 去除白边</label>
+        <label><input type="checkbox" id="op-mono" value="mono" checked /> C 彩色转黑色</label>
+        <details><summary>高级参数</summary>
+          <label>亮度阈值 <input type="number" id="p-threshold" value="120" min="0" max="255" /></label>
+          <label>padding <input type="number" id="p-padding" value="0.06" step="0.01" /></label>
+          <label><input type="checkbox" id="p-invert" /> 位图反相(浅底深字请勾)</label>
+        </details>
+        <button id="run">净化</button>
+        <p class="msg" id="msg"></p>
+      </div>
+    </section>
+
+    <section class="result" id="result" hidden>
+      <div class="previews">
+        <figure><figcaption>原图</figcaption><div class="cell" id="cellOrig"></div></figure>
+        <figure><figcaption>结果(亮底)</figcaption><div class="cell light" id="cellLight"></div></figure>
+        <figure><figcaption>结果(暗底)</figcaption><div class="cell dark" id="cellDark"></div></figure>
+      </div>
+      <p class="stats" id="stats"></p>
+      <div class="actions">
+        <button id="download">下载 SVG</button>
+        <button id="copy">复制 SVG 源码</button>
+      </div>
+    </section>
+  </main>
+  <script src="static/app.js"></script>
+</body>
+</html>
