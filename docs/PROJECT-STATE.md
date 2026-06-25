@@ -17,7 +17,8 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 
 **已知待改进(2026-06-25,后面再处理):**
 1. IconForge 工具体验差(用户反馈),后续迭代净化效果。
-2. **RAG 冷启动 502**:`Agent()` 在 import 时(`backends/rag_app/main.py:38`)做阻塞式 dashscope 调用,而**服务器连不上 dashscope.aliyuncs.com**(curl 000/超时),每次 `compose up --build` 重建 rag 容器,`/rag/` 都会 502 数分钟直到超时走完才 200。改进:RAG/Agent 初始化挪出 import 路径(FastAPI startup/懒加载)+ dashscope 短超时 + `chroma_db` 持久化挂卷;并确认生产 LLM 出口(代理/region endpoint),否则 RAG 实际检索会失败。
+2. **生产 RAG/LLM 出口已定位并半修复**:首尔服务器连不到大陆 dashscope(`dashscope.aliyuncs.com`→大陆 IP `8.152.x`,跨境 TCP 443 超时);国际站 `dashscope-intl.aliyuncs.com`(`47.236.x`)可达。已在服务器 `.env` 设 `DASHSCOPE_HTTP_BASE_URL=https://dashscope-intl.aliyuncs.com/api/v1` 并重建容器——`/rag/` 启动不再 502,RAG 调用从超时变为 **0.23s 快速 401**。**唯一剩余阻塞:现有 key 是大陆站 key,国际站不认(401)。用户将申请阿里云百炼「国际版」key,拿到后换 `.env` 的 `DASHSCOPE_API_KEY` + `docker compose ... up -d --force-recreate rag fc nexus` 即全通。** (注:之前误把启动 502 归因于 `Agent()` 阻塞调用,已纠正——`Agent.__init__` 不发网络请求,502 实为镜像重建+冷启动延迟。)
+3. RAG 冷启动可优化(非阻塞):`init_rag_tool()` 挪出 import 路径、`chroma_db` 持久化挂卷、dashscope 调用设短超时。
 
 ---
 

@@ -13,17 +13,29 @@
 - ✅ **部署到首尔服务器**:`git reset --hard origin/master` → `build-frontends.sh` → `docker compose up -d --build`。IconForge 容器首次构建 apt 装 potrace 成功。
 - ✅ **生产验证**:`https://www.shiyuan-wreg.cloud` 全 8 路由 HTTPS 200(`/ /me /rag/ /fc/ /nexus/ /doctomd/ /learn/ /iconforge/`),新 portfolio bundle(`index-BNE973Ps.js`,含 iconforge 路由)已上线。
 
-### 排查记录(RAG 冷启动 502)
+### 排查记录(RAG 502 + dashscope 出口)
 
-- 部署后 `/rag/` 一度 502,排查约 16 分钟。容器 `running`、0 重启、却完全无日志(容器未设 `PYTHONUNBUFFERED`,print 被缓冲)。
-- 逐步定位:`init_rag_tool()` 在模块级(`main.py:34`)同步执行,但实测只要 1.1s——走"加载已有向量数据库"分支(`chroma.sqlite3` 已烤进镜像),不是卡点。
-- 真正的慢点在 `agent = Agent()`(`main.py:38`)构造:服务器**连不上 dashscope.aliyuncs.com**(curl 直接 000/20s 超时),Agent 初始化里的阻塞调用要慢慢超时后才放行,导致 uvicorn 迟迟不 bind 端口(期间 nginx 上游连不上 → 502)。超时走完后自动恢复,`/rag/` 现已 200。
+**先纠正一个错误归因**(初次排查时我误判了):
+- 起初怀疑 `agent = Agent()`(`main.py:38`)构造时做阻塞式 dashscope 调用导致 uvicorn 迟迟不 bind。**实测推翻**:`Agent.__init__` 只设置消息模板,**不发任何网络请求**;`init_rag_tool()` 走"加载已有向量数据库"分支(`chroma.sqlite3` 已烤进镜像),也不调 API。容器内 `import backends.rag_app.main`(含完整 app init)warm 状态只要 **1.2s**。
+- 所以部署后 `/rag/` 一度 502 数分钟的真实原因是 **`compose up --build` 重建镜像 + 冷启动延迟**(2GB 小机器、PyPI/apt 拉取、首次冷缓存),属一次性现象,镜像就绪后自动恢复。不是网络阻塞。
+
+**真正确定的功能问题(发生在查询时,不是启动时):**
+- RAG 检索会调 `embed_query` → 打 dashscope,**首尔服务器连不到大陆 dashscope**。逐层定位:
+  - `dashscope.aliyuncs.com` 被 GTM 解析到大陆节点 IP(`8.152.x`),从韩国跨境 **TCP 443 超时**(普通 IPv4 如 baidu/aliyun 都通,仅这些 IP 不可达)。
+  - 国际站 `dashscope-intl.aliyuncs.com`(新加坡 `47.236.x`)**网络可达**(0.2s 响应)。
+  - 把 SDK 指到国际站后(SDK 在 import 时读环境变量 `DASHSCOPE_HTTP_BASE_URL`,默认大陆域名),实测 generation + embedding 返回 **`401 Invalid API-key`** —— 因为 **dashscope 国际站与大陆站是两套独立账号**,现有大陆 key 在国际站不被认。
+
+**本次处理(让方案半成品落地,等 key):**
+- 在服务器 `/opt/ai-demos/.env` 追加 `DASHSCOPE_HTTP_BASE_URL=https://dashscope-intl.aliyuncs.com/api/v1`,`--force-recreate` 重建 rag/fc/nexus。
+- 验证:容器 base url 已切国际站;`/rag/` 0.01s 起来(**502 卡顿消除**,因为切到可达端点后调用快速返回);RAG embed 调用从"15s 超时"变为"**0.23s 快速 401**"。
+- 结论:**网络已通,只差一个国际站 key**。用户决定去阿里云百炼国际版控制台申请 key,拿到后换掉 `.env` 的 `DASHSCOPE_API_KEY` 并重启容器即全通。
+- 同步在仓库 `.env.example` 加了 `DASHSCOPE_HTTP_BASE_URL` 说明(海外服务器须用国际站 + 国际站 key)。
 
 ### 待改进(记录,后面再处理)
 
 1. **IconForge 工具本身体验差**(用户反馈),后续迭代净化效果/交互。
-2. **RAG 冷启动慢且脆弱**:`Agent()` 在 import 时做阻塞式 dashscope 调用,服务器又连不上 dashscope 出口 → 每次 `compose up --build` 重建容器 `/rag/` 都会 502 数分钟。改进方向:把 RAG/Agent 初始化挪出 import 路径(改 FastAPI startup 后台任务 / 懒加载),并给 dashscope 调用设短超时;`chroma_db` 持久化挂卷避免重建。
-3. **服务器到 dashscope 网络不通**:需确认生产环境 LLM 出口(是否要走代理 / 换 region endpoint),否则 RAG 实际检索会失败。
+2. **等国际站 key**:拿到后换 `.env` 的 `DASHSCOPE_API_KEY` + 重启,RAG/FC/Nexus 即可真正调用 LLM。
+3. **RAG 冷启动可优化(非阻塞性)**:`init_rag_tool()` 仍在 import 路径同步执行,虽快(~1s)但建议挪到 FastAPI startup/懒加载;`chroma_db` 持久化挂卷避免每次重建容器丢索引;给 dashscope 调用设短超时,避免端点不可达时长时间挂起。
 
 ---
 
