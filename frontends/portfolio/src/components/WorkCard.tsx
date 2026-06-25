@@ -3,11 +3,12 @@ import { Work } from '../data/works'
 import Icon from './Icon'
 import Tag from './Tag'
 
-export default function WorkCard({ work }: { work: Work }) {
+export default function WorkCard({ work, style }: { work: Work; style?: React.CSSProperties }) {
   return (
     <Link
       to={work.path}
       className="work-card group block bg-surface border border-border rounded-lg p-5 shadow-sm"
+      style={style}
     >
       <span className="work-card__scan" />
       <div className="work-card__inner">

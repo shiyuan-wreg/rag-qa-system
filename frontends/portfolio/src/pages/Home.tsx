@@ -44,8 +44,8 @@ export default function Home() {
           </div>
         ) : (
           <div data-reveal className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((w) => (
-              <WorkCard key={w.slug} work={w} />
+            {filtered.map((w, i) => (
+              <WorkCard key={w.slug} work={w} style={{ transitionDelay: `${i * 60}ms` }} />
             ))}
           </div>
         )}

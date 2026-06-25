@@ -105,3 +105,34 @@ body::after {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* Staggered scroll reveal: children inherit delay via inline style */
+[data-reveal] .work-card { transition-delay: inherit; }
+
+/* Hero ambient: slow drifting glow + grid pulse */
+.hero-ambient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(600px 300px at 20% 20%, rgba(0,0,0,0.06), transparent 60%),
+    radial-gradient(500px 250px at 80% 30%, rgba(0,0,0,0.05), transparent 60%);
+  animation: hero-drift 12s ease-in-out infinite alternate;
+}
+@keyframes hero-drift {
+  0% { transform: translate(-2%, -2%) scale(1); opacity: .7; }
+  100% { transform: translate(2%, 2%) scale(1.05); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-ambient::before { animation: none; }
+}
+
+/* Subtle float for hero scroll indicator or decorative elements */
+.float-slow { animation: float-slow 4s ease-in-out infinite; }
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@media (prefers-reduced-motion: reduce) { .float-slow { animation: none; } }

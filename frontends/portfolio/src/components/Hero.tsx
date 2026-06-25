@@ -6,7 +6,7 @@ import Button from './Button'
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden bg-hero border-b border-border-subtle">
+    <section className="hero-ambient relative overflow-hidden bg-hero border-b border-border-subtle">
       <div className="relative max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 text-center">
         <p className="font-mono text-xs tracking-[0.2em] uppercase text-tertiary mb-6">个人集成学习网站 · Personal Lab</p>
         <GlitchTitle text="构建可运行的 AI / Agent 应用" />
