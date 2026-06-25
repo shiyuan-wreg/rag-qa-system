@@ -13,8 +13,8 @@ export default function WorkCard({ work, style }: { work: Work; style?: React.CS
       <div className="work-card__inner">
         <div className="flex items-center justify-between">
           <span className="font-mono text-xs tracking-widest text-muted">{work.index}</span>
-          <span className="w-9 h-9 rounded-md border border-border flex items-center justify-center overflow-hidden transition-colors group-hover:border-strong">
-            <img src={work.icon} alt="" className="demo-icon w-5 h-5 object-contain" />
+          <span className="w-10 h-10 rounded-md border border-border flex items-center justify-center overflow-hidden transition-colors group-hover:border-strong">
+            <img src={work.icon} alt="" className="demo-icon w-6 h-6 object-contain" />
           </span>
         </div>
         <h3 className="mt-4 font-semibold text-primary tracking-tight">{work.title}</h3>
