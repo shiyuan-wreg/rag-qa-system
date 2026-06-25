@@ -70,6 +70,7 @@ docker compose -f deploy/docker-compose.yml up -d --build
 | `/fc/` | Function Calling Agent |
 | `/nexus/` | Nexus Multi-Agent 工作流 |
 | `/doctomd/` | DocHub Markdown 文档站 |
+| `/learn/` | Nexus 交互式学习站 |
 | `/iconforge/` | IconForge 图标净化器 |
 
 ## 当前状态
