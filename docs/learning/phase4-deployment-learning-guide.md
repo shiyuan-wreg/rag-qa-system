@@ -1,6 +1,6 @@
 # Phase 4 服务器部署排错与学习指南
 
-> 本文档记录 2026-06-23 部署 `ai-demos` 到阿里云韩国首尔服务器过程中遇到的所有关键错误、排查思路和解决方法。内容从基础概念讲起，适合零基础逐步进阶。
+> 本文档记录 2026-06-23 部署 `ai-demos` 到阿里云韩国首尔服务器过程中遇到的所有关键错误、排查思路和解决方法。内容从基础概念讲起，适合零基础逐步进阶。**2026-06-24 增补：深入解释 SSH 直连失败、代理无效、HTTP CONNECT 隧道有效的三层原因。**
 
 ---
 
@@ -67,22 +67,135 @@ ssh root@8.213.145.110
 
 ### 1.3 代理与 HTTP CONNECT 隧道
 
-**代理（Proxy）** 就像一个“中转站”。你的请求先发给代理，再由代理转发出去。
+#### 1.3.1 “代理”到底是什么？
 
-常见两种：
+**代理（Proxy）** 就像一个“邮局中转站”：你不直接把信寄给收件人，而是先寄给邮局，再由邮局替你转发。
 
-- **HTTP 代理**：主要用于 HTTP/HTTPS 流量。浏览器、Git 都能用。
-- **SOCKS5 代理**：更通用，几乎任何 TCP 流量都能走（包括 SSH）。
-
-你本机开的代理是 **Clash / 类似工具**，监听 `127.0.0.1:7890`。它支持 **HTTP CONNECT** 方法——客户端向代理发送 `CONNECT 目标地址:端口`，代理建立一条 TCP 隧道，之后的数据原样转发。
+在网络世界里，你的电脑是客户端，服务器是目标地址。正常情况下：
 
 ```text
-你 ── CONNECT 8.213.145.110:22 ──▶ 代理
-你 ◀──────── 200 Connection established ──── 代理
-你 ─────────── 原始 SSH 数据 ───────────▶ 代理 ────────▶ 服务器
+你的电脑 ────── TCP 直连 ──────▶ 服务器:22
 ```
 
-这就是 `ssh` 能“借道”代理的原理。
+走代理时变成：
+
+```text
+你的电脑 ──────▶ 代理服务器 ──────▶ 目标服务器:22
+```
+
+代理自己也有 IP 和端口。你本机开的代理（Clash / v2rayN / 类似工具）监听在 **本机回环地址** `127.0.0.1:7890` 上。也就是说，所有想走代理的流量，必须先送到你电脑自己的 7890 端口。
+
+#### 1.3.2 代理分两种：HTTP 代理 vs SOCKS5 代理
+
+| 类型 | 工作层级 | 能转发什么流量 | 典型用途 |
+|---|---|---|---|
+| **HTTP 代理** | 应用层（HTTP 协议） | HTTP、HTTPS；通过 CONNECT 方法可扩展为任意 TCP 隧道 | 浏览器、Git、`curl` |
+| **SOCKS5 代理** | 会话层 | 几乎所有 TCP/UDP 流量 | 游戏、SSH、任意应用 |
+
+关键点：**HTTP 代理本身不是为 SSH 设计的**。它只能直接转发 HTTP 请求。但是 HTTP 协议里有一个特殊方法叫 `CONNECT`，它允许客户端对代理说：“请你帮我建一条到 `目标IP:端口` 的裸 TCP 隧道，后面的数据我不解释，你原样搬运。”
+
+这就是 **HTTP CONNECT 隧道**。
+
+#### 1.3.3 HTTP CONNECT 隧道的工作原理（逐帧拆解）
+
+假设你要通过代理访问 `8.213.145.110:22`：
+
+**第 1 步：你的电脑向本机代理发 HTTP CONNECT 请求**
+
+```text
+CONNECT 8.213.145.110:22 HTTP/1.1
+Host: 8.213.145.110:22
+
+```
+
+注意：这里用的是 HTTP/1.1 明文请求，目标地址是 `服务器IP:22`。
+
+**第 2 步：代理回复**
+
+如果代理允许并且成功连上目标：
+
+```text
+HTTP/1.1 200 Connection established
+
+```
+
+**第 3 步：隧道建立**
+
+从这个字节开始，连接的两端仿佛直接连在了一起。你发给代理的数据，代理不再按 HTTP 解析，而是原样转发给 `8.213.145.110:22`。服务器回的数据也原样返回给你。
+
+```text
+你的 SSH 客户端
+       │
+       │  原始 SSH 协议数据（此时外面已经不套 HTTP 了）
+       ▼
+127.0.0.1:7890（本机代理）
+       │
+       │  同样的原始 SSH 数据
+       ▼
+8.213.145.110:22（阿里云服务器 sshd）
+```
+
+形象地说：CONNECT 隧道就是代理给你挖了一条“透明管道”。管道里面流的是什么协议，代理不关心；它只负责把字节从一端搬到另一端。
+
+#### 1.3.4 为什么你“开了代理”SSH 还是连不上？
+
+这是最常见的误区。你以为“开了 Clash，系统代理已启用”，SSH 就会走代理。其实不然。
+
+**SSH 客户端默认完全不读取操作系统的代理设置。**
+
+浏览器、Git、curl 等应用会读取系统代理环境变量（如 `HTTP_PROXY`、`HTTPS_PROXY`），但 OpenSSH 不会。它只按自己的配置行事，默认就是**直接 TCP 连接目标服务器**。
+
+所以当时的情况可能是：
+
+| 流量类型 | 是否走代理 | 结果 |
+|---|---|---|
+| 浏览器访问 Google | ✅ 系统自动走代理 | 能打开 |
+| `git clone` | ✅ 你配了代理或 Git 读了环境变量 | 能拉 |
+| `ssh root@8.213.145.110` | ❌ SSH 默认直连 | 超时 |
+
+你之前提到的“日本代理也连不上”，更可能的原因是：
+
+1. **那个代理是浏览器/Web 代理**，只能转发 HTTP/HTTPS，不支持 CONNECT 到 22 端口；或者你根本没告诉 SSH 要走它。
+2. **代理到韩国阿里云的回程同样被黑洞**，因为问题的根源是“代理→目标服务器”这条路径不通，而不是你本地到目标服务器不通。
+3. **SSH 配置里没有 ProxyCommand**，所以它仍然尝试直连，自然还是超时。
+
+#### 1.3.5 为什么本地代理的 HTTP CONNECT 能成功？
+
+这里要分清三条不同的网络路径：
+
+```text
+路径 A：你的电脑  ──直连──▶  8.213.145.110:22    （失败，SYN+ACK 回不来）
+路径 B：你的电脑  ──日本代理──▶  8.213.145.110:22  （可能失败，回程路由同样被黑洞）
+路径 C：你的电脑  ──本机代理 7890──▶  代理远端出口──▶  8.213.145.110:22  （成功）
+```
+
+**路径 C 成功的原因不是“用了 HTTP CONNECT 这个方法本身”，而是“本机代理的出口节点到韩国阿里云服务器是通的”。**
+
+HTTP CONNECT 只是**一种机制**，让 SSH 客户端能把数据交给本地代理。真正解决连接问题的是：**本地代理的后端节点（Clash 订阅里的某个海外节点）到目标服务器的路由是健康的**。
+
+换句话说：
+
+- 如果你的本机代理节点也连不上 `8.213.145.110:22`，HTTP CONNECT 同样会失败。
+- 如果直接连是通的，你根本不需要代理。
+
+这也能解释为什么你换日本代理不行：那个代理的出口到韩国服务器之间网络也不通。而本机代理当前选用的节点到韩国服务器之间恰好是通的。
+
+#### 1.3.6 `ProxyCommand` 在 SSH 里做了什么？
+
+`ssh` 命令本身不知道如何走 HTTP 代理，但它提供了一个钩子：**`ProxyCommand`**。
+
+```text
+ProxyCommand /mingw64/bin/connect -H 127.0.0.1:7890 %h %p
+```
+
+这条命令的意思是：在建立 SSH 连接之前，先执行 `connect` 这个辅助程序。`connect` 会：
+
+1. 连接到本机代理 `127.0.0.1:7890`。
+2. 向代理发送 `CONNECT %h:%p`，其中 `%h` 是 SSH 目标主机，`%p` 是端口（这里就是 `8.213.145.110:22`）。
+3. 等代理返回 `200 Connection established`。
+4. 把它的标准输入/输出挂在 SSH 进程的网络上。
+
+于是 `ssh` 不再直接连服务器，而是把 `connect` 当成一条“虚拟网线”。
 
 ---
 
@@ -129,8 +242,10 @@ Nginx 根据路径决定转发给哪个后端：
 
 ```text
 ssh: connect to host 8.213.145.110 port 22: Connection timed out
-ping 也 100% 丢包
+ping 8.213.145.110 也 100% 丢包
 ```
+
+注意：这里不是 `Connection refused`。`refused` 表示能到目标机器，只是端口没开；`timed out` 表示**网络层根本没把包送过去或者回不来**。
 
 #### 排查过程
 
@@ -139,25 +254,70 @@ ping 也 100% 丢包
 3. **tcpdump 抓包**：在服务器上运行 `sudo tcpdump -i any port 22 -n`，同时从本地发 SSH 请求。
 4. **发现**：本地 SYN 能到达服务器，服务器也回了 SYN+ACK，但**本地收不到 SYN+ACK**。
 
-#### 根因
+这一步非常关键：它排除了“服务器没开 SSH”和“云防火墙拦截入站”两种可能。问题出在**回程路由**上。
 
-不是服务器拒绝，而是**本地网络到韩国这个公网 IP 的回程流量被丢弃或路由黑洞**。你用的日本代理也连不上，说明不是你一家网络的问题。
+#### 根因：不是服务器拒绝，而是运营商层面的路由黑洞
 
-#### 解决
+我们用 `mtr` 或 `traceroute` 看的话，会发现类似情况：
 
-让 SSH 走本机代理的 HTTP CONNECT 隧道：
+```text
+你的电脑 ──▶ 国内运营商路由器 ──▶ 国际出口 ──▶ 韩国骨干网 ──▶ 阿里云首尔
+       ▲___________________________________________________________│
+                        回程 SYN+ACK 在这里丢失
+```
+
+`ping` 也丢包说明 ICMP（也就是 `ping` 用的协议）同样受影响，进一步证明这是**网络层路由/策略问题**，不是 TCP 层端口问题。
+
+可能的具体原因：
+
+- 你所在网络到该 IP 段的路由表中，某台上游路由器丢弃了回程包。
+- 该 IP 段被某些网络策略临时或局部阻断。
+- 国际链路拥塞或路由震荡导致特定路径不稳定。
+
+注意：阿里云控制台的安全组/防火墙并没有拦截 22 端口，否则**本地 SYN 根本到不了服务器**，tcpdump 也就抓不到包了。
+
+#### 为什么日本代理也失败？
+
+你当时试过的日本代理，从现象上看也连不上。这里要区分两种情况：
+
+1. **如果你只是“开着浏览器代理”然后执行 `ssh`**：那 SSH 根本不走代理，等同于直连，失败是必然的。
+2. **如果你确实让 SSH 走了日本代理**：说明日本代理的出口节点到 `8.213.145.110:22` 的路径也不通。问题的根源在于“代理出口到目标服务器”这段回程被黑洞，而不是“你本地到代理”这段。
+
+这也侧面验证了：不是某个特定网络的问题，而是**目标服务器在部分国际路径上的可达性有问题**。
+
+#### 解决：让 SSH 走本机代理的 HTTP CONNECT 隧道
+
+既然直连和日本代理都不行，我们换一条路径：让本地 Clash 代理作为中转。它当前的出口节点到韩国阿里云恰好是通的。
+
+**第 1 步：确认 `connect` 工具存在**
+
+Git Bash 自带 `connect`，路径是 `/mingw64/bin/connect`。如果没有，可以用 `corkscrew` 替代，或者自己写一个 Python 脚本。
 
 ```bash
-# 1. 安装/确认有 connect 工具（Git Bash 自带 /mingw64/bin/connect）
 which /mingw64/bin/connect
+```
 
-# 2. 测试
+**第 2 步：命令行直接测试**
+
+```bash
 ssh -i "C:\Users\hzs17\Downloads\ssh.pem" \
     -o ProxyCommand="/mingw64/bin/connect -H 127.0.0.1:7890 %h %p" \
     root@8.213.145.110
 ```
 
-为了方便，创建了 `ai-demos/.claude/ssh_config`：
+参数解释：
+
+- `-i`：指定私钥文件。
+- `-o ProxyCommand=...`：告诉 SSH 用哪个命令来建立底层连接。
+- `/mingw64/bin/connect -H 127.0.0.1:7890 %h %p`：
+  - `-H` 表示使用 HTTP CONNECT（还有 `-S` 表示 SOCKS5）。
+  - `127.0.0.1:7890` 是你本机代理的地址和端口。
+  - `%h` 是 SSH 自动替换的目标主机名。
+  - `%p` 是 SSH 自动替换的目标端口（默认 22）。
+
+**第 3 步：写成配置文件，避免每次敲长命令**
+
+创建了 `ai-demos/.claude/ssh_config`：
 
 ```text
 Host ai-demos
@@ -169,6 +329,14 @@ Host ai-demos
     ProxyCommand /mingw64/bin/connect -H 127.0.0.1:7890 %h %p
 ```
 
+字段解释：
+
+- `Host ai-demos`：给这条配置起个别名，以后 `ssh ai-demos` 就会匹配。
+- `HostName`：真实的服务器 IP。
+- `IdentityFile`：私钥路径，注意在 Windows/Git Bash 中用正斜杠更稳。
+- `StrictHostKeyChecking no` + `UserKnownHostsFile /dev/null`：测试阶段跳过主机密钥校验，避免每次 IP 不变但证书变化导致无法登录。**生产环境建议去掉这两行，使用正常 known_hosts。**
+- `ProxyCommand`：核心，建立 HTTP CONNECT 隧道。
+
 以后登录：
 
 ```bash
@@ -177,8 +345,19 @@ ssh -F C:/Users/hzs17/Desktop/ai-demos/.claude/ssh_config ai-demos
 
 #### 进阶思考
 
-- 如果代理不支持 CONNECT，可以用 `nc` 或 Python 脚本做 SOCKS5 中转。
-- 生产环境不应依赖本地代理；可以考虑跳板机、WireGuard、Cloudflare Tunnel 等更稳定的方案。
+- 如果代理只支持 SOCKS5 不支持 CONNECT，可以用 `nc -X 5 -x 127.0.0.1:7890 %h %p` 作为 ProxyCommand。
+- 如果代理需要用户名密码认证，`connect` 本身不支持；可以用 `corkscrew` 或在 Python 脚本里手写 HTTP CONNECT 并加 `Proxy-Authorization` 头。
+- 生产环境不应长期依赖本地代理登录服务器。更稳定的方案：
+  - **跳板机（Bastion Host）**：买一台国内能稳定访问的轻量服务器，先 SSH 到跳板机，再从跳板机 SSH 到韩国服务器。
+  - **WireGuard / Tailscale**：在服务器和你的设备之间建立私有网络，绕开公网路由问题。
+  - **Cloudflare Tunnel**：让服务器主动 outbound 连 Cloudflare，你通过 Cloudflare 的私有入口访问，无需关心服务器公网可达性。
+
+#### 常见误区再强调
+
+1. **“我开了 Clash，为什么 SSH 不走？”** —— SSH 不读系统代理，必须显式配置 ProxyCommand。
+2. **“HTTP 代理不是只能转发网页吗？”** —— 普通 HTTP 转发只能处理网页，但 CONNECT 方法可以把任意 TCP 包塞进去。
+3. **“HTTP CONNECT 加密吗？”** —— CONNECT 请求本身是明文的（代理能看到你要连哪个 IP 和端口），但**隧道建立后，SSH 协议自己的加密会接管**，里面的数据代理看不到。
+4. **“代理会不会看到我输入的 root 密码/私钥？”** —— 不会。私钥永远只在你的本地 SSH 客户端使用；密码/密钥交换发生在 SSH 加密隧道内部，代理只能看到加密后的字节流。
 
 ---
 
@@ -451,11 +630,16 @@ RAG 后端在启动时会执行 `init_rag_tool()`，流程是：
 
 1. SSH 报 `Connection timed out` 时，应该先怀疑服务器本身，还是先怀疑网络层？怎么验证？
 2. `ufw inactive` 为什么不是 SSH 连不上的原因？
-3. 为什么 `sshd` 监听 443 会导致 nginx 启动失败？怎么彻底关闭 sshd 的 443？
-4. `docker run -it` 和 `docker run -i` 有什么区别？自动化脚本应该用什么？
-5. 为什么 `proxy_pass $rag/;` 不能直接替代 `proxy_pass http://rag:8001/;`？会带来哪两个问题？
-6. Let's Encrypt 验证域名时为什么要临时占用 80 端口？
-7. RAG 后端第一次启动慢的根本原因是什么？怎么优化？
+3. 为什么浏览器能翻墙，但 `ssh root@8.213.145.110` 仍然超时？
+4. HTTP 代理为什么能转发 SSH 这种非 HTTP 协议？关键机制是什么？
+5. `ProxyCommand` 中的 `%h` 和 `%p` 分别代表什么？
+6. 为什么说 HTTP CONNECT 隧道里“代理看不到你输入的密码/私钥”？
+7. 日本代理连不上、本机代理能连上，这说明了什么？问题的真正根源在哪里？
+8. 为什么 `sshd` 监听 443 会导致 nginx 启动失败？怎么彻底关闭 sshd 的 443？
+9. `docker run -it` 和 `docker run -i` 有什么区别？自动化脚本应该用什么？
+10. 为什么 `proxy_pass $rag/;` 不能直接替代 `proxy_pass http://rag:8001/;`？会带来哪两个问题？
+11. Let's Encrypt 验证域名时为什么要临时占用 80 端口？
+12. RAG 后端第一次启动慢的根本原因是什么？怎么优化？
 
 ---
 
@@ -489,6 +673,9 @@ openssl s_client -connect www.shiyuan-wreg.cloud:443 -servername www.shiyuan-wre
 ## 6. 参考资料
 
 - [SSH ProxyCommand 官方文档](https://man.openbsd.org/ssh_config.5#ProxyCommand)
+- [SSH 通过 HTTP 代理 (CONNECT 方法)](https://en.wikipedia.org/wiki/HTTP_tunnel#HTTP_CONNECT_method)
+- [corkscrew: 通过 HTTP 代理转发 SSH](https://github.com/bryanpkc/corkscrew)
+- [connect: Git for Windows 自带的 ProxyCommand 工具](https://github.com/git-for-windows/git/wiki/Proxy-configuration)
 - [Nginx proxy_pass 指令](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass)
 - [Docker Compose depends_on](https://docs.docker.com/compose/compose-file/05-services/#depends_on)
 - [Let's Encrypt How It Works](https://letsencrypt.org/how-it-works/)
