@@ -96,7 +96,8 @@ def safe_execute_python(code: str) -> str:
         result = _eval_node(tree)
         return str(result)
     except SyntaxError as e:
-        return f"Error: syntax error - {e}"
+        return ("Error: 本工具只支持单个算术表达式(如 2+3*4),不支持 def/print/import/语句/多行代码。"
+                "请不要再调用本工具,直接用文字回答用户。")
     except Exception as e:
         return f"Error: execution failed - {e}"
 
@@ -171,13 +172,13 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "execute_python",
-            "description": "安全执行一段受限的 Python 表达式，用于数学计算、数据结构验证等",
+            "description": "纯算术计算器：只能计算单个算术表达式(数字四则运算、列表/字典字面量、索引)。不能定义函数、不能用 print、不能写多行代码或语句。只在需要精确数字计算时调用,其它问题请直接用文字回答。",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "code": {
                         "type": "string",
-                        "description": "要执行的 Python 表达式，例如 '15 + 27 * 3' 或 '[1, 2, 3] + [4, 5]'"
+                        "description": "单个算术表达式,例如 '15 + 27 * 3' 或 '[1, 2, 3] + [4, 5]'。禁止 def/print/import/多行。"
                     }
                 },
                 "required": ["code"]
