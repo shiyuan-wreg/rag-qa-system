@@ -35,13 +35,21 @@ services:
       - ../backends/md_converter_app/output:/app/output
       - ../backends/md_converter_app/uploads:/app/uploads
 
+  iconforge:
+    build:
+      context: ..
+      dockerfile: backends/iconforge_app/Dockerfile
+    env_file: ../.env
+    restart: always
+    expose: ["8005"]
+
   nginx:
     image: nginx:1.27-alpine
     ports:
       - "80:80"
       - "443:443"
     restart: always
-    depends_on: [rag, fc, nexus, md_converter]
+    depends_on: [rag, fc, nexus, md_converter, iconforge]
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro

@@ -72,4 +72,16 @@ export const WORKS: Work[] = [
       { version: '0.1', date: '2026-06-23', items: ['DocHub Markdown 文档站上线'] },
     ],
   },
+  {
+    slug: 'iconforge',
+    index: '06',
+    title: 'IconForge 图标净化器',
+    desc: '上传图标自选净化:位图转矢量 / 去除白边 / 彩色转黑色,导出干净单色 SVG。',
+    tech: ['FastAPI', 'Pillow', 'potrace', 'SVG'],
+    path: '/iconforge',
+    icon: '/icons/iconforge.svg',
+    changelog: [
+      { version: '0.1', date: '2026-06-25', items: ['IconForge 图标净化器上线'] },
+    ],
+  },
 ]
