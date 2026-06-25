@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
+import Logo from './Logo'
 import { useScrolled } from '../hooks/useScrolled'
 
 const ITEMS = [
@@ -47,9 +48,7 @@ export default function NavBar() {
       <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-accent text-accent-text flex items-center justify-center text-xs font-bold shadow-sm">
-              AI
-            </div>
+            <Logo className="w-8 h-8 text-primary" />
             <span className="font-bold text-primary">个人集成学习网站</span>
           </Link>
 
