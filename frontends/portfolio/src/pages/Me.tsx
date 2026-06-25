@@ -10,12 +10,12 @@ import { WORKS } from '../data/works'
 const ROLE_TAGS = ['AI / Agent 开发', '全栈工程', 'RAG / LLM 应用']
 
 // 技能按方向分组，制造层次而非一堆扁平标签。
-const SKILL_GROUPS: { title: string; letter: string; bg: string; text: string; skills: string[] }[] = [
-  { title: '语言', letter: '⌘', bg: '#eff6ff', text: '#1d4ed8', skills: ['Python', 'TypeScript', 'JavaScript', 'SQL'] },
-  { title: 'AI / Agent', letter: 'A', bg: '#ecfeff', text: '#0e7490', skills: ['RAG', 'Function Calling', 'Multi-Agent', 'LangChain', 'Prompt 工程', '通义千问'] },
-  { title: '后端', letter: 'B', bg: '#faf5ff', text: '#7e22ce', skills: ['FastAPI', 'REST API', 'SSE', 'Flask'] },
-  { title: '前端', letter: 'F', bg: '#f0fdf4', text: '#15803d', skills: ['React', 'Vite', 'TailwindCSS', 'Vite + TS'] },
-  { title: '工程化 / 部署', letter: 'D', bg: '#fff7ed', text: '#c2410c', skills: ['Docker', 'Nginx', 'Linux', 'Git', 'CI/CD'] },
+const SKILL_GROUPS: { title: string; index: string; skills: string[] }[] = [
+  { title: '语言', index: '01', skills: ['Python', 'TypeScript', 'JavaScript', 'SQL'] },
+  { title: 'AI / Agent', index: '02', skills: ['RAG', 'Function Calling', 'Multi-Agent', 'LangChain', 'Prompt 工程', '通义千问'] },
+  { title: '后端', index: '03', skills: ['FastAPI', 'REST API', 'SSE', 'Flask'] },
+  { title: '前端', index: '04', skills: ['React', 'Vite', 'TailwindCSS', 'Vite + TS'] },
+  { title: '工程化 / 部署', index: '05', skills: ['Docker', 'Nginx', 'Linux', 'Git', 'CI/CD'] },
 ]
 
 const SECTIONS = [
@@ -28,7 +28,7 @@ const SECTIONS = [
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <h2 className="flex items-center gap-2 text-lg font-bold text-primary mb-4">
-      <span className="w-1 h-5 rounded-full bg-accent" />
+      <span className="w-1 h-5 rounded-full bg-strong" />
       {children}
     </h2>
   )
@@ -43,15 +43,12 @@ export default function Me() {
         {/* 顶部定位区 */}
         <section className="relative overflow-hidden rounded-2xl border border-border bg-hero shadow-sm">
           <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ backgroundImage: 'radial-gradient(circle at 15% 120%, var(--glow-accent), transparent 50%)' }}
+            className="absolute inset-0 pointer-events-none opacity-30"
+            style={{ backgroundImage: 'radial-gradient(circle at 15% 120%, var(--surface-hover), transparent 50%)' }}
           />
           <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-6 p-6 sm:p-8">
             {/* 头像（图形化，无个人信息） */}
-            <div
-              className="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0 shadow-md text-accent-text"
-              style={{ background: 'linear-gradient(135deg, var(--accent-primary), var(--text-link))' }}
-            >
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0 shadow-md border border-border bg-surface-soft text-primary">
               <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="16 18 22 12 16 6" />
                 <polyline points="8 6 2 12 8 18" />
@@ -61,7 +58,7 @@ export default function Me() {
             <div className="flex-1 text-center sm:text-left min-w-0">
               <div className="flex flex-wrap justify-center sm:justify-start gap-2 mb-3">
                 {ROLE_TAGS.map((t) => (
-                  <span key={t} className="px-2.5 py-0.5 rounded-full bg-accent-secondary-bg text-accent-secondary-text text-xs font-semibold">
+                  <span key={t} className="px-2.5 py-0.5 rounded-full border border-border-subtle bg-surface-soft text-tertiary text-xs font-semibold">
                     {t}
                   </span>
                 ))}
@@ -73,7 +70,7 @@ export default function Me() {
                 从 RAG、Function Calling 到 Multi-Agent 工作流，专注把大模型能力工程化、产品化，整合成可部署、可演示的完整作品。
               </p>
               <div className="mt-5 flex flex-wrap justify-center sm:justify-start gap-3">
-                <a href="#works" className="inline-flex items-center px-4 py-2 rounded-lg bg-accent text-accent-text text-sm font-medium hover:opacity-90 transition-opacity">
+                <a href="#works" className="inline-flex items-center px-4 py-2 rounded-lg border border-border bg-surface text-primary text-sm font-medium hover:bg-surface-hover transition-colors">
                   浏览作品
                 </a>
                 <a
@@ -108,11 +105,8 @@ export default function Me() {
                 {SKILL_GROUPS.map((g) => (
                   <div key={g.title} className="bg-surface-soft border border-border-subtle rounded-lg p-4">
                     <div className="flex items-center gap-2.5 mb-3">
-                      <span
-                        className="w-8 h-8 rounded-md flex items-center justify-center text-sm font-bold shrink-0"
-                        style={{ backgroundColor: g.bg, color: g.text }}
-                      >
-                        {g.letter}
+                      <span className="font-mono text-xs tracking-wide text-muted shrink-0">
+                        {g.index}
                       </span>
                       <span className="font-semibold text-primary text-sm">{g.title}</span>
                     </div>
@@ -144,7 +138,7 @@ export default function Me() {
                 href="/resume.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent text-accent-text text-sm font-medium hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border bg-surface text-primary text-sm font-medium hover:bg-surface-hover transition-colors"
               >
                 下载简历(PDF)
               </a>

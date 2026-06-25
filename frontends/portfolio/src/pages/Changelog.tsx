@@ -24,18 +24,18 @@ export default function Changelog() {
               className="rounded-xl border border-border bg-surface shadow-sm hover:shadow-md transition-shadow p-5"
             >
               <div className="flex items-center gap-2 flex-wrap mb-3">
-                <span className="px-2 py-0.5 rounded-full bg-accent text-accent-text text-xs font-semibold">
+                <span className="font-mono text-xs tracking-wide text-muted">
                   v{note.version}
                 </span>
-                <span className="text-xs text-muted">{note.date}</span>
-                <span className="text-xs text-tertiary border border-border rounded px-1.5">
+                <span className="font-mono text-xs tracking-wide text-muted">{note.date}</span>
+                <span className="font-mono text-xs tracking-wide text-tertiary border border-border rounded px-1.5">
                   {PAGE_LABELS[note.page] ?? note.page}
                 </span>
               </div>
               <ul className="space-y-1.5">
                 {note.items.map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-secondary">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-strong shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}

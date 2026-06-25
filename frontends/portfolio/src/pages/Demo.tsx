@@ -32,7 +32,7 @@ export default function Demo({ slug, src }: { slug: string; src: string }) {
               </div>
             }
           >
-            <DemoFrame src={src} title={work.title} />
+            <DemoFrame src={src} title={work.title} index={work.index} />
           </SidebarLayout>
         </div>
       </div>
