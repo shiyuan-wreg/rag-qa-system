@@ -1,6 +1,8 @@
 import { useTheme, type Theme } from '../hooks/useTheme'
 
 const THEMES: { key: Theme; label: string }[] = [
+  { key: 'mono-light', label: '极简' },
+  { key: 'mono', label: '墨黑' },
   { key: 'light', label: '浅色' },
   { key: 'deepblue', label: '深蓝' },
   { key: 'cyber', label: '赛博' },

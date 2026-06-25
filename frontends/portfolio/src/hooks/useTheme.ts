@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 
-export type Theme = 'light' | 'deepblue' | 'cyber'
+export type Theme = 'mono-light' | 'mono' | 'light' | 'deepblue' | 'cyber'
 
 const STORAGE_KEY = 'ai-demos-theme'
-const DEFAULT_THEME: Theme = 'light'
+const DEFAULT_THEME: Theme = 'mono-light'
+const ALL_THEMES: Theme[] = ['mono-light', 'mono', 'light', 'deepblue', 'cyber']
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return DEFAULT_THEME
   const stored = window.localStorage.getItem(STORAGE_KEY) as Theme | null
-  if (stored && ['light', 'deepblue', 'cyber'].includes(stored)) return stored
+  if (stored && ALL_THEMES.includes(stored)) return stored
   return DEFAULT_THEME
 }
 
