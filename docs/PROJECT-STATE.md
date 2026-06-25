@@ -9,7 +9,7 @@
 
 ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`**。**Nexus Phase 2 已完成并合并入 `master`**(14 个提交,39 测试通过),新增 `/nexus/` Multi-Agent 工作流助手(FastAPI + SSE + 通义千问)。**DocHub 已完成并合并入 `master`**(19 个提交,59 测试通过),新增 `/doctomd/` Markdown 转 HTML 文档站(上传/路径转换/在线浏览/密码保护/CLI)。**Phase 4 服务器部署已完成**:项目已部署到韩国首尔阿里云轻量服务器(Ubuntu 24.04 LTS + Docker),通过 `https://www.shiyuan-wreg.cloud` 对外提供统一门户,Let's Encrypt SSL 证书已生效,所有子路径(`/rag/`、`/fc/`、`/nexus/`、`/doctomd/`、`/learn/`)及后端代理均验证通过。`master` **已推送**到 GitHub `origin/master`。
 
-**新增:门户外壳「黑白高级感科技风」重构**在隔离 worktree `feat+portfolio-ui-redesign` 完成(11 个任务 + 首轮反馈修复,当前 HEAD `d30835a`),默认主题改为 `mono-light`,含科技 hero(glitch 标题/打字机/假终端)、Lucide 可替换图标身份、WorkCard 纯黑白四特效选中态、全局网格/噪点质感、等宽元信息字体。本地 Docker 验证所有路由 200,stack 正在 `:8080` 运行。
+**新增:门户外壳「黑白高级感科技风」重构**在隔离 worktree `feat+portfolio-ui-redesign` 完成(11 个任务 + 多轮反馈修复,当前 HEAD `e16c2a5`),默认主题改为 `mono-light`,含科技 hero(glitch 标题/打字机/假终端)、Lucide 可替换图标身份、WorkCard 纯黑白四特效选中态、全局网格/噪点质感、等宽元信息字体。本地 Docker 验证所有路由 200,stack 正在 `:8080` 运行。
 
 ---
 
