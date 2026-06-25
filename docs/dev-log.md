@@ -1,5 +1,39 @@
 # Nexus 开发日志
 
+## 2026-06-26
+
+### 今日目标
+
+把 LLM 出口从通义千问(大陆 dashscope,首尔服务器连不到)整体切到 **DeepSeek**(聊天)+ **Jina**(RAG embedding),并部署验证。
+
+### 完成内容
+
+- ✅ **聊天统一走 `LLMClient`**:原本 `core/agent.py`、`backends/fc_app/main.py`、`eval/evaluator.py` 各自硬编码 `dashscope.Generation.call`。改为都走 `core/llm.py` 已有的 OpenAI 兼容分支(`LLMClient.from_config()`),provider=openai / model=deepseek-chat / base_url=api.deepseek.com。Nexus 也改用 `from_config()`。保留了 `provider=qwen` 路径,日后可切回。
+- ✅ **配置通用化**:`core/config.py` 加 `LLM_BASE_URL` / `LLM_API_KEY`(回退 `DASHSCOPE_API_KEY`)/ `JINA_API_KEY`。`.env.example` 改通用键 + DeepSeek/Jina 示例。
+- ✅ **RAG embedding 改 Jina 托管**:`rag/vectorstore.py` 手写了最小 Jina 客户端(`embed_documents`/`embed_query` 打 `api.jina.ai/v1/embeddings`,v3 的 retrieval.passage / retrieval.query task hint),替掉 `DashScopeEmbeddings`。服务器零内存/磁盘负担(不引入 torch)。
+- ✅ **依赖**:根 + nexus requirements 加 `openai`;fc_app Dockerfile 加 `COPY core/`(fc 现在 import core.llm)。
+- ✅ **修了一个被 DeepSeek 暴露的老 bug**:`safe_execute_python` 其实是个"只算单个算术表达式"的受限计算器(`ast.parse(mode='eval')`),但工具描述写得像通用 Python 执行器。qwen 很少调它,**DeepSeek 会真去调**并发整段 `def/print` 程序 → SyntaxError → 反复重试到 max_turns → `/rag/` 回"处理时间过长"。改法:把工具描述/报错改成明确的"算术计算器,别发程序,直接作答",并放松 system prompt 里"必须用 execute_python"的措辞。修完 `/rag/` 正常。
+
+### 验证
+
+- 本地(中国机器连不到 Jina,但 Docker 容器内能连):FC 天气工具 ✅、Nexus 多 agent SSE+LLM 评分 ✅、RAG 装饰器问题(修 loop 后)✅。
+- 服务器 `https://www.shiyuan-wreg.cloud`:8 路由 200;FC 天气工具 ✅;RAG 用语料内问题(Python 谁创建)检索到正确片段并据此作答 ✅(Jina 建库 7 块成功);Nexus `final_answer` ✅。DeepSeek + Jina key 均实测有效。
+- 单测:`test_llm_client / test_agent / test_main` 6 passed(本地 venv 补装了 `openai`)。
+
+### 关键决策 / 因果
+
+1. **为什么 DeepSeek 而非阿里云国际站**:国际站要境外手机号 + 境外卡 + 风控,成本高;DeepSeek 国内账号充值即用、key 全球通用、海外可达,且用户后续本就打算用 DeepSeek。
+2. **为什么 embedding 单独用 Jina 而非本地模型**:DeepSeek 没有 embeddings 接口。本地 sentence-transformers+torch 在 1.6G 小机器上常驻 ~400MB 偏重;Jina 托管=服务器零负担,代价是多一个海外网络依赖(已实测可达)。
+3. **两个外部依赖的可达性都从服务器侧实测过**(api.deepseek.com / api.jina.ai),不靠想当然——延续上一轮 dashscope 踩坑的教训。
+
+### 待改进(记录,后面再处理)
+
+1. IconForge 工具体验差(用户反馈)。
+2. **Nexus retriever 有个 pre-existing async bug**:多 agent 流程里 retriever 调 rag_app 时报 `object Response can't be used in 'await' expression`(httpx 同步响应被 await),导致 Nexus 的检索步拿不到结果(但 LLM 仍能凭自身知识作答)。与本次 provider 切换无关,单独修。
+3. RAG `init_rag_tool()` 仍在 import 路径同步执行(虽快);`chroma_db` 未挂卷,每次重建容器都重新调 Jina 建库(7 块,很快,可接受)。
+
+---
+
 ## 2026-06-25
 
 ### 今日目标

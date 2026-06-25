@@ -1,7 +1,7 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-06-25(门户「黑白科技风」重构 + 第 6 个 demo IconForge **已部署到首尔生产服务器并验证全 8 路由 HTTPS 200**;HEAD `ee8ff6e`)
+> 最近更新:2026-06-26(**LLM 出口整体切到 DeepSeek 聊天 + Jina embedding,已部署服务器并三 demo 实测通过**;HEAD `a82b450`)
 
 ---
 
@@ -15,10 +15,11 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 - `2099d78` fix(portfolio): 补 `/iconforge` SPA 路由(App.tsx 漏了,点卡片空白页)。
 - `ee8ff6e` fix(portfolio): 把 `@fontsource/inter` + `@fontsource/jetbrains-mono` 写进 package.json(原先靠用户主目录幽灵 node_modules,服务器干净 clone 构建失败)。
 
-**已知待改进(2026-06-25,后面再处理):**
+**已知待改进(2026-06-26 更新):**
 1. IconForge 工具体验差(用户反馈),后续迭代净化效果。
-2. **生产 RAG/LLM 出口已定位并半修复**:首尔服务器连不到大陆 dashscope(`dashscope.aliyuncs.com`→大陆 IP `8.152.x`,跨境 TCP 443 超时);国际站 `dashscope-intl.aliyuncs.com`(`47.236.x`)可达。已在服务器 `.env` 设 `DASHSCOPE_HTTP_BASE_URL=https://dashscope-intl.aliyuncs.com/api/v1` 并重建容器——`/rag/` 启动不再 502,RAG 调用从超时变为 **0.23s 快速 401**。**唯一剩余阻塞:现有 key 是大陆站 key,国际站不认(401)。用户将申请阿里云百炼「国际版」key,拿到后换 `.env` 的 `DASHSCOPE_API_KEY` + `docker compose ... up -d --force-recreate rag fc nexus` 即全通。** (注:之前误把启动 502 归因于 `Agent()` 阻塞调用,已纠正——`Agent.__init__` 不发网络请求,502 实为镜像重建+冷启动延迟。)
-3. RAG 冷启动可优化(非阻塞):`init_rag_tool()` 挪出 import 路径、`chroma_db` 持久化挂卷、dashscope 调用设短超时。
+2. **~~生产 RAG/LLM 出口~~ ✅ 已解决(2026-06-26)**:LLM 出口从大陆 dashscope 整体切到 **DeepSeek(聊天,OpenAI 兼容)+ Jina(RAG embedding)**,两者从首尔均可达、已实测有效。聊天统一走 `core/llm.py` 的 `LLMClient.from_config()`(provider=openai/model=deepseek-chat/base_url=api.deepseek.com);embedding 走 `rag/vectorstore.py` 里手写的最小 Jina 客户端。服务器 `.env` 用 `LLM_PROVIDER/LLM_MODEL/LLM_BASE_URL/LLM_API_KEY/JINA_API_KEY`(旧 `DASHSCOPE_*` 留作回退)。三 demo 生产实测:FC 工具调用、RAG Jina 检索作答、Nexus SSE 均通过。**切 DeepSeek 时暴露并修了一个老 bug**:`safe_execute_python` 是受限算术计算器,但描述像通用执行器,DeepSeek 会发整段程序导致 `/rag/` 死循环——已改描述/报错/system prompt 修正。
+3. **Nexus retriever pre-existing async bug**:retriever 调 rag_app 报 `object Response can't be used in 'await'`,检索步拿不到结果(LLM 仍能凭自身知识作答)。与 provider 切换无关,待单独修。
+4. RAG `chroma_db` 未挂卷,每次重建容器重新调 Jina 建库(7 块,快,可接受);`init_rag_tool` 仍在 import 路径同步执行。
 
 ---
 
