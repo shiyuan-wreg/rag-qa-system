@@ -1,7 +1,7 @@
 """SVG 文本 ↔ 路径 / 颜色 / 几何 工具。仅处理自闭合 <path> 标签。"""
 import re
 
-PATH_RE = re.compile(r"<path\b[^>]*?/>", re.S)
+PATH_RE = re.compile(r"<path\b[^>]*?(?:/>|>.*?</path>)", re.S)
 FILL_RGB_RE = re.compile(r'fill="rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)"')
 FILL_HEX_RE = re.compile(r'fill="(#[0-9a-fA-F]{3,6})"')
 D_RE = re.compile(r'\bd="([^"]*)"')
@@ -99,7 +99,7 @@ def _recolor_one(tag: str, color: str) -> str:
     else:
         tag = tag.replace("<path", f'<path fill="{color}"', 1)
     if STROKE_ANY_RE.search(tag):
-        tag = STROKE_ANY_RE.sub(f'stroke="{color}"', tag)
+        tag = STROKE_ANY_RE.sub(f'stroke="{color}"', tag, count=1)
     return tag
 
 

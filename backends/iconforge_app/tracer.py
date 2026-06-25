@@ -8,6 +8,8 @@ from pathlib import Path
 
 from PIL import Image, ImageOps
 
+Image.MAX_IMAGE_PIXELS = 40_000_000
+
 GFILL_RE = re.compile(r'(<g[^>]*\bfill=")#[0-9a-fA-F]{3,6}(")')
 
 
@@ -49,7 +51,9 @@ def trace(image_bytes, *, color="#171817", threshold=128, invert=False, padding=
         bitmap.save(src)
         try:
             subprocess.run(["potrace", str(src), "-s", "-o", str(out)],
-                           check=True, capture_output=True)
+                           check=True, capture_output=True, timeout=30)
+        except subprocess.TimeoutExpired as exc:
+            raise TraceError("potrace 处理超时,请尝试更小或更简单的图片") from exc
         except subprocess.CalledProcessError as exc:
             raise TraceError(f"potrace 执行失败:{exc.stderr.decode(errors='ignore')}") from exc
         svg = out.read_text(encoding="utf-8")

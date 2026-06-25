@@ -34,3 +34,14 @@ def test_trace_without_potrace_raises(monkeypatch):
     monkeypatch.setattr(tracer, "potrace_available", lambda: False)
     with pytest.raises(tracer.TraceError):
         tracer.trace(b"not-an-image")
+
+
+import subprocess
+
+def test_trace_potrace_timeout(monkeypatch):
+    def _fake_run(*args, **kwargs):
+        raise subprocess.TimeoutExpired(cmd="potrace", timeout=30)
+    monkeypatch.setattr(tracer, "potrace_available", lambda: True)
+    monkeypatch.setattr(tracer.subprocess, "run", _fake_run)
+    with pytest.raises(tracer.TraceError, match="超时"):
+        tracer.trace(_png_with_black_square())

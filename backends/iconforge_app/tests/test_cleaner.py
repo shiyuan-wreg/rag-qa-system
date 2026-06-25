@@ -40,3 +40,9 @@ def test_raster_without_trace_raises():
 def test_svg_with_trace_warns():
     r = cleaner.clean(DIRTY_SVG, "x.svg", ["trace", "dewhite"], {})
     assert any("矢量" in w for w in r["warnings"])
+
+def test_bom_prefixed_svg_sniffed_as_svg():
+    bom_svg = b"\xef\xbb\xbf" + DIRTY_SVG
+    # filename not .svg, but BOM-stripped sniff should recognize it
+    r = cleaner.clean(bom_svg, "x.bin", ["mono"], {})
+    assert r["stats"]["pathsKept"] == 2

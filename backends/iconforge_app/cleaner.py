@@ -11,7 +11,10 @@ class CleanError(Exception):
 def _looks_like_svg(file_bytes: bytes, filename: str) -> bool:
     if filename.lower().endswith(".svg"):
         return True
-    head = file_bytes.lstrip()[:5].lower()
+    stripped = file_bytes.lstrip()
+    if stripped.startswith(b"\xef\xbb\xbf"):
+        stripped = stripped[3:]
+    head = stripped.lstrip()[:5].lower()
     return head.startswith(b"<?xml") or head.startswith(b"<svg")
 
 

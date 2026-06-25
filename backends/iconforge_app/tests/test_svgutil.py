@@ -61,6 +61,17 @@ def test_dewhite_all_white_raises():
     except ValueError:
         pass
 
+def test_paired_path_tags_extract_and_dewhite():
+    svg = (
+        '<svg><path fill="rgb(253,253,253)" d="M 0 0 L 500 0 L 500 500 Z"></path>'
+        '<path fill="rgb(23,24,23)" d="M 100 100 L 200 100 L 200 200 Z"></path></svg>'
+    )
+    assert len(svgutil.extract_paths(svg)) == 2
+    out, kept, dropped = svgutil.dewhite(svg, 120, 0.0)
+    assert kept == 1 and dropped == 1
+    assert "rgb(253,253,253)" not in out
+    assert "rgb(23,24,23)" in out
+
 def test_monochrome_recolors_all_paths():
     svg = '<svg><path fill="rgb(200,10,10)" d="M0 0"/><path fill="#0a0" d="M1 1"/></svg>'
     out = svgutil.monochrome(svg, "#171817")
