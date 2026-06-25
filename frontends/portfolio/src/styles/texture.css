@@ -129,6 +129,37 @@ body::after {
   .hero-ambient::before { animation: none; }
 }
 
+/* Hero scanline sweep: occasional horizontal beam passing through */
+.hero-ambient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.04) 50%, transparent 55%);
+  background-size: 100% 8px;
+  opacity: 0;
+  animation: hero-scan-sweep 7s ease-in-out infinite;
+}
+@keyframes hero-scan-sweep {
+  0%, 85%, 100% { opacity: 0; transform: translateY(-120%); }
+  92% { opacity: .6; }
+  95% { opacity: .6; transform: translateY(120%); }
+}
+@media (prefers-reduced-motion: reduce) { .hero-ambient::after { animation: none; } }
+
+/* Grid pulse: very subtle breathing of the texture layer */
+body::before { animation: grid-pulse 8s ease-in-out infinite alternate; }
+@keyframes grid-pulse {
+  0% { opacity: .8; }
+  100% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
+
+/* Button hover lift */
+.btn-lift { transition: transform .2s, box-shadow .2s; }
+.btn-lift:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+
 /* Subtle float for hero scroll indicator or decorative elements */
 .float-slow { animation: float-slow 4s ease-in-out infinite; }
 @keyframes float-slow {

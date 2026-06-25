@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
+import { useScrolled } from '../hooks/useScrolled'
 
 const ITEMS = [
   { to: '/', label: '首页' },
@@ -32,6 +33,7 @@ function MenuIcon({ open }: { open: boolean }) {
 export default function NavBar() {
   const { pathname } = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const scrolled = useScrolled()
 
   const isActive = (to: string) => {
     if (to === '/') return pathname === '/'
@@ -39,7 +41,9 @@ export default function NavBar() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 bg-surface/90 backdrop-blur border-b border-border">
+    <nav className={`sticky top-0 z-50 bg-surface/90 backdrop-blur border-b transition-all duration-300 ${
+      scrolled ? 'border-strong shadow-md' : 'border-border'
+    }`}>
       <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           <Link to="/" className="flex items-center gap-2.5">
