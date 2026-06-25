@@ -56,3 +56,54 @@ def tighten_viewbox(minx, miny, maxx, maxy, padding):
     w += 2 * pad
     h += 2 * pad
     return f"{minx:.1f} {miny:.1f} {w:.1f} {h:.1f}", w, h
+
+
+FILL_ANY_RE = re.compile(r'fill="[^"]*"')
+STROKE_ANY_RE = re.compile(r'stroke="[^"]*"')
+
+
+def is_near_white(rgb, threshold) -> bool:
+    return all(c > threshold for c in rgb)
+
+
+def _build_svg(paths: list[str], view_box: str, w: float, h: float) -> str:
+    body = "".join(paths)
+    return (
+        "<?xml version='1.0' encoding='utf-8'?>\n"
+        '<svg xmlns="http://www.w3.org/2000/svg" '
+        f'viewBox="{view_box}" width="{w:.0f}" height="{h:.0f}" version="1.1">'
+        f"{body}</svg>\n"
+    )
+
+
+def dewhite(svg: str, threshold, padding):
+    paths = extract_paths(svg)
+    dropped = 0
+    kept_paths = []
+    for p in paths:
+        rgb = parse_fill(p)
+        if rgb is not None and is_near_white(rgb, threshold):
+            dropped += 1
+            continue
+        kept_paths.append(p)
+    if not kept_paths:
+        raise ValueError("去白边后没有剩余路径(可能整图都被判为背景)")
+    minx, miny, maxx, maxy = bbox(kept_paths)
+    view_box, w, h = tighten_viewbox(minx, miny, maxx, maxy, padding)
+    return _build_svg(kept_paths, view_box, w, h), len(kept_paths), dropped
+
+
+def _recolor_one(tag: str, color: str) -> str:
+    if FILL_ANY_RE.search(tag):
+        tag = FILL_ANY_RE.sub(f'fill="{color}"', tag, count=1)
+    else:
+        tag = tag.replace("<path", f'<path fill="{color}"', 1)
+    if STROKE_ANY_RE.search(tag):
+        tag = STROKE_ANY_RE.sub(f'stroke="{color}"', tag)
+    return tag
+
+
+def monochrome(svg: str, color: str) -> str:
+    for tag in extract_paths(svg):
+        svg = svg.replace(tag, _recolor_one(tag, color))
+    return svg
