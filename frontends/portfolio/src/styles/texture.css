@@ -109,6 +109,10 @@ body::after {
 /* Staggered scroll reveal: children inherit delay via inline style */
 [data-reveal] .work-card { transition-delay: inherit; }
 
+.logo-img { filter: none; transition: filter .3s; }
+[data-theme="deepblue"] .logo-img,
+[data-theme="cyber"] .logo-img { filter: invert(1); }
+
 /* Hero internal grid overlay */
 .hero-grid {
   position: absolute;
