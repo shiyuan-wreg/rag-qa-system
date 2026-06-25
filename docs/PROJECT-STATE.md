@@ -46,23 +46,24 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 
 ### 当前如何跑起来
 1. Docker Desktop 要先启动
-2. 仓库根有 `.env`(含 `DASHSCOPE_API_KEY`)
+2. 仓库根有 `.env`(现在含 `LLM_PROVIDER=openai` / `LLM_MODEL=deepseek-chat` / `LLM_BASE_URL=https://api.deepseek.com` / `LLM_API_KEY=<deepseek>` / `JINA_API_KEY=<jina>`;旧 `DASHSCOPE_API_KEY` 留作回退)
 3. `bash deploy/build-frontends.sh`
-4. `docker compose -f deploy/docker-compose.yml up -d --build`
+4. 本地起栈(带 local 覆盖,端口 8080):
+   `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d --build`
 5. 访问 http://127.0.0.1:8080
+6. **注意**:中国大陆本机直连 `api.jina.ai` 不通(超时),但 Docker 容器内能连;首尔服务器两者都通。所以本地 RAG 检索由容器跑,没问题。
 
 ---
 
 ## 待处理 / 下一步(按优先级)
 
+0. **【明天第一件事】修 Nexus retriever 的 async bug**:多 agent 流程里 retriever 调 rag_app 时报 `object Response can't be used in 'await' expression`(httpx 同步 Response 被 await),导致 Nexus 检索步拿不到结果(LLM 仍能凭自身知识答,所以 `/nexus/` 表面正常)。定位起点:`core/agents/retriever.py`(找对 rag_app 的 HTTP 调用,八成是 `await client.get(...)` 用错了同步/异步 client,或 `await` 了一个非 awaitable)。修完本地 + 服务器各跑一条 Nexus 流程确认 retriever 的 `tool_result` 不再是"检索失败"。HEAD 起点 `a73e769`。
 1. **~~决定分支去向~~ ✅ 已完成**:`feat/portfolio-phase1` 已合并入 `master`(线性历史/快进,分支已删)。
 2. **~~删 agent-console-ai 残留目录~~ ✅ 已解决**:目录已删除,无残留。
-3. **~~Phase 2 实现计划已确认:Nexus Web 后端~~ ✅ 已完成**:Nexus Phase 2 已实现并合并入 `master`,包括 FastAPI SSE 后端、chat 前端、fc_app `/execute`、Docker/compose/nginx/portfolio 集成;本地测试 39 通过(除 rag 测试),Docker compose 验证待 Docker Desktop 启动。
-4. **~~DocHub 实现计划已确认:Markdown 文档站~~ ✅ 已完成**:DocHub 已实现、合并入 `master` 并推送,包括上传/路径转换、全局索引、在线浏览、密码认证、CLI、Docker/compose/nginx/portfolio 集成;本地测试 59 通过(除 rag 测试)。
-5. **~~Phase 4~~ ✅ 已完成**:已部署到韩国首尔阿里云轻量服务器(Ubuntu 24.04 LTS + Docker)，域名 `www.shiyuan-wreg.cloud`，全站 HTTPS，所有路径和后端代理验证通过。生产 `.env` 已上传到 `/opt/ai-demos/.env`；SSH 走本地代理 `127.0.0.1:7890`（见 `.claude/ssh_config`）。
-6. **门户外壳「黑白高级感科技风」重构 + IconForge 第 6 个 demo ✅ 已完成(在 worktree,待合并)**:默认 `mono-light` 主题,科技 hero,纯黑白选中特效,已替换用户提供的 SVG logo 和 5 个 demo 图标,Lucide 可替换图标,等宽元信息字体,全局网格/噪点质感。新增 IconForge 图标净化器(`/iconforge/`,FastAPI+Pillow+potrace,无状态,三操作自选)。worktree 内 12 个任务全部完成并通过本地 Docker 验证,当前 HEAD `140a3bc`,待用户最终视觉确认后合并入 `master` 并重新部署首尔服务器。
-7. **Phase 3**:cs-quiz-app 完整集成(Fastify+SQLite 容器 + `/quiz` 静态前端);个人页目前只有占位链接。
-8. **后续**:博客;把 demo 由 iframe 逐个重写为原生 React(演进到方案 A)。
+3. **~~Phase 2 / DocHub / Phase 4 部署 / 黑白改版+IconForge~~ ✅ 均已完成并部署**(详见上文与 dev-log)。
+4. **~~LLM 出口切 DeepSeek + Jina~~ ✅ 已完成并部署**(2026-06-26,HEAD `a73e769`,三 demo 生产实测通过)。
+5. **Phase 3**:cs-quiz-app 完整集成(Fastify+SQLite 容器 + `/quiz` 静态前端);个人页目前只有占位链接。
+6. **后续**:IconForge 净化效果迭代;博客;把 demo 由 iframe 逐个重写为原生 React(演进到方案 A);RAG `chroma_db` 持久化挂卷 + `init_rag_tool` 挪出 import 路径。
 
 ## 当前可用路径(本地 Docker 启动后)
 
