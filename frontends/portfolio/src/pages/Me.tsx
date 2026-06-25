@@ -118,7 +118,7 @@ export default function Me() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {g.skills.map((s) => (
-                        <Tag key={s} color="slate">{s}</Tag>
+                        <Tag key={s}>{s}</Tag>
                       ))}
                     </div>
                   </div>

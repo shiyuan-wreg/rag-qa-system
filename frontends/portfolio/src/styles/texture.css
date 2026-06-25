@@ -23,3 +23,25 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 @media (prefers-reduced-motion: reduce) { /* 静态层无需处理,占位说明 */ }
+
+/* WorkCard 选中态四特效:冷冽底 + snap 偏移模糊 + 扫描线 + 抬升提亮。纯黑白。 */
+.work-card { position: relative; overflow: hidden;
+  transition: border-color .25s, transform .28s cubic-bezier(.2,.7,.2,1), background .35s, box-shadow .3s; }
+.work-card::after { content:""; position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0; transition:opacity .35s;
+  background: radial-gradient(420px 160px at 80% -10%, var(--cold-sheen), transparent 70%); }
+.work-card__scan { position:absolute; left:0; right:0; top:0; height:34%; z-index:0; pointer-events:none; opacity:0;
+  background: linear-gradient(180deg, var(--cold-sheen), transparent); }
+.work-card__inner { position: relative; z-index: 1; }
+.work-card:hover, .work-card:focus-visible, .work-card.is-active {
+  transform: translateY(-3px); border-color: var(--border-strong);
+  background: var(--surface-cold);
+  box-shadow: 0 0 0 1px var(--border-strong), 0 14px 40px rgba(0,0,0,.16), 0 0 40px var(--glow-accent); }
+.work-card:hover::after, .work-card:focus-visible::after, .work-card.is-active::after { opacity: 1; }
+.work-card:hover .work-card__scan, .work-card.is-active .work-card__scan { animation: work-scan .7s ease-out 1; }
+.work-card:hover .work-card__inner, .work-card.is-active .work-card__inner { animation: work-snap .3s cubic-bezier(.2,.7,.2,1) 1; }
+@keyframes work-scan { 0%{opacity:.9; transform:translateY(-40%)} 100%{opacity:0; transform:translateY(320%)} }
+@keyframes work-snap { 0%{transform:translateX(-5px); filter:blur(3px)} 60%{transform:translateX(1px); filter:blur(.6px)} 100%{transform:translateX(0); filter:blur(0)} }
+@media (prefers-reduced-motion: reduce) {
+  .work-card:hover, .work-card.is-active { transform:none }
+  .work-card__scan, .work-card__inner { animation:none !important }
+}

@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
+import Icon from './Icon'
+import type { IconName } from './Icon'
 
 export interface SidebarNavItem {
   key: string
   to: string
   label: string
-  icon?: { letter: string; bg: string; text: string }
+  icon?: IconName
 }
 
 export default function SidebarNav({ items, activeKey }: { items: SidebarNavItem[]; activeKey: string }) {
@@ -24,11 +26,8 @@ export default function SidebarNav({ items, activeKey }: { items: SidebarNavItem
             ].join(' ')}
           >
             {it.icon && (
-              <span
-                className="w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm"
-                style={{ backgroundColor: it.icon.bg, color: it.icon.text }}
-              >
-                {it.icon.letter}
+              <span className="w-6 h-6 rounded-md border border-border flex items-center justify-center text-secondary shrink-0">
+                <Icon name={it.icon} className="w-3.5 h-3.5" />
               </span>
             )}
             {it.label}

@@ -1,8 +1,6 @@
 import { Work } from '../data/works'
 import Tag from './Tag'
 
-const TAG_COLORS = ['blue', 'green', 'purple', 'cyan', 'orange', 'red', 'slate']
-
 export default function DemoInfoCard({ work }: { work: Work }) {
   return (
     <div className="border-t border-border-subtle pt-5">
@@ -13,8 +11,8 @@ export default function DemoInfoCard({ work }: { work: Work }) {
         <h1 className="text-base font-bold text-primary">{work.title}</h1>
         <p className="mt-2 text-sm text-secondary leading-relaxed">{work.desc}</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {work.tech.map((t, idx) => (
-            <Tag key={t} color={TAG_COLORS[idx % TAG_COLORS.length]}>
+          {work.tech.map((t) => (
+            <Tag key={t}>
               {t}
             </Tag>
           ))}
