@@ -113,6 +113,10 @@ body::after {
 [data-theme="deepblue"] .logo-img,
 [data-theme="cyber"] .logo-img { filter: invert(1); }
 
+.demo-icon { filter: none; transition: filter .3s; }
+[data-theme="deepblue"] .demo-icon,
+[data-theme="cyber"] .demo-icon { filter: invert(1); }
+
 /* Hero internal grid overlay */
 .hero-grid {
   position: absolute;
