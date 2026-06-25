@@ -11,10 +11,12 @@ export default {
           raised: 'var(--surface-raised)',
           hover: 'var(--surface-hover)',
           soft: 'var(--surface-soft)',
+          cold: 'var(--surface-cold)',
         },
         border: {
           DEFAULT: 'var(--border-default)',
           subtle: 'var(--border-subtle)',
+          strong: 'var(--border-strong)',
         },
         primary: 'var(--text-primary)',
         secondary: 'var(--text-secondary)',
