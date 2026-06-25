@@ -9,7 +9,7 @@
 
 ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`**。**Nexus Phase 2 已完成并合并入 `master`**(14 个提交,39 测试通过),新增 `/nexus/` Multi-Agent 工作流助手(FastAPI + SSE + 通义千问)。**DocHub 已完成并合并入 `master`**(19 个提交,59 测试通过),新增 `/doctomd/` Markdown 转 HTML 文档站(上传/路径转换/在线浏览/密码保护/CLI)。**Phase 4 服务器部署已完成**:项目已部署到韩国首尔阿里云轻量服务器(Ubuntu 24.04 LTS + Docker),通过 `https://www.shiyuan-wreg.cloud` 对外提供统一门户,Let's Encrypt SSL 证书已生效,所有子路径(`/rag/`、`/fc/`、`/nexus/`、`/doctomd/`、`/learn/`)及后端代理均验证通过。`master` **已推送**到 GitHub `origin/master`。
 
-**新增:门户外壳「黑白高级感科技风」重构**在隔离 worktree `feat+portfolio-ui-redesign` 完成(11 个任务 + 多轮反馈修复 + logo 替换,当前 HEAD `15a7f00`),默认主题改为 `mono-light`,含科技 hero(glitch 标题/打字机/假终端)、Lucide 可替换图标身份、WorkCard 纯黑白四特效选中态、全局网格/噪点质感、等宽元信息字体。本地 Docker 验证所有路由 200,stack 正在 `:8080` 运行。
+**新增:门户外壳「黑白高级感科技风」重构**在隔离 worktree `feat+portfolio-ui-redesign` 完成(11 个任务 + 多轮反馈修复 + logo 替换,当前 HEAD `140a3bc`),默认主题改为 `mono-light`,含科技 hero(glitch 标题/打字机/假终端)、Lucide 可替换图标身份、WorkCard 纯黑白四特效选中态、全局网格/噪点质感、等宽元信息字体。本地 Docker 验证所有路由 200,stack 正在 `:8080` 运行。
 
 ---
 
@@ -50,7 +50,7 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 3. **~~Phase 2 实现计划已确认:Nexus Web 后端~~ ✅ 已完成**:Nexus Phase 2 已实现并合并入 `master`,包括 FastAPI SSE 后端、chat 前端、fc_app `/execute`、Docker/compose/nginx/portfolio 集成;本地测试 39 通过(除 rag 测试),Docker compose 验证待 Docker Desktop 启动。
 4. **~~DocHub 实现计划已确认:Markdown 文档站~~ ✅ 已完成**:DocHub 已实现、合并入 `master` 并推送,包括上传/路径转换、全局索引、在线浏览、密码认证、CLI、Docker/compose/nginx/portfolio 集成;本地测试 59 通过(除 rag 测试)。
 5. **~~Phase 4~~ ✅ 已完成**:已部署到韩国首尔阿里云轻量服务器(Ubuntu 24.04 LTS + Docker)，域名 `www.shiyuan-wreg.cloud`，全站 HTTPS，所有路径和后端代理验证通过。生产 `.env` 已上传到 `/opt/ai-demos/.env`；SSH 走本地代理 `127.0.0.1:7890`（见 `.claude/ssh_config`）。
-6. **门户外壳「黑白高级感科技风」重构 ✅ 已完成(在 worktree,待合并)**:默认 `mono-light` 主题,科技 hero,纯黑白选中特效,Lucide 可替换图标,等宽元信息字体,全局网格/噪点质感。worktree 内 11 个任务全部完成并通过本地 Docker 验证,当前 HEAD `9ac301b`,待用户最终视觉确认后合并入 `master` 并重新部署首尔服务器。
+6. **门户外壳「黑白高级感科技风」重构 ✅ 已完成(在 worktree,待合并)**:默认 `mono-light` 主题,科技 hero,纯黑白选中特效,已替换用户提供的 SVG logo,Lucide 可替换图标,等宽元信息字体,全局网格/噪点质感。worktree 内 11 个任务全部完成并通过本地 Docker 验证,当前 HEAD `140a3bc`,待用户最终视觉确认后合并入 `master` 并重新部署首尔服务器。
 7. **Phase 3**:cs-quiz-app 完整集成(Fastify+SQLite 容器 + `/quiz` 静态前端);个人页目前只有占位链接。
 8. **后续**:博客;把 demo 由 iframe 逐个重写为原生 React(演进到方案 A)。
 
