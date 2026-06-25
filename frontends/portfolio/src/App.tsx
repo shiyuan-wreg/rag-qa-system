@@ -25,6 +25,7 @@ export default function App() {
           <Route path="/nexus" element={<DemoRoute slug="nexus" src="/nexus/" />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/doctomd" element={<DemoRoute slug="doctomd" src="/doctomd/" />} />
+          <Route path="/iconforge" element={<DemoRoute slug="iconforge" src="/iconforge/" />} />
           <Route path="/changelog" element={<Changelog />} />
           <Route path="/me" element={<Me />} />
         </Routes>
