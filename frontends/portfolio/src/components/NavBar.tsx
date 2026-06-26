@@ -42,13 +42,8 @@ export default function NavBar() {
     return pathname.startsWith(to)
   }
 
-  // /nexus 应用 The Machine 监控配色(导航栏与 demo 内容区呼应)
-  const machine = pathname.startsWith('/nexus')
-
   return (
     <nav className={`sticky top-0 z-50 bg-surface/90 backdrop-blur border-b transition-all duration-300 ${
-      machine ? 'machine-nav ' : ''
-    }${
       scrolled ? 'border-strong shadow-md' : 'border-border'
     }`}>
       <div className="max-w-wide mx-auto px-4 sm:px-6 lg:px-8">

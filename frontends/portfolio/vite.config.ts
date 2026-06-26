@@ -16,6 +16,7 @@ export default defineConfig({
       '/nexus/': demoProxy,
       '/doctomd/': demoProxy,
       '/iconforge/': demoProxy,
+      '/learn/': demoProxy,
     },
   },
 })

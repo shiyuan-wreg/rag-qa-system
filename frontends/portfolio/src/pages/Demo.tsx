@@ -38,7 +38,7 @@ export default function Demo({ slug, src }: { slug: string; src: string }) {
     </div>
   )
 
-  const machine = slug === 'nexus' || theme === 'machine'
+  const machine = theme === 'machine'
 
   return (
     <PageTransition>
