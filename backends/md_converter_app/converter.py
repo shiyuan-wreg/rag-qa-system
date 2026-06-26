@@ -5,37 +5,72 @@ from pathlib import Path
 import markdown
 
 
-HTML_TEMPLATE = """\
+# 跟随门户主题:读 localStorage,监听 storage 事件即时换肤(同源 iframe 自动收到)
+_THEME_SYNC_SCRIPT = """\
+(function(){
+  var KEY='ai-demos-theme', VALID=['mono-light','light','deepblue','cyber','machine'];
+  function apply(t){ if(VALID.indexOf(t)<0)t='mono-light'; document.documentElement.setAttribute('data-demo-theme',t); }
+  try{ apply(localStorage.getItem(KEY)); }catch(e){ apply('mono-light'); }
+  window.addEventListener('storage', function(e){ if(e.key===KEY) apply(e.newValue); });
+})();
+"""
+
+_THEME_PALETTE_CSS = """\
+:root, [data-demo-theme="mono-light"]{
+  --d-bg:#fafafa;--d-surface:#fff;--d-surface-soft:#f8f8f9;--d-border:rgba(0,0,0,.12);
+  --d-text:#09090b;--d-dim:#71717a;--d-accent:#09090b;--d-accent-text:#fafafa;--d-danger:#dc2626;
+  --d-font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+[data-demo-theme="light"]{
+  --d-bg:#f6f7fb;--d-surface:#fff;--d-surface-soft:#f8fafc;--d-border:#e2e8f0;
+  --d-text:#0f172a;--d-dim:#64748b;--d-accent:#4f46e5;--d-accent-text:#fff;--d-danger:#dc2626;
+  --d-font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+[data-demo-theme="deepblue"]{
+  --d-bg:#0b1120;--d-surface:#111827;--d-surface-soft:#172033;--d-border:#1f2937;
+  --d-text:#f8fafc;--d-dim:#94a3b8;--d-accent:#2563eb;--d-accent-text:#fff;--d-danger:#f87171;
+  --d-font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+[data-demo-theme="cyber"]{
+  --d-bg:#050507;--d-surface:#0f0f12;--d-surface-soft:#141417;--d-border:#27272a;
+  --d-text:#e4e4e7;--d-dim:#71717a;--d-accent:#a3e635;--d-accent-text:#050507;--d-danger:#ff5577;
+  --d-font:"JetBrains Mono",ui-monospace,Consolas,"PingFang SC","Microsoft YaHei",monospace;
+}
+[data-demo-theme="machine"]{
+  --d-bg:#0a0a0c;--d-surface:#0e0e11;--d-surface-soft:#111114;--d-border:rgba(227,179,65,.30);
+  --d-text:#e3b341;--d-dim:#9a8c5a;--d-accent:#e3b341;--d-accent-text:#0a0a0c;--d-danger:#ff4500;
+  --d-font:"JetBrains Mono",ui-monospace,Consolas,"PingFang SC","Microsoft YaHei",monospace;
+}
+"""
+
+HTML_TEMPLATE = f"""\
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title}</title>
+<title>{{title}}</title>
+<script>
+{_THEME_SYNC_SCRIPT}
+</script>
 <style>
-:root {{ color-scheme: light dark; }}
+{_THEME_PALETTE_CSS}
 body {{
   max-width: 900px;
   margin: 40px auto;
   padding: 0 20px;
-  font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  color: #24292f;
-  background: #ffffff;
+  font: 16px/1.7 var(--d-font);
+  color: var(--d-text);
+  background: var(--d-bg);
+  transition: background .25s, color .25s;
 }}
-@media (prefers-color-scheme: dark) {{
-  body {{ color: #c9d1d9; background: #0d1117; }}
-  a {{ color: #58a6ff; }}
-  code, pre {{ background: #161b22; }}
-  blockquote {{ color: #8b949e; border-left-color: #30363d; }}
-  table th, table td {{ border-color: #30363d; }}
-  table tr:nth-child(2n) {{ background: #161b22; }}
-  h1, h2 {{ border-bottom-color: #30363d; }}
-}}
-h1, h2 {{ border-bottom: 1px solid #d0d7de; padding-bottom: .3em; }}
+a {{ color: var(--d-accent); text-decoration: none; }}
+a:hover {{ text-decoration: underline; }}
+h1, h2 {{ border-bottom: 1px solid var(--d-border); padding-bottom: .3em; }}
 h3, h4, h5, h6 {{ margin-top: 1.5em; }}
 code {{
   padding: .2em .4em;
-  background: #f6f8fa;
+  background: var(--d-surface-soft);
   border-radius: 4px;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
   font-size: 85%;
@@ -43,7 +78,7 @@ code {{
 pre {{
   padding: 16px;
   overflow: auto;
-  background: #f6f8fa;
+  background: var(--d-surface-soft);
   border-radius: 6px;
   line-height: 1.45;
 }}
@@ -51,26 +86,23 @@ pre code {{ padding: 0; background: transparent; }}
 blockquote {{
   margin: 0;
   padding: 0 1em;
-  color: #57606a;
-  border-left: .25em solid #d0d7de;
+  color: var(--d-dim);
+  border-left: .25em solid var(--d-border);
 }}
 table {{ border-collapse: collapse; width: 100%; margin: 1em 0; }}
-table th, table td {{ border: 1px solid #d0d7de; padding: 6px 13px; }}
-table tr:nth-child(2n) {{ background: #f6f8fa; }}
+table th, table td {{ border: 1px solid var(--d-border); padding: 6px 13px; }}
+table tr:nth-child(2n) {{ background: var(--d-surface-soft); }}
 img {{ max-width: 100%; }}
-a {{ color: #0969da; text-decoration: none; }}
-a:hover {{ text-decoration: underline; }}
 nav {{ margin-bottom: 24px; font-size: 14px; }}
 nav a {{ margin-right: 12px; }}
-.toc {{ background: #f6f8fa; padding: 12px 20px; border-radius: 6px; margin-bottom: 24px; }}
+.toc {{ background: var(--d-surface-soft); padding: 12px 20px; border-radius: 6px; margin-bottom: 24px; }}
 .toc ul {{ padding-left: 20px; }}
-@media (prefers-color-scheme: dark) {{ .toc {{ background: #161b22; }} }}
 </style>
 </head>
 <body>
-{nav}
-{toc}
-{content}
+{{nav}}
+{{toc}}
+{{content}}
 </body>
 </html>
 """
@@ -126,22 +158,24 @@ def build_dir_index(directory: Path, html_files: list[Path], root: Path) -> None
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>索引 - {directory.name}</title>
+<script>
+{_THEME_SYNC_SCRIPT}
+</script>
 <style>
-:root {{ color-scheme: light dark; }}
+{_THEME_PALETTE_CSS}
 body {{
   max-width: 900px;
   margin: 40px auto;
   padding: 0 20px;
-  font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font: 16px/1.7 var(--d-font);
+  color: var(--d-text);
+  background: var(--d-bg);
+  transition: background .25s, color .25s;
 }}
-@media (prefers-color-scheme: dark) {{
-  body {{ color: #c9d1d9; background: #0d1117; }}
-  a {{ color: #58a6ff; }}
-}}
-h1 {{ border-bottom: 1px solid #d0d7de; padding-bottom: .3em; }}
-li {{ margin: 6px 0; }}
-a {{ text-decoration: none; }}
+a {{ color: var(--d-accent); text-decoration: none; }}
 a:hover {{ text-decoration: underline; }}
+h1 {{ border-bottom: 1px solid var(--d-border); padding-bottom: .3em; }}
+li {{ margin: 6px 0; }}
 </style>
 </head>
 <body>
@@ -203,22 +237,24 @@ def build_global_index(output_root: Path) -> None:
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DocHub 文档总目录</title>
+<script>
+{_THEME_SYNC_SCRIPT}
+</script>
 <style>
-:root {{ color-scheme: light dark; }}
+{_THEME_PALETTE_CSS}
 body {{
   max-width: 900px;
   margin: 40px auto;
   padding: 0 20px;
-  font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font: 16px/1.7 var(--d-font);
+  color: var(--d-text);
+  background: var(--d-bg);
+  transition: background .25s, color .25s;
 }}
-@media (prefers-color-scheme: dark) {{
-  body {{ color: #c9d1d9; background: #0d1117; }}
-  a {{ color: #58a6ff; }}
-}}
-h1 {{ border-bottom: 1px solid #d0d7de; padding-bottom: .3em; }}
-li {{ margin: 6px 0; }}
-a {{ text-decoration: none; }}
+a {{ color: var(--d-accent); text-decoration: none; }}
 a:hover {{ text-decoration: underline; }}
+h1 {{ border-bottom: 1px solid var(--d-border); padding-bottom: .3em; }}
+li {{ margin: 6px 0; }}
 </style>
 </head>
 <body>
