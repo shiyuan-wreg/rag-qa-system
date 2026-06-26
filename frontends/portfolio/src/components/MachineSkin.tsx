@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useMotionPreference } from '../hooks/useMotionPreference'
+import { getLatestChangelog } from '../data/changelogs'
 
 export default function MachineSkin({ children }: { children: ReactNode }) {
   const { effectiveParallax } = useMotionPreference()
+  const version = getLatestChangelog()?.version ?? '0.0.0'
   const viewportRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -62,13 +64,13 @@ export default function MachineSkin({ children }: { children: ReactNode }) {
         <span /><span /><span /><span />
       </div>
       <div className="machine-skin__hud machine-skin__hud--tr" aria-hidden="true">
-        <div className="rec">REC // SYSTEM LOG</div>
-        <div>ADMIN ACCESS · LVL 5</div>
+        <div className="rec">LIVE · MULTI-AGENT</div>
+        <div>STATUS: ONLINE</div>
       </div>
       <div className="machine-skin__hud machine-skin__hud--bl" aria-hidden="true">
-        <div>IP_ORIGIN: 10.0.2.15</div>
-        <div>LOCATION: NYC_SECTOR_7</div>
-        <div>SYSTEM: VIRTUE_CORE_v4.1</div>
+        <div>VERSION: v{version}</div>
+        <div>MODEL: QWEN · 通义千问</div>
+        <div>SYSTEM: UBUNTU · SEOUL</div>
       </div>
       <div ref={viewportRef} className="machine-skin__viewport">
         <div ref={contentRef} className="machine-skin__content">{children}</div>
