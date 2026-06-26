@@ -1,7 +1,7 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-06-26(**LLM 出口整体切到 DeepSeek 聊天 + Jina embedding,已部署服务器并三 demo 实测通过**;HEAD `a82b450`)
+> 最近更新:2026-06-26(**修复 Nexus retriever 的 httpx async bug;LLM 出口整体切到 DeepSeek 聊天 + Jina embedding,已部署服务器并三 demo 实测通过**;HEAD `36e9c56`)
 
 ---
 
@@ -18,7 +18,7 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 **已知待改进(2026-06-26 更新):**
 1. IconForge 工具体验差(用户反馈),后续迭代净化效果。
 2. **~~生产 RAG/LLM 出口~~ ✅ 已解决(2026-06-26)**:LLM 出口从大陆 dashscope 整体切到 **DeepSeek(聊天,OpenAI 兼容)+ Jina(RAG embedding)**,两者从首尔均可达、已实测有效。聊天统一走 `core/llm.py` 的 `LLMClient.from_config()`(provider=openai/model=deepseek-chat/base_url=api.deepseek.com);embedding 走 `rag/vectorstore.py` 里手写的最小 Jina 客户端。服务器 `.env` 用 `LLM_PROVIDER/LLM_MODEL/LLM_BASE_URL/LLM_API_KEY/JINA_API_KEY`(旧 `DASHSCOPE_*` 留作回退)。三 demo 生产实测:FC 工具调用、RAG Jina 检索作答、Nexus SSE 均通过。**切 DeepSeek 时暴露并修了一个老 bug**:`safe_execute_python` 是受限算术计算器,但描述像通用执行器,DeepSeek 会发整段程序导致 `/rag/` 死循环——已改描述/报错/system prompt 修正。
-3. **Nexus retriever pre-existing async bug**:retriever 调 rag_app 报 `object Response can't be used in 'await'`,检索步拿不到结果(LLM 仍能凭自身知识作答)。与 provider 切换无关,待单独修。
+3. **~~Nexus retriever pre-existing async bug~~ ✅ 已修复(2026-06-26,HEAD `36e9c56`)**:根因是 httpx 的 `Response.raise_for_status()`/`json()` 在 `AsyncClient` 下仍是**同步**方法(只有 `aread()`/`aclose()` 是协程),原代码对它们误用 `await` → `object Response can't be used in 'await' expression`。改为同步调用并移除多余 `aread()`。**漏测原因**:旧测试用 `AsyncMock` 模拟这两个方法,让错误的 await 假通过;已改 `MagicMock` 反映真实行为。nexus 核心 17 测试通过。
 4. RAG `chroma_db` 未挂卷,每次重建容器重新调 Jina 建库(7 块,快,可接受);`init_rag_tool` 仍在 import 路径同步执行。
 
 ---
@@ -57,7 +57,7 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 
 ## 待处理 / 下一步(按优先级)
 
-0. **【明天第一件事】修 Nexus retriever 的 async bug**:多 agent 流程里 retriever 调 rag_app 时报 `object Response can't be used in 'await' expression`(httpx 同步 Response 被 await),导致 Nexus 检索步拿不到结果(LLM 仍能凭自身知识答,所以 `/nexus/` 表面正常)。定位起点:`core/agents/retriever.py`(找对 rag_app 的 HTTP 调用,八成是 `await client.get(...)` 用错了同步/异步 client,或 `await` 了一个非 awaitable)。修完本地 + 服务器各跑一条 Nexus 流程确认 retriever 的 `tool_result` 不再是"检索失败"。HEAD 起点 `a73e769`。
+0. **~~修 Nexus retriever 的 async bug~~ ✅ 已完成**(2026-06-26,HEAD `36e9c56`):见上文「已知待改进 #3」。本地 nexus 核心 17 测试通过;`tests/fc/test_execute.py` 仍因本机 venv 未装 `openai` 包(容器内有)收集失败,与本修复无关。**待补**:Docker 起栈后跑一条真实 Nexus 流程,确认 retriever 的 `tool_result` 不再是「检索失败」;服务器同验。
 1. **~~决定分支去向~~ ✅ 已完成**:`feat/portfolio-phase1` 已合并入 `master`(线性历史/快进,分支已删)。
 2. **~~删 agent-console-ai 残留目录~~ ✅ 已解决**:目录已删除,无残留。
 3. **~~Phase 2 / DocHub / Phase 4 部署 / 黑白改版+IconForge~~ ✅ 均已完成并部署**(详见上文与 dev-log)。
