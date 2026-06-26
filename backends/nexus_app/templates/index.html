@@ -3,48 +3,234 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexus Multi-Agent</title>
+<title>Nexus Multi-Agent // Terminal</title>
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #24292f; background: #fff; }
-@media (prefers-color-scheme: dark) { body { color: #c9d1d9; background: #0d1117; } a { color: #58a6ff; } }
-.container { max-width: 900px; margin: 0 auto; }
-.messages { border: 1px solid #d0d7de; border-radius: 8px; height: 60vh; overflow-y: auto; padding: 16px; margin-bottom: 16px; }
-.message { margin: 8px 0; padding: 10px; border-radius: 6px; background: #f6f8fa; }
-.user { background: #ddf4ff; }
-.input-area { display: flex; gap: 8px; }
-input { flex: 1; padding: 10px; }
-button { padding: 10px 20px; }
-.thought { color: #57606a; font-size: 14px; margin: 4px 0; }
-.tool { color: #0969da; font-size: 14px; margin: 4px 0; }
+:root {
+  --bg: #0a0a0c;
+  --panel: #0e0e11;
+  --panel-soft: #121216;
+  --yellow: #ffd700;
+  --dim: #9a8c5a;
+  --muted: #6b6347;
+  --cyan: #00ffff;
+  --red: #ff4500;
+  --border: rgba(255, 215, 0, 0.25);
+  --border-soft: rgba(255, 215, 0, 0.12);
+  --font: ui-monospace, "Cascadia Code", "JetBrains Mono", "Share Tech Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 22px;
+  font-family: var(--font);
+  color: var(--yellow);
+  background:
+    linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px),
+    var(--bg);
+  background-size: 40px 40px, 40px 40px, auto;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.15);
+}
+/* CRT 扫描线叠加 */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent 50%, rgba(255,255,255,0.025) 50%);
+  background-size: 100% 4px;
+  z-index: 9;
+}
+.container { max-width: 920px; margin: 0 auto; position: relative; z-index: 1; }
+
+/* 标题栏 */
+.term-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 13px;
+}
+.term-head .dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  animation: blink 1.4s steps(2, start) infinite;
+}
+.term-head .spacer { flex: 1; }
+.term-head .meta { color: var(--dim); font-size: 11px; letter-spacing: 0.1em; }
+@keyframes blink { 50% { opacity: 0.25; } }
+
+/* 消息区 */
+.messages {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  height: 60vh;
+  overflow-y: auto;
+  padding: 16px;
+  margin-bottom: 14px;
+  background: var(--panel);
+}
+/* 边角括号 */
+.messages::before, .messages::after {
+  content: "";
+  position: absolute;
+  width: 12px; height: 12px;
+  border: 0 solid var(--yellow);
+  opacity: 0.7;
+}
+.messages::before { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
+.messages::after { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; }
+
+.message {
+  margin: 10px 0;
+  padding: 10px 12px;
+  background: var(--panel-soft);
+  border-left: 2px solid var(--border-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+.msg-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 5px;
+}
+.user { border-left-color: var(--yellow); }
+.user .msg-label { color: var(--yellow); }
+.thought { color: var(--dim); font-size: 13px; border-left-color: var(--muted); }
+.tool { color: var(--cyan); border-left-color: var(--cyan); text-shadow: 0 0 6px rgba(0,255,255,0.2); }
+.final { border-left-color: var(--yellow); color: var(--yellow); }
+.final .msg-label { color: var(--yellow); }
+.caret::after {
+  content: "▋";
+  animation: blink 1s steps(2, start) infinite;
+  margin-left: 1px;
+}
+
+/* 输入区 */
+.input-area { display: flex; gap: 10px; }
+input {
+  flex: 1;
+  padding: 11px 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--yellow);
+  font-family: var(--font);
+  font-size: 14px;
+  outline: none;
+}
+input::placeholder { color: var(--muted); }
+input:focus { border-color: var(--yellow); box-shadow: 0 0 0 1px var(--border); }
+button {
+  padding: 11px 22px;
+  background: var(--yellow);
+  color: var(--bg);
+  border: 1px solid var(--yellow);
+  font-family: var(--font);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+button:hover { opacity: 0.85; }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); }
+
+@media (prefers-reduced-motion: reduce) {
+  .term-head .dot, .caret::after { animation: none; }
+  body::after { display: none; }
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Nexus Multi-Agent 工作流助手</h1>
+  <div class="term-head">
+    <span class="dot"></span>
+    <span>Nexus // Multi-Agent Terminal</span>
+    <span class="spacer"></span>
+    <span class="meta">ENGINE: QWEN · STATUS: ONLINE</span>
+  </div>
   <div class="messages" id="messages"></div>
   <div class="input-area">
-    <input type="text" id="input" placeholder="输入问题..." onkeypress="if(event.key==='Enter') send()">
-    <button onclick="send()">发送</button>
+    <input type="text" id="input" placeholder="输入指令…" onkeypress="if(event.key==='Enter') send()">
+    <button id="send-btn" onclick="send()">发送</button>
   </div>
 </div>
 <script>
 const messages = document.getElementById('messages');
 const input = document.getElementById('input');
+const sendBtn = document.getElementById('send-btn');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function addMessage(html, cls='') {
+// 普通消息(思考/工具/用户):带 HUD 标签,立即显示
+function addMessage(content, cls, label) {
   const div = document.createElement('div');
   div.className = 'message ' + cls;
-  div.innerHTML = html;
+  if (label) {
+    const lb = document.createElement('div');
+    lb.className = 'msg-label';
+    lb.textContent = label;
+    div.appendChild(lb);
+  }
+  const body = document.createElement('div');
+  body.innerHTML = content;
+  div.appendChild(body);
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
+}
+
+// 最终答案:快速打字机流式回显(reduced-motion 时直接显示)
+function typeFinal(text) {
+  const div = document.createElement('div');
+  div.className = 'message final';
+  const lb = document.createElement('div');
+  lb.className = 'msg-label';
+  lb.textContent = '■ RESPONSE';
+  const body = document.createElement('div');
+  body.className = 'caret';
+  div.appendChild(lb);
+  div.appendChild(body);
+  messages.appendChild(div);
+
+  if (reduceMotion || !text) {
+    body.textContent = text;
+    body.classList.remove('caret');
+    messages.scrollTop = messages.scrollHeight;
+    return;
+  }
+  let i = 0;
+  const step = Math.max(1, Math.round(text.length / 180)); // 长答案自动加速,~2s 内完成
+  const timer = setInterval(() => {
+    i += step;
+    body.textContent = text.slice(0, i);
+    messages.scrollTop = messages.scrollHeight;
+    if (i >= text.length) {
+      body.textContent = text;
+      body.classList.remove('caret');
+      clearInterval(timer);
+    }
+  }, 14);
 }
 
 function send() {
   const query = input.value.trim();
   if (!query) return;
-  addMessage(query, 'user');
+  addMessage(query, 'user', '▸ QUERY');
   input.value = '';
+  sendBtn.disabled = true;
 
   const form = new FormData();
   form.append('query', query);
@@ -56,7 +242,8 @@ function send() {
       function read() {
         reader.read().then(({ done, value }) => {
           if (done) {
-            if (final) addMessage(final);
+            if (final) typeFinal(final);
+            sendBtn.disabled = false;
             return;
           }
           const chunk = decoder.decode(value, { stream: true });
@@ -68,9 +255,9 @@ function send() {
             else if (line === '' && event) {
               const obj = JSON.parse(data);
               if (event === 'final_answer') final = obj.content;
-              else if (event === 'agent_thought') addMessage('<div class="thought">[' + obj.agent + '] ' + obj.content + '</div>');
-              else if (event === 'planner_thought') addMessage('<div class="thought">[planner] ' + obj.content + '</div>');
-              else if (event === 'tool_call') addMessage('<div class="tool">调用：' + obj.agent + ' / ' + obj.tool + '</div>');
+              else if (event === 'agent_thought') addMessage(obj.content, 'thought', '[' + obj.agent + ']');
+              else if (event === 'planner_thought') addMessage(obj.content, 'thought', '[planner]');
+              else if (event === 'tool_call') addMessage(obj.agent + ' / ' + obj.tool, 'tool', '⚙ TOOL CALL');
               event = null; data = '';
             }
           }
@@ -78,7 +265,8 @@ function send() {
         });
       }
       read();
-    });
+    })
+    .catch(() => { sendBtn.disabled = false; });
 }
 </script>
 </body>
