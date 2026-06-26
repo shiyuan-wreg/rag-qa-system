@@ -207,17 +207,11 @@ body::before { animation: grid-pulse 8s ease-in-out infinite alternate; }
 .hero-box--tr { top: 22px; right: 22px; }
 .hero-box--bl { bottom: 22px; left: 22px; }
 
-/* Hero 标题:周期性"分散/模糊"爆发(替代旧 RGB 失真) */
-.scatter-title {
-  display: inline-block;
-  will-change: filter, transform, letter-spacing;
-  animation: scatter 7.5s ease-in-out infinite;
+/* 全局 3D 视差容器(ParallaxToggle 开启时,鼠标移动整页轻微倾斜) */
+.parallax-viewport { perspective: 1200px; }
+.parallax-content {
+  transition: transform .2s ease-out;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
-@keyframes scatter {
-  0%, 86%, 100% { filter: blur(0); transform: translate(0,0); letter-spacing: -0.01em; opacity: 1; }
-  88% { filter: blur(2.5px); transform: translate(-2px, 1px); letter-spacing: 0.10em; opacity: .82; }
-  91% { filter: blur(4px);   transform: translate(3px, -1px); letter-spacing: 0.20em; opacity: .7; }
-  94% { filter: blur(1.5px); transform: translate(-1px, 1px); letter-spacing: 0.06em; opacity: .9; }
-  97% { filter: blur(0.4px); transform: translate(0,0); letter-spacing: 0; opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) { .scatter-title { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .parallax-content { transition: none; } }
