@@ -205,14 +205,16 @@ function typeFinal(text) {
   div.appendChild(body);
   messages.appendChild(div);
 
-  if (reduceMotion || !text) {
-    body.textContent = text;
+  if (!text) {
+    body.textContent = '';
     body.classList.remove('caret');
     messages.scrollTop = messages.scrollHeight;
     return;
   }
+  // reduced-motion 下仍回显,但更快(大步长 + 短间隔),兼顾可见与无障碍
   let i = 0;
-  const step = Math.max(1, Math.round(text.length / 180)); // 长答案自动加速,~2s 内完成
+  const step = Math.max(reduceMotion ? 6 : 1, Math.round(text.length / 180));
+  const delay = reduceMotion ? 6 : 14;
   const timer = setInterval(() => {
     i += step;
     body.textContent = text.slice(0, i);
@@ -222,7 +224,7 @@ function typeFinal(text) {
       body.classList.remove('caret');
       clearInterval(timer);
     }
-  }, 14);
+  }, delay);
 }
 
 function send() {
