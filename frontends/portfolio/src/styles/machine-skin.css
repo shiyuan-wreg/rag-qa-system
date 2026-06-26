@@ -165,6 +165,10 @@
 /* 信息卡角标稍大,且不被 bg-surface-soft 的 background-color 影响(分属不同属性) */
 .machine-skin .demo-info-card { --corner-len: 12px; }
 
+/* 暗色皮肤下作品图标反相为可见(近黑 SVG 贴黑底会消失);图标框去圆角 */
+.machine-skin .demo-icon { filter: invert(1); }
+.machine-skin .sidebar-link span { border-radius: 0; }
+
 /* ---------- HUD 装饰文字(纯氛围,不挡交互) ---------- */
 .machine-skin__hud {
   position: absolute;
