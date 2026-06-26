@@ -25,8 +25,8 @@ export default function SidebarNav({ items, activeKey }: { items: SidebarNavItem
             ].join(' ')}
           >
             {it.icon && (
-              <span className="w-6 h-6 rounded-md border border-border flex items-center justify-center overflow-hidden shrink-0">
-                <img src={it.icon} alt="" className="demo-icon w-4 h-4 object-contain" />
+              <span className="w-6 h-6 flex items-center justify-center overflow-hidden shrink-0">
+                <img src={it.icon} alt="" className="demo-icon w-5 h-5 object-contain" />
               </span>
             )}
             {it.label}
