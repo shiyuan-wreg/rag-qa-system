@@ -6,6 +6,7 @@ import Learn from './pages/Learn'
 import Me from './pages/Me'
 import Changelog from './pages/Changelog'
 import PageTransition from './components/PageTransition'
+import GlobalHud from './components/GlobalHud'
 
 function DemoRoute({ slug, src }: { slug: string; src: string }) {
   return <Demo slug={slug} src={src} />
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/me" element={<Me />} />
         </Routes>
       </PageTransition>
+      <GlobalHud />
     </div>
   )
 }
