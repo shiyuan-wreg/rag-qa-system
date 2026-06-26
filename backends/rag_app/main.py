@@ -83,114 +83,151 @@ HTML_PAGE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智能文档任务 Agent</title>
+    <script>
+    // 跟随门户主题:读 localStorage,监听 storage 事件即时换肤(同源 iframe 自动收到)
+    (function(){
+      var KEY='ai-demos-theme', VALID=['mono-light','light','deepblue','cyber','machine'];
+      function apply(t){ if(VALID.indexOf(t)<0)t='mono-light'; document.documentElement.setAttribute('data-demo-theme',t); }
+      try{ apply(localStorage.getItem(KEY)); }catch(e){ apply('mono-light'); }
+      window.addEventListener('storage', function(e){ if(e.key===KEY) apply(e.newValue); });
+    })();
+    </script>
     <style>
+        /* ===== 五主题调色板(对齐门户 theme.css) ===== */
+        :root, [data-demo-theme="mono-light"]{
+          --d-bg:#fafafa;--d-surface:#fff;--d-surface-soft:#f8f8f9;--d-border:rgba(0,0,0,.12);
+          --d-text:#09090b;--d-dim:#71717a;--d-accent:#09090b;--d-accent-text:#fafafa;--d-danger:#dc2626;
+          --d-font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+        }
+        [data-demo-theme="light"]{
+          --d-bg:#f6f7fb;--d-surface:#fff;--d-surface-soft:#f8fafc;--d-border:#e2e8f0;
+          --d-text:#0f172a;--d-dim:#64748b;--d-accent:#4f46e5;--d-accent-text:#fff;--d-danger:#dc2626;
+          --d-font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+        }
+        [data-demo-theme="deepblue"]{
+          --d-bg:#0b1120;--d-surface:#111827;--d-surface-soft:#172033;--d-border:#1f2937;
+          --d-text:#f8fafc;--d-dim:#94a3b8;--d-accent:#2563eb;--d-accent-text:#fff;--d-danger:#f87171;
+          --d-font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+        }
+        [data-demo-theme="cyber"]{
+          --d-bg:#050507;--d-surface:#0f0f12;--d-surface-soft:#141417;--d-border:#27272a;
+          --d-text:#e4e4e7;--d-dim:#71717a;--d-accent:#a3e635;--d-accent-text:#050507;--d-danger:#ff5577;
+          --d-font:"JetBrains Mono",ui-monospace,Consolas,"PingFang SC","Microsoft YaHei",monospace;
+        }
+        [data-demo-theme="machine"]{
+          --d-bg:#0a0a0c;--d-surface:#0e0e11;--d-surface-soft:#111114;--d-border:rgba(227,179,65,.30);
+          --d-text:#e3b341;--d-dim:#9a8c5a;--d-accent:#e3b341;--d-accent-text:#0a0a0c;--d-danger:#ff4500;
+          --d-font:"JetBrains Mono",ui-monospace,Consolas,"PingFang SC","Microsoft YaHei",monospace;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--d-font);
+            background: var(--d-bg);
+            color: var(--d-text);
             min-height: 100vh;
             padding: 20px;
+            transition: background .25s, color .25s;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        .container { max-width: 840px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 16px; }
+        .header h1 { font-size: 20px; letter-spacing: .04em; }
+        .header p { font-size: 13px; color: var(--d-dim); margin-top: 4px; }
+
+        /* HUD 容器:直角 + 四角方括号 */
+        .hud-box {
+            position: relative;
+            background: var(--d-surface);
+            border: 1px solid var(--d-border);
+            border-radius: 0;
+            --c: var(--d-accent); --cl: 11px;
+            background-image:
+              linear-gradient(var(--c),var(--c)), linear-gradient(var(--c),var(--c)),
+              linear-gradient(var(--c),var(--c)), linear-gradient(var(--c),var(--c)),
+              linear-gradient(var(--c),var(--c)), linear-gradient(var(--c),var(--c)),
+              linear-gradient(var(--c),var(--c)), linear-gradient(var(--c),var(--c));
+            background-repeat: no-repeat;
+            background-size:
+              var(--cl) 2px, 2px var(--cl), var(--cl) 2px, 2px var(--cl),
+              var(--cl) 2px, 2px var(--cl), var(--cl) 2px, 2px var(--cl);
+            background-position:
+              top left, top left, top right, top right,
+              bottom left, bottom left, bottom right, bottom right;
         }
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 20px;
-        }
-        .header h1 { font-size: 24px; margin-bottom: 8px; }
-        .header p { font-size: 14px; opacity: 0.9; }
         .chat-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 140px);
+            display: flex; flex-direction: column;
+            height: calc(100vh - 150px);
         }
-        .toolbar {
-            padding: 10px 20px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            gap: 10px;
+
+        /* 终端标题栏 + 闪烁状态点 */
+        .term-head {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; border-bottom: 1px solid var(--d-border);
+            text-transform: uppercase; letter-spacing: .14em;
+            font-size: 12px; color: var(--d-dim);
         }
+        .term-head .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--d-danger); box-shadow: 0 0 8px var(--d-danger);
+            animation: blink 1.4s steps(2, start) infinite;
+        }
+        .term-head .spacer { flex: 1; }
+        @keyframes blink { 50% { opacity: .25; } }
+
+        .toolbar { display: flex; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--d-border); }
         .toolbar button {
-            padding: 6px 12px;
-            border: 1px solid #e0e0e0;
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
+            padding: 6px 12px; border: 1px solid var(--d-border); background: transparent;
+            color: var(--d-dim); font-size: 12px; cursor: pointer; border-radius: 0; font-family: inherit;
         }
-        .toolbar button:hover { background: #f5f5f5; }
-        .messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .toolbar button:hover { color: var(--d-text); border-color: var(--d-accent); }
+
+        .messages { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
         .msg {
-            max-width: 80%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 14px;
-            line-height: 1.6;
+            max-width: 82%; padding: 10px 14px; font-size: 14px; line-height: 1.6;
+            border: 1px solid var(--d-border); border-radius: 0; word-break: break-word; white-space: pre-wrap;
         }
         .msg.user {
-            align-self: flex-end;
-            background: #667eea;
-            color: white;
+            align-self: flex-end; border-color: var(--d-accent); color: var(--d-text);
+            background: color-mix(in srgb, var(--d-accent) 12%, transparent);
         }
-        .msg.assistant {
-            align-self: flex-start;
-            background: #f5f5f5;
-            color: #333;
-        }
-        .msg .tools {
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #e0e0e0;
-            font-size: 12px;
-            color: #888;
-        }
-        .msg .tool-item {
-            margin-top: 4px;
-            padding: 4px 8px;
-            background: white;
-            border-radius: 4px;
-        }
-        .input-area {
-            padding: 15px 20px;
-            border-top: 1px solid #f0f0f0;
-            display: flex;
-            gap: 10px;
-        }
+        .msg.assistant { align-self: flex-start; background: var(--d-surface-soft); color: var(--d-text); }
+        .msg .tools { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--d-border); font-size: 12px; color: var(--d-dim); }
+        .msg .tool-item { margin-top: 4px; padding: 4px 8px; background: var(--d-bg); border: 1px solid var(--d-border); }
+
+        .input-area { display: flex; gap: 10px; padding: 14px; border-top: 1px solid var(--d-border); }
         .input-area input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            outline: none;
+            flex: 1; padding: 11px 14px; border: 1px solid var(--d-border);
+            background: var(--d-bg); color: var(--d-text); font-size: 14px; outline: none;
+            font-family: inherit; border-radius: 0;
         }
-        .input-area input:focus { border-color: #667eea; }
+        .input-area input:focus { border-color: var(--d-accent); }
         .input-area button {
-            padding: 12px 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
+            padding: 11px 22px; background: var(--d-accent); color: var(--d-accent-text);
+            border: none; cursor: pointer; font-weight: 700; letter-spacing: .08em;
+            font-family: inherit; border-radius: 0; text-transform: uppercase;
         }
-        .input-area button:disabled { background: #ccc; }
-        .welcome {
-            text-align: center;
-            padding: 40px;
-            color: #999;
+        .input-area button:disabled { opacity: .45; cursor: not-allowed; }
+        .welcome { text-align: center; padding: 40px; color: var(--d-dim); }
+
+        /* 思考中:循环跳动三点 */
+        .thinking { display: inline-flex; align-items: center; gap: 8px; color: var(--d-dim); }
+        .thinking .dots { display: inline-flex; gap: 4px; }
+        .thinking .dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--d-accent); display: inline-block; animation: think 1s infinite; }
+        .thinking .dots i:nth-child(2) { animation-delay: .18s; }
+        .thinking .dots i:nth-child(3) { animation-delay: .36s; }
+        @keyframes think { 0%,80%,100% { opacity: .2; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+
+        /* 警告框:三角内嵌 ! + 主题色 */
+        .alert {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 11px 14px; border: 1px solid var(--d-danger); border-radius: 0;
+            background: color-mix(in srgb, var(--d-danger) 12%, transparent);
+            color: var(--d-danger); font-size: 13px; line-height: 1.55;
+        }
+        .alert svg { flex: none; width: 18px; height: 18px; margin-top: 1px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .term-head .dot, .thinking .dots i { animation: none; }
         }
     </style>
 </head>
@@ -200,7 +237,13 @@ HTML_PAGE = """
             <h1>智能文档任务 Agent</h1>
             <p>基于 RAG + Function Calling 的文档问答与任务执行助手</p>
         </div>
-        <div class="chat-container">
+        <div class="hud-box chat-container">
+            <div class="term-head">
+                <span class="dot"></span>
+                <span>RAG // Document Agent</span>
+                <span class="spacer"></span>
+                <span>ENGINE: DEEPSEEK · STATUS: ONLINE</span>
+            </div>
             <div class="toolbar">
                 <button onclick="clearHistory()">清空对话</button>
                 <button onclick="runEval()">运行评估</button>
@@ -222,6 +265,7 @@ HTML_PAGE = """
         const messages = document.getElementById('messages');
         const input = document.getElementById('input');
         const sendBtn = document.getElementById('sendBtn');
+        const WARN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
 
         function addMsg(content, type, tools) {
             const div = document.createElement('div');
@@ -230,11 +274,35 @@ HTML_PAGE = """
             if (tools && tools.length) {
                 html += '<div class="tools">调用了工具:';
                 tools.forEach(t => {
-                    html += `<div class="tool-item">${t.name}(${JSON.stringify(t.arguments)})</div>`;
+                    html += `<div class="tool-item">${escapeHtml(t.name)}(${escapeHtml(JSON.stringify(t.arguments))})</div>`;
                 });
                 html += '</div>';
             }
             div.innerHTML = html;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // 思考指示:循环点
+        function addThinking(label) {
+            const div = document.createElement('div');
+            div.className = 'msg assistant';
+            div.innerHTML = '<span class="thinking">' + escapeHtml(label) +
+                ' <span class="dots"><i></i><i></i><i></i></span></span>';
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+            return div;
+        }
+
+        // 错误:三角警告框
+        function addAlert(text) {
+            const div = document.createElement('div');
+            div.className = 'msg assistant';
+            div.style.maxWidth = '100%';
+            div.style.border = 'none';
+            div.style.background = 'transparent';
+            div.style.padding = '0';
+            div.innerHTML = '<div class="alert">' + WARN_SVG + '<div>' + escapeHtml(text) + '</div></div>';
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
         }
@@ -247,12 +315,7 @@ HTML_PAGE = """
             input.value = '';
             sendBtn.disabled = true;
 
-            const loading = document.createElement('div');
-            loading.className = 'msg assistant';
-            loading.style.fontStyle = 'italic';
-            loading.style.color = '#888';
-            loading.textContent = '思考中...';
-            messages.appendChild(loading);
+            const loading = addThinking('思考中');
 
             try {
                 const form = new FormData();
@@ -263,13 +326,13 @@ HTML_PAGE = """
                 loading.remove();
 
                 if (data.error) {
-                    addMsg('错误: ' + data.error, 'assistant');
+                    addAlert('错误: ' + data.error);
                 } else {
                     addMsg(data.answer, 'assistant', data.tool_calls);
                 }
             } catch (e) {
                 loading.remove();
-                addMsg('请求失败: ' + e.message, 'assistant');
+                addAlert('请求失败: ' + e.message);
             } finally {
                 sendBtn.disabled = false;
             }
@@ -286,12 +349,7 @@ HTML_PAGE = """
         }
 
         async function runEval() {
-            const loading = document.createElement('div');
-            loading.className = 'msg assistant';
-            loading.style.fontStyle = 'italic';
-            loading.style.color = '#888';
-            loading.textContent = '正在运行评估...';
-            messages.appendChild(loading);
+            const loading = addThinking('正在运行评估');
 
             try {
                 const res = await fetch('eval', { method: 'POST' });
@@ -299,7 +357,7 @@ HTML_PAGE = """
                 loading.remove();
 
                 if (data.error) {
-                    addMsg('评估错误: ' + data.error, 'assistant');
+                    addAlert('评估错误: ' + data.error);
                 } else {
                     let html = `平均得分: ${data.average_score}\n\n`;
                     data.results.forEach((item, i) => {
@@ -311,7 +369,7 @@ HTML_PAGE = """
                 }
             } catch (e) {
                 loading.remove();
-                addMsg('评估请求失败: ' + e.message, 'assistant');
+                addAlert('评估请求失败: ' + e.message);
             }
         }
 
@@ -328,6 +386,7 @@ HTML_PAGE = """
 </body>
 </html>
 """
+
 
 
 if __name__ == "__main__":
