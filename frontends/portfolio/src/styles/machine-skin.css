@@ -3,10 +3,12 @@
    仅 /nexus demo 页使用;靠后代选择器隔离,无全局副作用。
    ============================================================ */
 
-.machine-skin {
+.machine-skin,
+.machine-nav {
   /* 皮肤私有色板 */
   --machine-bg: #0a0a0c;
   --machine-yellow: #ffd700;
+  --machine-red: #ff4500;
   --machine-grid: rgba(255, 255, 255, 0.05);
 
   /* 覆盖站点标准变量(tailwind 类名据此取色)→ 子组件自动变监控配色 */
@@ -41,7 +43,10 @@
   /* 复用自托管 JetBrains Mono;CJK 回退保证中文不缺字 */
   --font-sans: "JetBrains Mono", "MiSans", "HarmonyOS Sans SC", "PingFang SC",
                "Microsoft YaHei", ui-monospace, monospace;
+}
 
+/* 皮肤容器布局(仅内容区,导航栏不需要这些) */
+.machine-skin {
   position: relative;
   background: var(--machine-bg);
   overflow: hidden;
@@ -123,4 +128,60 @@
 @media (prefers-reduced-motion: reduce) {
   .machine-skin__scanline { animation: none; }
   .machine-skin__content { transition: none; }
+}
+
+/* ---------- 侧边栏作品项:方括号边框区分 ---------- */
+.machine-skin .sidebar-link {
+  position: relative;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0;            /* 直角,呼应监控终端 */
+}
+.machine-skin .sidebar-link::before,
+.machine-skin .sidebar-link::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 0 solid var(--machine-yellow);
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+.machine-skin .sidebar-link::before {
+  top: -1px;
+  left: -1px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+.machine-skin .sidebar-link::after {
+  right: -1px;
+  bottom: -1px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+.machine-skin .sidebar-link:hover { border-color: var(--border-default); }
+.machine-skin .sidebar-link[aria-current="page"] {
+  border-color: var(--machine-yellow);
+  box-shadow: var(--shadow-sm);
+}
+.machine-skin .sidebar-link[aria-current="page"]::before,
+.machine-skin .sidebar-link[aria-current="page"]::after { opacity: 1; }
+
+/* ---------- HUD 装饰文字(纯氛围,不挡交互) ---------- */
+.machine-skin__hud {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--machine-yellow);
+  opacity: 0.32;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.25);
+}
+.machine-skin__hud--tr { top: 14px; right: 20px; text-align: right; }
+.machine-skin__hud--bl { bottom: 14px; left: 20px; }
+.machine-skin__hud .rec::before {
+  content: "● ";
+  color: var(--machine-red);
 }

@@ -16,8 +16,9 @@ export default function SidebarNav({ items, activeKey }: { items: SidebarNavItem
           <Link
             key={it.key}
             to={it.to}
+            aria-current={active ? 'page' : undefined}
             className={[
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+              'sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
               active
                 ? 'bg-accent-secondary-bg text-accent-secondary-text shadow-sm'
                 : 'text-tertiary hover:bg-surface-hover hover:text-primary',

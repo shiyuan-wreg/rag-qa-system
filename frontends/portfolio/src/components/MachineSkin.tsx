@@ -61,6 +61,15 @@ export default function MachineSkin({ children }: { children: ReactNode }) {
       <div className="machine-skin__frame" aria-hidden="true">
         <span /><span /><span /><span />
       </div>
+      <div className="machine-skin__hud machine-skin__hud--tr" aria-hidden="true">
+        <div className="rec">REC // SYSTEM LOG</div>
+        <div>ADMIN ACCESS · LVL 5</div>
+      </div>
+      <div className="machine-skin__hud machine-skin__hud--bl" aria-hidden="true">
+        <div>IP_ORIGIN: 10.0.2.15</div>
+        <div>LOCATION: NYC_SECTOR_7</div>
+        <div>SYSTEM: VIRTUE_CORE_v4.1</div>
+      </div>
       <div ref={viewportRef} className="machine-skin__viewport">
         <div ref={contentRef} className="machine-skin__content">{children}</div>
       </div>
