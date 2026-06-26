@@ -39,8 +39,8 @@ export function useMotionPreference() {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(STORAGE_KEY, String(v))
       window.dispatchEvent(new Event(SYNC_EVENT))
+      setEnabled(v)
     }
-    setEnabled(v)
   }
 
   return {

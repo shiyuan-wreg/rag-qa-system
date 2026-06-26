@@ -14,13 +14,18 @@ export default function MachineSkin({ children }: { children: ReactNode }) {
     if (!viewport || !content) return
 
     let frame = 0
+    let latest: MouseEvent | null = null
     const onMove = (e: MouseEvent) => {
+      latest = e
       if (frame) return
       frame = window.requestAnimationFrame(() => {
         frame = 0
+        const ev = latest
+        latest = null
+        if (!ev) return
         const rect = viewport.getBoundingClientRect()
-        const nx = (e.clientX - rect.left) / rect.width - 0.5   // [-0.5, 0.5]
-        const ny = (e.clientY - rect.top) / rect.height - 0.5
+        const nx = (ev.clientX - rect.left) / rect.width - 0.5   // [-0.5, 0.5]
+        const ny = (ev.clientY - rect.top) / rect.height - 0.5
         const rotateY = nx * 12   // 上限 ±6°
         const rotateX = -ny * 12
         const tx = nx * 8
@@ -34,6 +39,7 @@ export default function MachineSkin({ children }: { children: ReactNode }) {
         window.cancelAnimationFrame(frame)
         frame = 0
       }
+      latest = null
       content.style.transform = ''
     }
 

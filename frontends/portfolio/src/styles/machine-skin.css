@@ -69,7 +69,7 @@
 .machine-skin__scanline {
   background: linear-gradient(to bottom, transparent 50%, rgba(255, 255, 255, 0.03) 50%);
   background-size: 100% 4px;
-  animation: machine-flicker 0.15s infinite;
+  animation: machine-flicker 1.5s infinite;
 }
 
 .machine-skin__vignette {
