@@ -6,8 +6,10 @@ import SidebarNav from '../components/SidebarNav'
 import type { SidebarNavItem } from '../components/SidebarNav'
 import PageTransition from '../components/PageTransition'
 import MachineSkin from '../components/MachineSkin'
+import { useTheme } from '../hooks/useTheme'
 
 export default function Demo({ slug, src }: { slug: string; src: string }) {
+  const { theme } = useTheme()
   const work = WORKS.find((w) => w.slug === slug)!
   const navItems: SidebarNavItem[] = WORKS.filter((w) => w.slug !== 'learn').map((w) => ({
     key: w.slug,
@@ -36,10 +38,12 @@ export default function Demo({ slug, src }: { slug: string; src: string }) {
     </div>
   )
 
+  const machine = slug === 'nexus' || theme === 'machine'
+
   return (
     <PageTransition>
       <div className="h-[calc(100vh-3.5rem)] flex flex-col">
-        {slug === 'nexus' ? <MachineSkin>{content}</MachineSkin> : content}
+        {machine ? <MachineSkin>{content}</MachineSkin> : content}
       </div>
     </PageTransition>
   )
