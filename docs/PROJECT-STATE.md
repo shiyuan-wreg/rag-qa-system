@@ -1,7 +1,48 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-06-26(**修复 Nexus retriever 的 httpx async bug;LLM 出口整体切到 DeepSeek 聊天 + Jina embedding,已部署服务器并三 demo 实测通过**;HEAD `36e9c56`)
+> 最近更新:2026-06-26(**进行中:`feat/machine-hud-skin` 分支——The Machine 监控皮肤 + demo 后端主题同步;未合并 master;见下方「⚠️ 当前进行中」**;HEAD `e2735eb`)
+
+---
+
+## ⚠️ 当前进行中:`feat/machine-hud-skin` 分支(未合并 master)
+
+> 这是新对话恢复的**首要上下文**。配套细节读:`.superpowers/sdd/progress.md`(账本)、`docs/superpowers/specs/2026-06-26-machine-global-theme-a2-design.md`、`docs/superpowers/specs/2026-06-26-demo-theme-sync-a3-design.md`。
+
+**目标**:给门户加「监控(The Machine)」可选主题(默认仍极简),并让所有 demo 后端 iframe **跟随门户主题配色**。
+
+**已完成且用户已验收 ✅**
+- A1:`/nexus` 监控皮 + B:nexus 后端 HUD + 打字机流式回显。
+- A2:machine 升级为全站可选主题(6 任务:注册/调色板/细节规则/卡片 hud-frame/demo 氛围/GlobalHud 角标)。用户明确"喜欢这个风格"。
+- 门户打磨:深色主题副标题可见、machine 金色调暗(#e3b341)、hero 网格变量化、侧栏图标去框、信息卡直角。
+- rag 后端主题同步(5 主题 token 调色板 + 思考点 + 三角警告框)。用户"已确认"。
+
+**已完成但用户未最终确认(新对话需复核)⚠️**
+- fc 后端主题同步(同 rag 套路)——已部署本地,未单独确认。
+- nexus 后端跟随主题(:root 变量映射到 --d-* token)+ **取消 /nexus 强制 MachineSkin**(Demo.tsx/NavBar)——已部署,未确认。
+- `/learn` 递归内嵌修复(vite.config 补 `/learn/` 代理)——curl 验证已修(本地 dev only)。
+- `/learn` 主题化(独立 SPA:index.html 注入同步脚本 + styles.css 暗色覆盖层)——磁盘 dist + nginx **已确认含脚本**,但用户截图仍白(疑 iframe 缓存,需硬刷 Ctrl+Shift+R 复核;**覆盖层方案对 ~130 处写死 slate 类可能有遗漏**)。
+- hero 右上/左下装饰方框——未确认。
+- 全局 3D 视差(ParallaxViewport 包全站路由,任意主题/页面生效)——刚加未确认;**注意**:开启态下 transform 祖先会影响 demo 页 sticky 侧栏定位。
+- hero 标题:已从"字距扩散"**改回原 glitch**(用户否决了扩散版)。
+
+**未开始(待办)🔲**
+- iconforge 后端主题同步(`templates/home.html` + `static/style.css`)。
+- md_converter / DocHub 后端主题同步(`templates/base|home|login.html` + `static/style.css`)。
+- learn 学习站:覆盖层只盖了暗色三主题(deepblue/cyber/machine),浅色主题保持原样;若要精细化需逐组件改。
+
+**机制(demo 跟随主题)**:门户 `setTheme` 写 `localStorage['ai-demos-theme']` → 同源 iframe 收到 `storage` 事件 → 切 `data-demo-theme`(learn 另加 `.demo-dark` class)。5 主题 `--d-*` token 调色板**内联**在各后端 HTML(未抽共享文件,有重复)。
+
+**⚠️ 部署注意(重要,易踩坑)**
+- 本地 docker 的 rag/fc/nexus 改动是用 `docker cp main.py / index.html` 塞进**运行中容器**的,**没烤进镜像**;容器一旦 recreate 就回退。learn 的 dist 是磁盘重建(nginx 挂卷,实时生效)。
+- **生产完全未部署**这批改动。收尾时要:重建 rag/fc/nexus/iconforge/md 镜像 + `build-frontends.sh`(门户 + learn)把所有改动烤进去,再推服务器。
+- 本地改单容器后,nginx 因容器 IP 变需 `docker restart deploy-nginx-1`,否则 502。
+
+**新对话恢复步骤**
+1. 读本节 + `.superpowers/sdd/progress.md` + 两个 A2/A3 spec。
+2. `git log --oneline master..HEAD` 对照(HEAD 应为 `e2735eb` 或更新)。
+3. 起本地栈复核:`docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d --build` + vite dev(`cd frontends/portfolio && npm run dev`,:5180 已代理 demo)。**注意**:`up --build` 会用仓库源重建镜像,把上面 docker cp 的临时改动正式烤进去(rag/fc/nexus 源文件已提交,所以重建即生效)。
+4. 先逐项复核上面"未确认"清单,再做"待办",最后合并 master + 部署生产。
 
 ---
 
