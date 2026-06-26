@@ -104,7 +104,15 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 3. **~~Phase 2 / DocHub / Phase 4 部署 / 黑白改版+IconForge~~ ✅ 均已完成并部署**(详见上文与 dev-log)。
 4. **~~LLM 出口切 DeepSeek + Jina~~ ✅ 已完成并部署**(2026-06-26,HEAD `a73e769`,三 demo 生产实测通过)。
 5. **Phase 3**:cs-quiz-app 完整集成(Fastify+SQLite 容器 + `/quiz` 静态前端);个人页目前只有占位链接。
-6. **后续**:IconForge 净化效果迭代;博客;把 demo 由 iframe 逐个重写为原生 React(演进到方案 A);RAG `chroma_db` 持久化挂卷 + `init_rag_tool` 挪出 import 路径。
+6. **后续（按用户 2026-06-26 调整后的优先级）**:
+   - **🔥 当务之急：优化 Agent 模块功能**。当前 RAG 和 Function Calling 的回答太简陋，需要增强：
+     - RAG：更完整的引用来源、分步推理、多轮追问、检索结果透明度；
+     - FC：工具调用解释、多步任务拆解、错误恢复、结果格式化；
+     - 统一 richer prompt / system prompt 工程，让输出更专业、更有用。
+   - IconForge 净化效果迭代；
+   - 博客；
+   - 把 demo 由 iframe 逐个重写为原生 React（演进到方案 A）；
+   - RAG `chroma_db` 持久化挂卷 + `init_rag_tool` 挪出 import 路径。
 
 ## 当前可用路径(本地 Docker 启动后)
 
