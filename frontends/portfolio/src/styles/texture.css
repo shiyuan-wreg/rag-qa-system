@@ -189,3 +189,35 @@ body::before { animation: grid-pulse 8s ease-in-out infinite alternate; }
   50% { transform: translateY(-6px); }
 }
 @media (prefers-reduced-motion: reduce) { .float-slow { animation: none; } }
+
+/* Hero 角落装饰方框(随主题边色) */
+.hero-box {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  width: 72px; height: 72px;
+  border: 1px solid var(--border-strong, rgba(0,0,0,.22));
+  opacity: .6;
+}
+.hero-box::after {
+  content: "";
+  position: absolute; inset: 5px;
+  border: 1px solid var(--border-subtle, rgba(0,0,0,.08));
+}
+.hero-box--tr { top: 22px; right: 22px; }
+.hero-box--bl { bottom: 22px; left: 22px; }
+
+/* Hero 标题:周期性"分散/模糊"爆发(替代旧 RGB 失真) */
+.scatter-title {
+  display: inline-block;
+  will-change: filter, transform, letter-spacing;
+  animation: scatter 7.5s ease-in-out infinite;
+}
+@keyframes scatter {
+  0%, 86%, 100% { filter: blur(0); transform: translate(0,0); letter-spacing: -0.01em; opacity: 1; }
+  88% { filter: blur(2.5px); transform: translate(-2px, 1px); letter-spacing: 0.10em; opacity: .82; }
+  91% { filter: blur(4px);   transform: translate(3px, -1px); letter-spacing: 0.20em; opacity: .7; }
+  94% { filter: blur(1.5px); transform: translate(-1px, 1px); letter-spacing: 0.06em; opacity: .9; }
+  97% { filter: blur(0.4px); transform: translate(0,0); letter-spacing: 0; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .scatter-title { animation: none; } }
