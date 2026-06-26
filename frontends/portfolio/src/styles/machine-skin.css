@@ -130,14 +130,17 @@
   .machine-skin__content { transition: none; }
 }
 
-/* ---------- 侧边栏作品项 + 信息卡:四角方括号边框 ---------- */
-/* 用 8 段 1px 渐变画四个角(每角 1 横 1 竖),颜色走 --corner 变量便于状态切换 */
+/* ---------- 四角方括号边框:全局 .hud-frame + /nexus 侧边栏/信息卡 ---------- */
+/* 8 段 1px 渐变画四角;颜色走 --corner 便于状态切换 */
+[data-theme="machine"] .hud-frame,
+[data-theme="machine"] .sidebar-link,
+.machine-skin .hud-frame,
 .machine-skin .sidebar-link,
 .machine-skin .demo-info-card {
   --corner: rgba(255, 215, 0, 0.4);
   --corner-len: 9px;
   border: 1px solid var(--border-subtle);
-  border-radius: 0;            /* 去圆角,呼应监控终端 */
+  border-radius: 0;
   background-image:
     linear-gradient(var(--corner), var(--corner)), linear-gradient(var(--corner), var(--corner)),
     linear-gradient(var(--corner), var(--corner)), linear-gradient(var(--corner), var(--corner)),
@@ -162,12 +165,26 @@
   --corner: var(--machine-yellow);
   box-shadow: var(--shadow-sm);
 }
-/* 信息卡角标稍大,且不被 bg-surface-soft 的 background-color 影响(分属不同属性) */
+/* 大卡片角标略大 */
+[data-theme="machine"] .hud-frame,
 .machine-skin .demo-info-card { --corner-len: 12px; }
 
-/* 暗色皮肤下作品图标反相为可见(近黑 SVG 贴黑底会消失);图标框去圆角 */
+/* ---------- 直角(卡片级圆角去圆;圆点/旋钮/头像 rounded-full 保留) ---------- */
+[data-theme="machine"] :is(.rounded-sm, .rounded, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl),
+.machine-skin :is(.rounded-sm, .rounded, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl) {
+  border-radius: 0;
+}
+[data-theme="machine"] .btn-lift,
+.machine-skin .btn-lift { border-radius: 0; }
+
+/* ---------- 图标反相可见(近黑 SVG) ---------- */
+[data-theme="machine"] .demo-icon,
 .machine-skin .demo-icon { filter: invert(1); }
-.machine-skin .sidebar-link span { border-radius: 0; }
+
+/* ---------- 黄色滚动条 ---------- */
+[data-theme="machine"] ::-webkit-scrollbar { width: 8px; }
+[data-theme="machine"] ::-webkit-scrollbar-thumb { background: var(--accent-primary); }
+[data-theme="machine"] ::-webkit-scrollbar-track { background: var(--bg-base); }
 
 /* ---------- HUD 装饰文字(纯氛围,不挡交互) ---------- */
 .machine-skin__hud {
