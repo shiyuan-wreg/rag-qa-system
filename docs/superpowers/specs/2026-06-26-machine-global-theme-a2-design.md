@@ -103,11 +103,11 @@ A1 把监控皮限定在 `/nexus` 外壳;B 把 nexus 后端 iframe 改成永久 
 
 修复(沿用 `useMotionPreference` 的事件同步模式):`setTheme` 写入后派发 `window` 事件 `ai-demos-theme-change`;hook 监听该事件与 `storage` 事件,实时同步所有实例的 `theme`。这样切主题全站(含 demo 包裹)即时生效。
 
-## 7. 全局 HUD 角标(克制)
+## 7. 全局 HUD 角标(已确认:做)
 
-machine 主题选中时,在全站右下角显示一行极淡的版本/系统信息(`v{version} · MONITORING`),作为氛围点缀。实现:`App.tsx` 中按当前 `theme === 'machine'` 条件渲染一个 `fixed` 定位、`pointer-events:none`、低透明度的小组件 `GlobalHud`。demo 页 `MachineSkin` 内已有更丰富的 HUD 文字,二者不冲突(角落不同 / demo 页可只保留 MachineSkin 的)。
+machine 主题选中时,在全站右下角显示一行极淡的版本/系统信息(`v{version} · MONITORING`),作为氛围点缀。实现:`App.tsx` 中按当前 `theme === 'machine'` 条件渲染一个 `fixed` 定位、`pointer-events:none`、低透明度的小组件 `GlobalHud`。demo 页 `MachineSkin` 内已有更丰富的 HUD 文字,二者角落不同不冲突。
 
-> 评审点:若觉得全局角标多余,可砍掉 §7,只保留 demo 页 MachineSkin 内的 HUD 文字。
+> 评审结论(2026-06-26):用户确认**保留**全局角标。
 
 ## 8. 改动文件清单
 
