@@ -41,7 +41,7 @@ export default function Me() {
     <PageTransition>
       <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* 顶部定位区 */}
-        <section className="relative overflow-hidden rounded-2xl border border-border bg-hero shadow-sm">
+        <section className="hud-frame relative overflow-hidden rounded-2xl border border-border bg-hero shadow-sm">
           <div
             className="absolute inset-0 pointer-events-none opacity-30"
             style={{ backgroundImage: 'radial-gradient(circle at 15% 120%, var(--surface-hover), transparent 50%)' }}
@@ -99,11 +99,11 @@ export default function Me() {
         >
           <div className="space-y-6">
             {/* 技能栈分组 */}
-            <section id="skills" className="bg-surface border border-border rounded-xl p-6 shadow-sm">
+            <section id="skills" className="hud-frame bg-surface border border-border rounded-xl p-6 shadow-sm">
               <SectionTitle>技能栈</SectionTitle>
               <div className="grid sm:grid-cols-2 gap-4">
                 {SKILL_GROUPS.map((g) => (
-                  <div key={g.title} className="bg-surface-soft border border-border-subtle rounded-lg p-4">
+                  <div key={g.title} className="hud-frame bg-surface-soft border border-border-subtle rounded-lg p-4">
                     <div className="flex items-center gap-2.5 mb-3">
                       <span className="font-mono text-xs tracking-wide text-muted shrink-0">
                         {g.index}
@@ -121,7 +121,7 @@ export default function Me() {
             </section>
 
             {/* 作品卡片区 */}
-            <section id="works" className="bg-surface border border-border rounded-xl p-6 shadow-sm">
+            <section id="works" className="hud-frame bg-surface border border-border rounded-xl p-6 shadow-sm">
               <SectionTitle>作品</SectionTitle>
               <div className="grid sm:grid-cols-2 gap-5">
                 {WORKS.map((w) => (
@@ -131,7 +131,7 @@ export default function Me() {
             </section>
 
             {/* 简历 */}
-            <section id="resume" className="bg-surface border border-border rounded-xl p-6 shadow-sm">
+            <section id="resume" className="hud-frame bg-surface border border-border rounded-xl p-6 shadow-sm">
               <SectionTitle>简历</SectionTitle>
               <p className="text-sm text-secondary mb-4">完整的项目经历与技术细节见简历文件。</p>
               <a
@@ -145,7 +145,7 @@ export default function Me() {
             </section>
 
             {/* 更新记录 */}
-            <section id="history" className="bg-surface border border-border rounded-xl p-6 shadow-sm">
+            <section id="history" className="hud-frame bg-surface border border-border rounded-xl p-6 shadow-sm">
               <SectionTitle>更新记录</SectionTitle>
               <p className="text-sm text-secondary mb-4">站点与各子作品的完整版本迭代记录。</p>
               <Link

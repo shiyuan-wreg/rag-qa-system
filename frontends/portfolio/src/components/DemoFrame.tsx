@@ -47,7 +47,7 @@ export default function DemoFrame({ src, title, index, showToolbar = true }: Dem
   }, [src])
 
   return (
-    <div className="flex flex-col h-full bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
+    <div className="hud-frame flex flex-col h-full bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
       {showToolbar && (
         <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border-subtle bg-surface-soft">
           <div className="min-w-0">

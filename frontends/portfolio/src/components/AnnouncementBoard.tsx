@@ -10,7 +10,7 @@ export default function AnnouncementBoard() {
     <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 pt-10">
       <Link
         to="/changelog"
-        className="block group rounded-xl border border-border bg-surface shadow-sm hover:shadow-md hover:border-strong/50 transition-all overflow-hidden"
+        className="hud-frame block group rounded-xl border border-border bg-surface shadow-sm hover:shadow-md hover:border-strong/50 transition-all overflow-hidden"
       >
         <div className="flex items-center justify-between gap-3 px-5 py-3 border-b border-border-subtle bg-surface-soft">
           <div className="flex items-center gap-2 flex-wrap">

@@ -21,7 +21,7 @@ export default function Changelog() {
           {notes.map((note) => (
             <article
               key={note.version}
-              className="rounded-xl border border-border bg-surface shadow-sm hover:shadow-md transition-shadow p-5"
+              className="hud-frame rounded-xl border border-border bg-surface shadow-sm hover:shadow-md transition-shadow p-5"
             >
               <div className="flex items-center gap-2 flex-wrap mb-3">
                 <span className="font-mono text-xs tracking-wide text-muted">
