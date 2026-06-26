@@ -175,7 +175,7 @@ const input = document.getElementById('input');
 const sendBtn = document.getElementById('send-btn');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// 普通消息(思考/工具/用户):带 HUD 标签,立即显示
+// 用户输入:即时显示(不打字)
 function addMessage(content, cls, label) {
   const div = document.createElement('div');
   div.className = 'message ' + cls;
@@ -186,35 +186,48 @@ function addMessage(content, cls, label) {
     div.appendChild(lb);
   }
   const body = document.createElement('div');
-  body.innerHTML = content;
+  body.textContent = content;
   div.appendChild(body);
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 }
 
-// 最终答案:快速打字机流式回显(reduced-motion 时直接显示)
-function typeFinal(text) {
+// ---- 打字机队列:规划过程([ORCHESTRATOR]/[PLANNER]/工具)与最终答案逐条流式回显 ----
+const typeQueue = [];
+let typing = false;
+
+function enqueue(job) { typeQueue.push(job); pump(); }
+
+function pump() {
+  if (typing) return;
+  const job = typeQueue.shift();
+  if (!job) return;
+  if (job.done) { sendBtn.disabled = false; pump(); return; }
+  typing = true;
+  renderTyped(job, () => { typing = false; pump(); });
+}
+
+function renderTyped(job, onDone) {
   const div = document.createElement('div');
-  div.className = 'message final';
-  const lb = document.createElement('div');
-  lb.className = 'msg-label';
-  lb.textContent = '■ RESPONSE';
+  div.className = 'message ' + job.cls;
+  if (job.label) {
+    const lb = document.createElement('div');
+    lb.className = 'msg-label';
+    lb.textContent = job.label;
+    div.appendChild(lb);
+  }
   const body = document.createElement('div');
   body.className = 'caret';
-  div.appendChild(lb);
   div.appendChild(body);
   messages.appendChild(div);
 
-  if (!text) {
-    body.textContent = '';
-    body.classList.remove('caret');
-    messages.scrollTop = messages.scrollHeight;
-    return;
-  }
-  // reduced-motion 下仍回显,但更快(大步长 + 短间隔),兼顾可见与无障碍
+  const text = job.content || '';
+  if (!text) { body.classList.remove('caret'); onDone(); return; }
+  // 过程日志打得更快,最终答案稍慢;reduced-motion 下进一步加速但仍逐字
   let i = 0;
-  const step = Math.max(reduceMotion ? 6 : 1, Math.round(text.length / 180));
-  const delay = reduceMotion ? 6 : 14;
+  const step = Math.max(reduceMotion ? 6 : (job.isFinal ? 1 : 2),
+                        Math.round(text.length / (job.isFinal ? 180 : 90)));
+  const delay = reduceMotion ? 6 : (job.isFinal ? 14 : 9);
   const timer = setInterval(() => {
     i += step;
     body.textContent = text.slice(0, i);
@@ -223,6 +236,7 @@ function typeFinal(text) {
       body.textContent = text;
       body.classList.remove('caret');
       clearInterval(timer);
+      onDone();
     }
   }, delay);
 }
@@ -244,8 +258,8 @@ function send() {
       function read() {
         reader.read().then(({ done, value }) => {
           if (done) {
-            if (final) typeFinal(final);
-            sendBtn.disabled = false;
+            if (final) enqueue({ content: final, cls: 'final', label: '■ RESPONSE', isFinal: true });
+            enqueue({ done: true });   // 队列排空后再恢复发送按钮
             return;
           }
           const chunk = decoder.decode(value, { stream: true });
@@ -257,9 +271,9 @@ function send() {
             else if (line === '' && event) {
               const obj = JSON.parse(data);
               if (event === 'final_answer') final = obj.content;
-              else if (event === 'agent_thought') addMessage(obj.content, 'thought', '[' + obj.agent + ']');
-              else if (event === 'planner_thought') addMessage(obj.content, 'thought', '[planner]');
-              else if (event === 'tool_call') addMessage(obj.agent + ' / ' + obj.tool, 'tool', '⚙ TOOL CALL');
+              else if (event === 'agent_thought') enqueue({ content: obj.content, cls: 'thought', label: '[' + obj.agent + ']' });
+              else if (event === 'planner_thought') enqueue({ content: obj.content, cls: 'thought', label: '[planner]' });
+              else if (event === 'tool_call') enqueue({ content: obj.agent + ' / ' + obj.tool, cls: 'tool', label: '⚙ TOOL CALL' });
               event = null; data = '';
             }
           }
