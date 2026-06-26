@@ -10,6 +10,7 @@ import '@fontsource/inter/800.css'
 import '@fontsource/jetbrains-mono/400.css'
 import '@fontsource/jetbrains-mono/500.css'
 import './styles.css'
+import './styles/machine-skin.css'
 
 import { ALL_THEMES, type Theme } from './hooks/useTheme'
 

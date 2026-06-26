@@ -1,0 +1,126 @@
+/* ============================================================
+   The Machine HUD 皮肤(A1)—— 作用域限定在 .machine-skin 内
+   仅 /nexus demo 页使用;靠后代选择器隔离,无全局副作用。
+   ============================================================ */
+
+.machine-skin {
+  /* 皮肤私有色板 */
+  --machine-bg: #0a0a0c;
+  --machine-yellow: #ffd700;
+  --machine-grid: rgba(255, 255, 255, 0.05);
+
+  /* 覆盖站点标准变量(tailwind 类名据此取色)→ 子组件自动变监控配色 */
+  --bg-base: #0a0a0c;
+  --bg-soft: #111114;
+  --surface-default: #0e0e11;
+  --surface-raised: #14141a;
+  --surface-hover: #1b1b22;
+  --surface-soft: #111114;
+  --surface-cold: #0c0e13;
+
+  --border-default: rgba(255, 215, 0, 0.25);
+  --border-subtle: rgba(255, 215, 0, 0.10);
+  --border-strong: rgba(255, 215, 0, 0.45);
+
+  --text-primary: #ffd700;
+  --text-secondary: #e6cf7a;
+  --text-tertiary: #9a8c5a;
+  --text-muted: #6b6347;
+  --text-link: #ffd700;
+
+  --accent-primary: #ffd700;
+  --accent-primary-text: #0a0a0c;
+  --accent-secondary-bg: rgba(255, 215, 0, 0.12);
+  --accent-secondary-text: #ffd700;
+
+  --shadow-sm: 0 0 8px rgba(255, 215, 0, 0.08);
+  --shadow-md: 0 0 16px rgba(255, 215, 0, 0.10);
+  --shadow-lg: 0 0 24px rgba(255, 215, 0, 0.14);
+  --shadow-glow: 0 0 0 1px rgba(255, 215, 0, 0.25), 0 0 20px rgba(255, 215, 0, 0.15);
+
+  /* 复用自托管 JetBrains Mono;CJK 回退保证中文不缺字 */
+  --font-sans: "JetBrains Mono", "MiSans", "HarmonyOS Sans SC", "PingFang SC",
+               "Microsoft YaHei", ui-monospace, monospace;
+
+  position: relative;
+  background: var(--machine-bg);
+  overflow: hidden;
+}
+
+/* ---------- 装饰叠加层(均不挡鼠标) ---------- */
+.machine-skin__grid,
+.machine-skin__scanline,
+.machine-skin__vignette,
+.machine-skin__noise,
+.machine-skin__frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.machine-skin__grid {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, var(--machine-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--machine-grid) 1px, transparent 1px);
+}
+
+.machine-skin__scanline {
+  background: linear-gradient(to bottom, transparent 50%, rgba(255, 255, 255, 0.03) 50%);
+  background-size: 100% 4px;
+  animation: machine-flicker 0.15s infinite;
+}
+
+.machine-skin__vignette {
+  background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.85) 100%);
+}
+
+.machine-skin__noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+}
+
+/* 四角括号框 */
+.machine-skin__frame span {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--machine-yellow);
+}
+.machine-skin__frame span:nth-child(1) { top: 6px; left: 6px; border-right: 0; border-bottom: 0; }
+.machine-skin__frame span:nth-child(2) { top: 6px; right: 6px; border-left: 0; border-bottom: 0; }
+.machine-skin__frame span:nth-child(3) { bottom: 6px; left: 6px; border-right: 0; border-top: 0; }
+.machine-skin__frame span:nth-child(4) { bottom: 6px; right: 6px; border-left: 0; border-top: 0; }
+
+/* ---------- 内容层(视差作用对象) ---------- */
+.machine-skin__viewport {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  perspective: 1000px;
+}
+.machine-skin__content {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease-out;
+  will-change: transform;
+}
+
+@keyframes machine-flicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1; }
+  100% { opacity: 0.98; }
+}
+
+/* 无障碍:系统要求减少动态 → 关闭装饰动画与过渡 */
+@media (prefers-reduced-motion: reduce) {
+  .machine-skin__scanline { animation: none; }
+  .machine-skin__content { transition: none; }
+}
