@@ -7,7 +7,6 @@ export type Work = {
   github?: string
   path: string
   icon: string             // /icons/{slug}.svg
-  changelog: { version: string; date: string; items: string[] }[]
 }
 
 export const WORKS: Work[] = [
@@ -19,9 +18,6 @@ export const WORKS: Work[] = [
     tech: ['RAG', 'Chroma', '通义千问', 'FastAPI'],
     path: '/rag',
     icon: '/icons/rag.svg',
-    changelog: [
-      { version: '0.1', date: '2026-06-22', items: ['RAG 文档问答 Demo 上线'] },
-    ],
   },
   {
     slug: 'fc',
@@ -31,9 +27,6 @@ export const WORKS: Work[] = [
     tech: ['Function Calling', '通义千问', 'FastAPI'],
     path: '/fc',
     icon: '/icons/fc.svg',
-    changelog: [
-      { version: '0.1', date: '2026-06-22', items: ['Function Calling Agent Demo 上线'] },
-    ],
   },
   {
     slug: 'nexus',
@@ -43,9 +36,6 @@ export const WORKS: Work[] = [
     tech: ['Multi-Agent', 'FastAPI', 'SSE', '通义千问'],
     path: '/nexus',
     icon: '/icons/nexus.svg',
-    changelog: [
-      { version: '0.1', date: '2026-06-22', items: ['Nexus Multi-Agent 工作流 Demo 上线'] },
-    ],
   },
   {
     slug: 'learn',
@@ -55,10 +45,6 @@ export const WORKS: Work[] = [
     tech: ['React', 'Vite', 'TypeScript'],
     path: '/learn',
     icon: '/icons/learn.svg',
-    changelog: [
-      { version: '0.2', date: '2026-06-24', items: ['学习站接入门户统一侧边栏'] },
-      { version: '0.1', date: '2026-06-22', items: ['Nexus 交互式学习站上线'] },
-    ],
   },
   {
     slug: 'doctomd',
@@ -68,9 +54,6 @@ export const WORKS: Work[] = [
     tech: ['FastAPI', 'Markdown', 'Jinja2'],
     path: '/doctomd',
     icon: '/icons/doctomd.svg',
-    changelog: [
-      { version: '0.1', date: '2026-06-23', items: ['DocHub Markdown 文档站上线'] },
-    ],
   },
   {
     slug: 'iconforge',
@@ -80,8 +63,5 @@ export const WORKS: Work[] = [
     tech: ['FastAPI', 'Pillow', 'potrace', 'SVG'],
     path: '/iconforge',
     icon: '/icons/iconforge.svg',
-    changelog: [
-      { version: '0.1', date: '2026-06-25', items: ['IconForge 图标净化器上线'] },
-    ],
   },
 ]

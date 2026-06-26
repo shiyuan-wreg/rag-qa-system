@@ -1,11 +1,11 @@
 import PageTransition from '../components/PageTransition'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { getAllChangelogs, PAGE_LABELS } from '../data/changelogs'
+import { CHANGELOGS } from '../data/changelogs'
 
 export default function Changelog() {
   useDocumentTitle('更新公告 · 个人集成学习网站')
 
-  const notes = getAllChangelogs()
+  const notes = CHANGELOGS
 
   return (
     <PageTransition>
@@ -20,7 +20,7 @@ export default function Changelog() {
         <div className="space-y-4">
           {notes.map((note) => (
             <article
-              key={`${note.page}-${note.version}`}
+              key={note.version}
               className="rounded-xl border border-border bg-surface shadow-sm hover:shadow-md transition-shadow p-5"
             >
               <div className="flex items-center gap-2 flex-wrap mb-3">
@@ -28,9 +28,6 @@ export default function Changelog() {
                   v{note.version}
                 </span>
                 <span className="font-mono text-xs tracking-wide text-muted">{note.date}</span>
-                <span className="font-mono text-xs tracking-wide text-tertiary border border-border rounded px-1.5">
-                  {PAGE_LABELS[note.page] ?? note.page}
-                </span>
               </div>
               <ul className="space-y-1.5">
                 {note.items.map((item, i) => (

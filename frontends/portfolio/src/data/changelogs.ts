@@ -1,54 +1,56 @@
 export interface ChangelogEntry {
-  version: string
+  version: string // 全站统一版本，三段号 x.y.z
   date: string
   items: string[]
 }
 
-export interface FlatChangelogEntry extends ChangelogEntry {
-  page: string
-}
+// 全站统一更新公告，按版本从新到旧排列。
+// 版本约定：大模块更新进 minor（0.3.0 → 0.4.0），其下的细分小更新 / 修复进 patch（0.4.0 → 0.4.1）。
+export const CHANGELOGS: ChangelogEntry[] = [
+  {
+    version: '0.4.1',
+    date: '2026-06-26',
+    items: [
+      'LLM 出口整体切换到 DeepSeek（聊天）+ Jina（RAG 向量），海外服务器直连可用',
+      '修复 Nexus 检索 Agent 的 httpx 异步 bug，多 Agent 流程恢复真实知识库检索',
+    ],
+  },
+  {
+    version: '0.4.0',
+    date: '2026-06-25',
+    items: [
+      '门户整体改版为黑白科技风：故障风标题、打字机副标题、网格与噪点质感',
+      '新增 IconForge 图标净化器（第 6 个作品）：位图转矢量 / 去除白边 / 彩色转黑',
+    ],
+  },
+  {
+    version: '0.3.0',
+    date: '2026-06-24',
+    items: [
+      '新增 Hero 区与统一侧边栏，iframe 加载骨架屏',
+      '新增主题切换器',
+      '首页新增更新公告板与独立公告详情页',
+      '学习站正文加宽，学习进度移入侧边栏',
+      '个人页上线',
+    ],
+  },
+  {
+    version: '0.2.0',
+    date: '2026-06-23',
+    items: ['新增 DocHub Markdown 文档站（第 5 个作品）'],
+  },
+  {
+    version: '0.1.0',
+    date: '2026-06-22',
+    items: [
+      '作品网格首页上线',
+      'RAG 文档问答、Function Calling Agent、Nexus Multi-Agent 三个 Demo 上线',
+      'Nexus 交互式学习站上线',
+    ],
+  },
+]
 
-// 各子站在便签上的简短标签
-export const PAGE_LABELS: Record<string, string> = {
-  home: '门户',
-  rag: 'RAG',
-  fc: 'Function Calling',
-  nexus: 'Nexus',
-  doctomd: 'DocHub',
-  learn: '学习站',
-  me: '个人页',
+// 最新一条（公告板用）。CHANGELOGS 已按版本从新到旧维护，取首条即可。
+export function getLatestChangelog(): ChangelogEntry | undefined {
+  return CHANGELOGS[0]
 }
-
-export const PAGE_CHANGELOGS: Record<string, ChangelogEntry[]> = {
-  home: [
-    {
-      version: '0.3',
-      date: '2026-06-24',
-      items: ['首页新增更新公告板', '新增更新公告详情页', '学习页加宽、进度移入侧边栏', 'Demo/Learn 沉浸式页面移除顶部公告条'],
-    },
-    {
-      version: '0.2',
-      date: '2026-06-24',
-      items: ['新增 Hero 区与统一侧边栏', '增加页面级更新公告', '新增主题切换器', 'iframe 加载骨架屏'],
-    },
-    { version: '0.1', date: '2026-06-22', items: ['作品网格首页上线'] },
-  ],
-  rag: [{ version: '0.1', date: '2026-06-22', items: ['RAG 文档问答 Demo 上线'] }],
-  fc: [{ version: '0.1', date: '2026-06-22', items: ['Function Calling Agent Demo 上线'] }],
-  nexus: [{ version: '0.1', date: '2026-06-22', items: ['Nexus Multi-Agent 工作流 Demo 上线'] }],
-  learn: [
-    { version: '0.3', date: '2026-06-24', items: ['正文区域加宽', '学习进度由顶部移入侧边栏'] },
-    { version: '0.2', date: '2026-06-24', items: ['学习站接入门户统一侧边栏'] },
-    { version: '0.1', date: '2026-06-22', items: ['Nexus 交互式学习站上线'] },
-  ],
-  doctomd: [{ version: '0.1', date: '2026-06-23', items: ['DocHub Markdown 文档站上线'] }],
-  me: [{ version: '0.2', date: '2026-06-24', items: ['个人页上线'] }],
-}
-
-// 拍平为所有条目,补充 page 字段,按日期降序。
-export function getAllChangelogs(): FlatChangelogEntry[] {
-  return Object.entries(PAGE_CHANGELOGS)
-    .flatMap(([page, entries]) => entries.map((e) => ({ ...e, page })))
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() || b.version.localeCompare(a.version))
-}
-

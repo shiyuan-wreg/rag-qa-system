@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
-import { getAllChangelogs, PAGE_LABELS } from '../data/changelogs'
+import { getLatestChangelog } from '../data/changelogs'
 
 export default function AnnouncementBoard() {
   // 只展示全站最近一次更新，整块卡片点击进入详情页。
-  const latest = getAllChangelogs()[0]
+  const latest = getLatestChangelog()
   if (!latest) return null
 
   return (
@@ -23,9 +23,6 @@ export default function AnnouncementBoard() {
               v{latest.version}
             </span>
             <span className="font-mono text-xs tracking-wide text-muted">{latest.date}</span>
-            <span className="font-mono text-xs tracking-wide text-tertiary border border-border rounded px-1.5">
-              {PAGE_LABELS[latest.page] ?? latest.page}
-            </span>
           </div>
           <span className="text-xs text-tertiary group-hover:text-primary transition-colors whitespace-nowrap">
             查看全部 →
