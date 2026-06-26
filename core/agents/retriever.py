@@ -34,9 +34,11 @@ class RetrieverAgent(BaseAgent):
                     f"{Config.RAG_URL}/chat",
                     data={"query": query}
                 )
-                await response.aread()
-                await response.raise_for_status()
-                result = await response.json()
+                # httpx 中 raise_for_status()/json() 是同步方法（即便在 AsyncClient 下），
+                # 只有 aread()/aclose() 这类流式 IO 才是协程；对同步返回值 await 会报
+                # "object Response can't be used in 'await' expression"。
+                response.raise_for_status()
+                result = response.json()
                 answer = result.get("answer", "")
                 return [
                     {"content": answer, "source": "rag_app", "score": 0.9}

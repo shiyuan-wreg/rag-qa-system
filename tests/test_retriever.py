@@ -1,7 +1,7 @@
 import asyncio
 import os
 import sys
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -19,11 +19,12 @@ async def test_retriever_calls_rag_app_http():
     llm = LLMClient(provider="qwen", model="qwen-turbo", api_key="fake")
     retriever = RetrieverAgent(bus, llm)
 
-    # Mock httpx.AsyncClient.post to return a fake RAG response
-    mock_response = AsyncMock()
-    mock_response.json = AsyncMock(return_value={"answer": "mock answer", "tool_calls": []})
-    mock_response.raise_for_status = AsyncMock()
-    mock_response.aread = AsyncMock()
+    # Mock httpx.AsyncClient.post to return a fake RAG response.
+    # httpx 的 json()/raise_for_status() 是同步方法，必须用 MagicMock 而非 AsyncMock，
+    # 否则就会重蹈那个 async bug（mock 与真实 httpx 行为不符，测试假通过）。
+    mock_response = MagicMock()
+    mock_response.json = MagicMock(return_value={"answer": "mock answer", "tool_calls": []})
+    mock_response.raise_for_status = MagicMock()
 
     # Mock the async context manager properly
     mock_client = AsyncMock()
@@ -94,9 +95,8 @@ async def test_retriever_handles_non_2xx_status():
     retriever = RetrieverAgent(bus, llm)
 
     # Mock httpx.AsyncClient returning a 500 response that raises on raise_for_status()
-    mock_response = AsyncMock()
-    mock_response.aread = AsyncMock()
-    mock_response.raise_for_status = AsyncMock(side_effect=Exception("500 Internal Server Error"))
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(side_effect=Exception("500 Internal Server Error"))
 
     mock_client = AsyncMock()
     mock_client.post = AsyncMock(return_value=mock_response)
