@@ -127,11 +127,11 @@
   --border-subtle: rgba(255, 215, 0, 0.10);
   --border-strong: rgba(255, 215, 0, 0.45);
 
-  --text-primary: #ffd700;
-  --text-secondary: #e6cf7a;
+  --text-primary: #e3b341;
+  --text-secondary: #d8c27a;
   --text-tertiary: #9a8c5a;
   --text-muted: #6b6347;
-  --text-link: #ffd700;
+  --text-link: #e3b341;
 
   --accent-primary: #ffd700;
   --accent-primary-text: #0a0a0c;
@@ -151,6 +151,8 @@
   /* 触发 texture.css 的全局网格 + 噪点(内容页轻量氛围) */
   --grid-line: rgba(255, 215, 0, 0.06);
   --noise-opacity: 0.03;
+  /* hero 内部网格在深色下需亮色线(否则黑线不可见) */
+  --hero-line: rgba(255, 215, 0, 0.10);
 
   /* 供细节规则复用 */
   --machine-bg: #0a0a0c;

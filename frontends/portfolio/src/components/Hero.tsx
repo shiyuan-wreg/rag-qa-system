@@ -13,7 +13,7 @@ export default function Hero() {
         <GlitchTitle text="构建可运行的 AI / Agent 应用" />
         <Typewriter
           text="RAG · Function-Calling · Multi-Agent · 已部署生产环境"
-          className="block mt-6 text-lg md:text-xl font-medium text-[#0a0a0a]"
+          className="block mt-6 text-lg md:text-xl font-medium text-secondary"
         />
         <div className="mt-9 flex items-center justify-center gap-3">
           <Link to="/rag"><Button>浏览作品</Button></Link>
