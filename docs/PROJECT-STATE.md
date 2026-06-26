@@ -57,7 +57,7 @@ ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成
 
 ## 待处理 / 下一步(按优先级)
 
-0. **~~修 Nexus retriever 的 async bug~~ ✅ 已完成**(2026-06-26,HEAD `36e9c56`):见上文「已知待改进 #3」。本地 nexus 核心 17 测试通过;`tests/fc/test_execute.py` 仍因本机 venv 未装 `openai` 包(容器内有)收集失败,与本修复无关。**待补**:Docker 起栈后跑一条真实 Nexus 流程,确认 retriever 的 `tool_result` 不再是「检索失败」;服务器同验。
+0. **~~修 Nexus retriever 的 async bug~~ ✅ 已完成并本地实测**(2026-06-26,HEAD `36e9c56`):见上文「已知待改进 #3」。本地 nexus 核心 17 测试通过;**重建 nexus 容器后跑真实流程实测通过**——`POST /nexus/chat`「Python 列表和元组区别」,retriever 的 `result` 返回真实 rag_app 检索内容(`source: rag_app, score: 0.9`),不再是「检索失败」,critic overall 1.0 passed。`tests/fc/test_execute.py` 仍因本机 venv 未装 `openai` 包(容器内有)收集失败,与本修复无关。**待补**:服务器同验(重建生产 nexus 容器后跑一条流程)。**注意**:本地重建单个容器后,因新容器 IP 变更需 `docker compose restart nginx` 让反代重新解析,否则该子路径 502。
 1. **~~决定分支去向~~ ✅ 已完成**:`feat/portfolio-phase1` 已合并入 `master`(线性历史/快进,分支已删)。
 2. **~~删 agent-console-ai 残留目录~~ ✅ 已解决**:目录已删除,无残留。
 3. **~~Phase 2 / DocHub / Phase 4 部署 / 黑白改版+IconForge~~ ✅ 均已完成并部署**(详见上文与 dev-log)。
