@@ -108,6 +108,56 @@
   --shadow-glow: 0 0 0 1px rgba(163, 230, 53, 0.18), 0 4px 20px rgba(163, 230, 53, 0.14);
 }
 
+/* ===== machine(The Machine 监控 HUD · 暗色) ===== */
+[data-theme="machine"] {
+  --bg-base: #0a0a0c;
+  --bg-soft: #111114;
+  --bg-soft-rgb: 17, 17, 20;
+  --bg-hero:
+    radial-gradient(680px 360px at 50% -8%, rgba(255, 215, 0, 0.06), transparent 70%),
+    linear-gradient(180deg, #0c0c0f 0%, #0a0a0c 60%, #08080a 100%);
+
+  --surface-default: #0e0e11;
+  --surface-raised: #14141a;
+  --surface-hover: #1b1b22;
+  --surface-soft: #111114;
+  --surface-cold: #0c0e13;
+
+  --border-default: rgba(255, 215, 0, 0.25);
+  --border-subtle: rgba(255, 215, 0, 0.10);
+  --border-strong: rgba(255, 215, 0, 0.45);
+
+  --text-primary: #ffd700;
+  --text-secondary: #e6cf7a;
+  --text-tertiary: #9a8c5a;
+  --text-muted: #6b6347;
+  --text-link: #ffd700;
+
+  --accent-primary: #ffd700;
+  --accent-primary-text: #0a0a0c;
+  --accent-secondary-bg: rgba(255, 215, 0, 0.12);
+  --accent-secondary-text: #ffd700;
+
+  --glow-accent: rgba(255, 215, 0, 0.18);
+
+  --shadow-sm: 0 0 8px rgba(255, 215, 0, 0.08);
+  --shadow-md: 0 0 16px rgba(255, 215, 0, 0.10);
+  --shadow-lg: 0 0 24px rgba(255, 215, 0, 0.14);
+  --shadow-glow: 0 0 0 1px rgba(255, 215, 0, 0.25), 0 0 20px rgba(255, 215, 0, 0.15);
+
+  --font-sans: "JetBrains Mono", "MiSans", "HarmonyOS Sans SC", "PingFang SC",
+               "Microsoft YaHei", ui-monospace, monospace;
+
+  /* 触发 texture.css 的全局网格 + 噪点(内容页轻量氛围) */
+  --grid-line: rgba(255, 215, 0, 0.06);
+  --noise-opacity: 0.03;
+
+  /* 供细节规则复用 */
+  --machine-bg: #0a0a0c;
+  --machine-yellow: #ffd700;
+  --machine-red: #ff4500;
+}
+
 /* ===== mono-light(黑白科技风 · 纸白 · 新默认) ===== */
 [data-theme="mono-light"] {
   --bg-base: #fafafa;
