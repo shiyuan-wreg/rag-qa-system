@@ -42,3 +42,83 @@
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-400;
 }
+
+/* ===================================================================
+   跟随门户主题:暗色主题(deepblue/cyber/machine)覆盖层
+   门户切主题时 index.html 的同步脚本在 <html> 上加 .demo-dark + data-demo-theme,
+   下面把学习站常用的 slate/primary 工具类重映射到对应主题色(浅色主题保持原样)。
+   =================================================================== */
+html[data-demo-theme="deepblue"] {
+  --t-bg:#0b1120; --t-surface:#111827; --t-surface2:#172033;
+  --t-text:#f8fafc; --t-text2:#cbd5e1; --t-dim:#94a3b8;
+  --t-border:#1f2937; --t-accent:#60a5fa; --t-accent-strong:#2563eb;
+  --t-accent-bg:rgba(37,99,235,.18); --t-code:#fca5a5;
+}
+html[data-demo-theme="cyber"] {
+  --t-bg:#050507; --t-surface:#0f0f12; --t-surface2:#141417;
+  --t-text:#e4e4e7; --t-text2:#cfcfd4; --t-dim:#a1a1aa;
+  --t-border:#27272a; --t-accent:#a3e635; --t-accent-strong:#a3e635;
+  --t-accent-bg:rgba(163,230,53,.14); --t-code:#fca5a5;
+}
+html[data-demo-theme="machine"] {
+  --t-bg:#0a0a0c; --t-surface:#0e0e11; --t-surface2:#111114;
+  --t-text:#e3b341; --t-text2:#d8c27a; --t-dim:#9a8c5a;
+  --t-border:rgba(227,179,65,.30); --t-accent:#e3b341; --t-accent-strong:#e3b341;
+  --t-accent-bg:rgba(227,179,65,.12); --t-code:#ff8a5b;
+}
+
+.demo-dark body { background: var(--t-bg) !important; color: var(--t-text) !important; }
+
+/* 背景面 */
+.demo-dark .bg-white,
+.demo-dark .bg-slate-50 { background-color: var(--t-surface) !important; }
+.demo-dark .bg-slate-100,
+.demo-dark .bg-slate-200 { background-color: var(--t-surface2) !important; }
+
+/* 文本 */
+.demo-dark .text-slate-900,
+.demo-dark .text-slate-800,
+.demo-dark .text-slate-700 { color: var(--t-text) !important; }
+.demo-dark .text-slate-600,
+.demo-dark .text-slate-500,
+.demo-dark .text-slate-400 { color: var(--t-dim) !important; }
+
+/* 边框 / 分隔线 */
+.demo-dark .border-slate-100,
+.demo-dark .border-slate-200,
+.demo-dark .border-slate-300,
+.demo-dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.demo-dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) { border-color: var(--t-border) !important; }
+
+/* 主题强调色(primary) */
+.demo-dark .text-primary-500,
+.demo-dark .text-primary-600,
+.demo-dark .text-primary-700,
+.demo-dark .text-primary-800 { color: var(--t-accent) !important; }
+.demo-dark .bg-primary-500,
+.demo-dark .bg-primary-600,
+.demo-dark .bg-primary-700 { background-color: var(--t-accent-strong) !important; color: var(--t-bg) !important; }
+.demo-dark .bg-primary-50,
+.demo-dark .bg-primary-100 { background-color: var(--t-accent-bg) !important; }
+.demo-dark .border-primary-300,
+.demo-dark .border-primary-500,
+.demo-dark .border-l-primary-500 { border-color: var(--t-accent) !important; }
+.demo-dark .ring-primary-500 { --tw-ring-color: var(--t-accent) !important; }
+
+/* prose(Markdown 正文) */
+.demo-dark .prose-custom { color: var(--t-text2) !important; }
+.demo-dark .prose-custom :where(h1,h2,h3,h4,h5,h6,strong) { color: var(--t-text) !important; }
+.demo-dark .prose-custom :where(p,li,td,th) { color: var(--t-text2) !important; }
+.demo-dark .prose-custom :where(a) { color: var(--t-accent) !important; }
+.demo-dark .prose-custom :where(code):not(pre code) {
+  color: var(--t-code) !important; background: var(--t-surface2) !important;
+}
+.demo-dark .prose-custom :where(blockquote) {
+  background: var(--t-accent-bg) !important; border-left-color: var(--t-accent) !important;
+}
+/* pre 代码块本就深色(slate-900),保留 */
+
+/* 滚动条 */
+.demo-dark ::-webkit-scrollbar-track { background: var(--t-bg) !important; }
+.demo-dark ::-webkit-scrollbar-thumb { background: var(--t-border) !important; }
+.demo-dark ::-webkit-scrollbar-thumb:hover { background: var(--t-accent) !important; }

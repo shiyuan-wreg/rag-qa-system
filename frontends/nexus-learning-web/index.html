@@ -5,6 +5,20 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nexus 交互式学习 | 从 LLM 到 Multi-Agent</title>
+    <script>
+    // 跟随门户主题:读 localStorage,监听 storage 事件即时换肤(同源 iframe 自动收到)
+    (function(){
+      var KEY='ai-demos-theme', VALID=['mono-light','light','deepblue','cyber','machine'], DARK=['deepblue','cyber','machine'];
+      function apply(t){
+        if(VALID.indexOf(t)<0)t='mono-light';
+        var el=document.documentElement;
+        el.setAttribute('data-demo-theme',t);
+        el.classList.toggle('demo-dark', DARK.indexOf(t)>=0);
+      }
+      try{ apply(localStorage.getItem(KEY)); }catch(e){ apply('mono-light'); }
+      window.addEventListener('storage', function(e){ if(e.key===KEY) apply(e.newValue); });
+    })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
