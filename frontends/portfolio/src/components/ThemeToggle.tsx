@@ -5,6 +5,7 @@ const THEMES: { key: Theme; label: string }[] = [
   { key: 'light', label: '浅色' },
   { key: 'deepblue', label: '深蓝' },
   { key: 'cyber', label: '赛博' },
+  { key: 'machine', label: '监控' },
 ]
 
 export default function ThemeToggle() {
