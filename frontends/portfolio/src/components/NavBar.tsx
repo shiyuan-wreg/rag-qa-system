@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
+import ParallaxToggle from './ParallaxToggle'
 import Logo from './Logo'
 import { useScrolled } from '../hooks/useScrolled'
 
@@ -67,10 +68,12 @@ export default function NavBar() {
                 }`} />
               </Link>
             ))}
+            <ParallaxToggle />
             <ThemeToggle />
           </div>
 
           <div className="flex md:hidden items-center gap-3">
+            <ParallaxToggle />
             <ThemeToggle />
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
