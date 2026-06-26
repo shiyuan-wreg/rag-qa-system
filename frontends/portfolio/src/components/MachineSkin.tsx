@@ -69,7 +69,7 @@ export default function MachineSkin({ children }: { children: ReactNode }) {
       </div>
       <div className="machine-skin__hud machine-skin__hud--bl" aria-hidden="true">
         <div>VERSION: v{version}</div>
-        <div>MODEL: QWEN · 通义千问</div>
+        <div>MODEL: DEEPSEEK</div>
         <div>SYSTEM: UBUNTU · SEOUL</div>
       </div>
       <div ref={viewportRef} className="machine-skin__viewport">

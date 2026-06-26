@@ -130,41 +130,40 @@
   .machine-skin__content { transition: none; }
 }
 
-/* ---------- 侧边栏作品项:方括号边框区分 ---------- */
-.machine-skin .sidebar-link {
-  position: relative;
+/* ---------- 侧边栏作品项 + 信息卡:四角方括号边框 ---------- */
+/* 用 8 段 1px 渐变画四个角(每角 1 横 1 竖),颜色走 --corner 变量便于状态切换 */
+.machine-skin .sidebar-link,
+.machine-skin .demo-info-card {
+  --corner: rgba(255, 215, 0, 0.4);
+  --corner-len: 9px;
   border: 1px solid var(--border-subtle);
-  border-radius: 0;            /* 直角,呼应监控终端 */
+  border-radius: 0;            /* 去圆角,呼应监控终端 */
+  background-image:
+    linear-gradient(var(--corner), var(--corner)), linear-gradient(var(--corner), var(--corner)),
+    linear-gradient(var(--corner), var(--corner)), linear-gradient(var(--corner), var(--corner)),
+    linear-gradient(var(--corner), var(--corner)), linear-gradient(var(--corner), var(--corner)),
+    linear-gradient(var(--corner), var(--corner)), linear-gradient(var(--corner), var(--corner));
+  background-repeat: no-repeat;
+  background-size:
+    var(--corner-len) 1px, 1px var(--corner-len),
+    var(--corner-len) 1px, 1px var(--corner-len),
+    var(--corner-len) 1px, 1px var(--corner-len),
+    var(--corner-len) 1px, 1px var(--corner-len);
+  background-position:
+    top left, top left, top right, top right,
+    bottom left, bottom left, bottom right, bottom right;
 }
-.machine-skin .sidebar-link::before,
-.machine-skin .sidebar-link::after {
-  content: "";
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border: 0 solid var(--machine-yellow);
-  opacity: 0.4;
-  transition: opacity 0.2s ease;
+.machine-skin .sidebar-link:hover {
+  border-color: var(--border-default);
+  --corner: rgba(255, 215, 0, 0.7);
 }
-.machine-skin .sidebar-link::before {
-  top: -1px;
-  left: -1px;
-  border-top-width: 1px;
-  border-left-width: 1px;
-}
-.machine-skin .sidebar-link::after {
-  right: -1px;
-  bottom: -1px;
-  border-right-width: 1px;
-  border-bottom-width: 1px;
-}
-.machine-skin .sidebar-link:hover { border-color: var(--border-default); }
 .machine-skin .sidebar-link[aria-current="page"] {
   border-color: var(--machine-yellow);
+  --corner: var(--machine-yellow);
   box-shadow: var(--shadow-sm);
 }
-.machine-skin .sidebar-link[aria-current="page"]::before,
-.machine-skin .sidebar-link[aria-current="page"]::after { opacity: 1; }
+/* 信息卡角标稍大,且不被 bg-surface-soft 的 background-color 影响(分属不同属性) */
+.machine-skin .demo-info-card { --corner-len: 12px; }
 
 /* ---------- HUD 装饰文字(纯氛围,不挡交互) ---------- */
 .machine-skin__hud {
