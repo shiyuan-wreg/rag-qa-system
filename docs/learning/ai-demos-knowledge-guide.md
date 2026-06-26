@@ -10,11 +10,14 @@
 
 `ai-demos` 是一个把多个 AI/Agent 相关小 demo 整合在一起的**个人作品集门户**。它目前包含：
 
-- 一个基于 **RAG + Function Calling** 的智能文档问答 Agent；
-- 一个只演示 **Function Calling** 的 Agent；
-- 一个统一展示的 **React 门户外壳**；
-- 一个交互式学习站 `nexus-learning-web`；
-- 用 **Docker + Nginx** 在本地把前后端跑起来。
+- 一个基于 **RAG + Function Calling** 的智能文档问答 Agent（`/rag/`）；
+- 一个只演示 **Function Calling** 的 Agent（`/fc/`）；
+- 一个 **Nexus Multi-Agent** 工作流助手（`/nexus/`）；
+- 一个 **DocHub** Markdown 文档站（`/doctomd/`）；
+- 一个 **IconForge** 图标净化器（`/iconforge/`）；
+- 一个统一展示的 **React 门户外壳**（黑白科技风，含"监控"可选主题）；
+- 一个交互式学习站 `nexus-learning-web`（`/learn/`）；
+- 用 **Docker + Nginx** 在本地/服务器把前后端跑起来。
 
 ### 0.2 它解决什么问题？
 
@@ -40,10 +43,13 @@
 │  Nginx（反向代理 + 静态文件托管）      │  端口 80/443（本地是 8080）
 └─────────────────────────────────────┘
     │
-    ├──▶ /          →  frontends/portfolio/dist（React 门户）
-    ├──▶ /learn/    →  frontends/nexus-learning-web/dist（学习站）
-    ├──▶ /rag/      →  backends/rag_app/main.py（RAG Agent）
-    └──▶ /fc/       →  backends/fc_app/main.py（Function Calling Agent）
+    ├──▶ /            →  frontends/portfolio/dist（React 门户）
+    ├──▶ /learn/      →  frontends/nexus-learning-web/dist（学习站）
+    ├──▶ /rag/        →  backends/rag_app/main.py（RAG Agent）
+    ├──▶ /fc/         →  backends/fc_app/main.py（Function Calling Agent）
+    ├──▶ /nexus/      →  backends/nexus_app/main.py（Nexus Multi-Agent）
+    ├──▶ /doctomd/    →  backends/md_converter_app/main.py（DocHub）
+    └──▶ /iconforge/  →  backends/iconforge_app/main.py（IconForge）
 ```
 
 ---
@@ -1164,3 +1170,66 @@ def test_safe_execute_python():
 建议你从“最小可运行单元”开始动手，每次只改一个小地方，观察输出变化。这比单纯看代码更能加深理解。
 
 祝你学习顺利！
+
+---
+
+## 附录：项目演进与主题系统（2026-06 更新）
+
+本附录记录 2026 年 6 月集中迭代的几项重要改动，帮助你理解项目当前状态。
+
+### A.1 黑白科技风门户改版
+
+门户从原来的浅色默认风格升级为**黑白科技风**：
+
+- 默认主题 `mono-light`，强调高对比度、网格/噪点质感、等宽元信息字体；
+- Hero 区使用 glitch 标题 + 打字机副标题 + 假终端装饰；
+- WorkCard 采用纯黑白四特效选中态；
+- 新增可选主题 **"监控（The Machine）"**，金色高对比 HUD 风格，灵感来自《疑犯追踪》。
+
+相关实现：`frontends/portfolio/src/` 下的 theme 系统、MachineSkin 组件、machine-skin.css、texture.css。
+
+### A.2 新增 Demo
+
+- **Nexus Multi-Agent（`/nexus/`）**：Planner + Orchestrator + Critic 多 Agent 协作，SSE 流式打字机回显；
+- **DocHub（`/doctomd/`）**：Markdown 转 HTML 文档站，支持上传、本地路径转换、密码保护、在线浏览；
+- **IconForge（`/iconforge/`）**：图标净化器，支持位图转矢量（potrace）、去除白边、彩色转黑。
+
+### A.3 Demo 后端主题同步机制
+
+为了让每个 demo 内部 UI 跟随门户主题，采用了**同源 iframe + localStorage + storage 事件**的方案：
+
+1. 门户切换主题时调用 `localStorage.setItem('ai-demos-theme', theme)`；
+2. 同源的 iframe 文档会自动收到 `storage` 事件；
+3. iframe 内脚本读取新主题并设置 `document.documentElement.setAttribute('data-demo-theme', theme)`；
+4. 每个后端的 HTML/CSS 使用统一的 `--d-*` token 调色板，根据 `data-demo-theme` 自动变色。
+
+该机制无需 postMessage、无需刷新页面，且对现有后端侵入很小。
+
+### A.4 LLM 出口切换：DeepSeek + Jina
+
+生产环境从大陆 DashScope 切换到：
+
+- **DeepSeek**（`deepseek-chat`，OpenAI 兼容接口）处理聊天/Agent 推理；
+- **Jina**（`api.jina.ai`）处理 RAG embedding。
+
+动机：服务器位于首尔，DeepSeek 与 Jina 从海外均可稳定访问。切换过程中发现并修复了 `safe_execute_python` 的描述/报错问题，避免模型发送整段程序导致死循环。
+
+### A.5 图标清洗：从位图描摹到干净 SVG
+
+IconForge 解决了一个实际工程问题：从网上下载的线性图标是位图，用工具描摹后会得到"带白边/脏路径"的 SVG。清洗流程：
+
+1. **位图转矢量**：Pillow 裁剪内容 → 二值化 → potrace 描摹；
+2. **去除白边**：按亮度阈值剥离近白路径，并紧贴 viewBox；
+3. **彩色转黑**：统一转为 `#171817` 深色，保证在门户各主题下可见。
+
+这套流程也被用来处理门户首页的 demo 线性图标。
+
+### A.6 如何继续学习
+
+如果你想动手复现，建议按这个顺序：
+
+1. 本地跑通 `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d --build`；
+2. 在浏览器切换主题，观察各 demo iframe 颜色变化；
+3. 打开 `backends/iconforge_app/templates/home.html` 和 `backends/md_converter_app/templates/base.html`，对比 rag/fc/nexus 的同步脚本；
+4. 修改一个 token 颜色，重新构建对应容器，看变化。
+
