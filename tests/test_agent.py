@@ -52,8 +52,20 @@ def test_agent_clear_history():
     print("[OK] Agent clear history passed")
 
 
+def test_agent_system_prompt_directives():
+    """system prompt 必须包含详细回答/引用/不编造的关键指令。"""
+    agent = Agent()
+    content = agent.system_message["content"]
+    assert "[1]" in content              # 引用标注要求
+    assert "结论" in content              # 先给结论
+    assert "Markdown" in content or "markdown" in content  # 结构化输出
+    assert "无法确定" in content          # 不编造
+    print("[OK] RAG system prompt directives present")
+
+
 if __name__ == "__main__":
     test_agent_basic()
     test_agent_tool_handling()
     test_agent_clear_history()
+    test_agent_system_prompt_directives()
     print("\nAll Agent tests passed!")
