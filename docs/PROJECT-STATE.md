@@ -7,7 +7,7 @@
 
 ## ✅ 已部署生产:P0 Agent 质量优化(`feat/agent-quality-p0` 已合并 master)
 
-> 2026-06-28 完成并部署。配套:`docs/superpowers/specs/2026-06-28-agent-quality-p0-design.md`(spec)、`docs/superpowers/plans/2026-06-28-agent-quality-p0.md`(7 任务计划)。**部署方式见记忆 [[ssh-prod-access]]:`ssh shiyuan-prod`(.pem + 7890 代理穿透)。**
+> 2026-06-28 完成并部署。配套:`docs/superpowers/specs/2026-06-28-agent-quality-p0-design.md`(spec)、`docs/superpowers/plans/2026-06-28-agent-quality-p0.md`(7 任务计划)。**生产部署流程见 `deploy/PRODUCTION.md`(增量重部署:`ssh shiyuan-prod` → git pull + build + compose up；需本机代理开着)。**
 
 **目标**:释放 RAG/FC 两个 demo 的回答质量(详细、结构化、可溯源),靠 prompt 工程 + 检索结果格式化 + 前端 Markdown 渲染 + FC 缺参代码强制反问。不动检索算法/真实 API(P1+)。
 
