@@ -108,6 +108,20 @@ TOOLS = [
 
 # ==================== Agent 核心 ====================
 
+def missing_required_args(tool_name: str, tool_args: dict) -> list:
+    """返回该工具缺失(不存在或值为空)的 required 参数名列表。"""
+    spec = next((t for t in TOOLS if t["function"]["name"] == tool_name), None)
+    if spec is None:
+        return []
+    required = spec["function"]["parameters"].get("required", [])
+    missing = []
+    for name in required:
+        val = tool_args.get(name)
+        if val is None or (isinstance(val, str) and val.strip() == ""):
+            missing.append(name)
+    return missing
+
+
 class Agent:
     def __init__(self, model: str = "qwen-turbo"):
         self.model = model
@@ -164,13 +178,20 @@ class Agent:
                         tool_name = tool_call["function"]["name"]
                         tool_args = json.loads(tool_call["function"]["arguments"])
 
-                        try:
-                            if tool_name in TOOL_MAP:
-                                result = TOOL_MAP[tool_name](**tool_args)
-                            else:
-                                result = f"错误: 未知工具 '{tool_name}'"
-                        except Exception as e:
-                            result = f"工具执行失败: {e}"
+                        missing = missing_required_args(tool_name, tool_args)
+                        if missing:
+                            result = (
+                                f"缺少必要参数:{', '.join(missing)}。"
+                                "请向用户说明并询问这些信息,不要猜测或编造。"
+                            )
+                        else:
+                            try:
+                                if tool_name in TOOL_MAP:
+                                    result = TOOL_MAP[tool_name](**tool_args)
+                                else:
+                                    result = f"错误: 未知工具 '{tool_name}'"
+                            except Exception as e:
+                                result = f"工具执行失败: {e}"
 
                         self.messages.append({
                             "role": "tool",
