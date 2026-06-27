@@ -17,6 +17,19 @@ from rag.vectorstore import get_or_create_vectorstore
 from rag.retriever import retrieve
 
 
+def format_retrieved(query: str, docs: list, max_chars: int = 800) -> str:
+    """把检索到的片段格式化为带来源、保留原始换行的文本。"""
+    parts = [f"用户问题:{query}", "以下是按相关度排序的相关片段:"]
+    for i, doc in enumerate(docs, 1):
+        source = doc.metadata.get("source") if getattr(doc, "metadata", None) else None
+        label = os.path.basename(source) if source else "未知来源"
+        content = doc.page_content.strip()
+        if len(content) > max_chars:
+            content = content[:max_chars] + "…"
+        parts.append(f"[{i}] 来源:{label}\n{content}")
+    return "\n\n".join(parts)
+
+
 # RAG 向量检索的 embedding 用 Jina(海外可达)
 JINA_API_KEY = os.environ.get("JINA_API_KEY", "")
 DOCS_PATH = os.environ.get("DOCS_PATH", "docs/python_guide.txt")
@@ -61,14 +74,7 @@ class RAGTool:
             docs = retrieve(self.vectorstore, query, k=top_k)
             if not docs:
                 return "未检索到相关文档片段"
-
-            parts = ["检索到以下相关片段："]
-            for i, doc in enumerate(docs, 1):
-                content = doc.page_content.strip().replace("\n", " ")
-                if len(content) > 500:
-                    content = content[:500] + "..."
-                parts.append(f"[{i}] {content}")
-            return "\n\n".join(parts)
+            return format_retrieved(query, docs)
         except Exception as e:
             return f"检索错误: {e}"
 
