@@ -408,6 +408,19 @@ AGENT_HTML = """
         .alert svg { flex: none; width: 18px; height: 18px; margin-top: 1px; }
 
         @media (prefers-reduced-motion: reduce) { .term-head .dot, .thinking .dots i { animation: none; } }
+        .md-h { margin: 10px 0 6px; line-height: 1.3; }
+        .md-ul, .md-ol { margin: 6px 0 6px 20px; }
+        .md-ul li, .md-ol li { margin: 2px 0; }
+        .md-code { background: var(--d-bg); border: 1px solid var(--d-border); padding: 1px 5px; border-radius: 0; font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; font-size: 12.5px; }
+        .md-pre { background: var(--d-bg); border: 1px solid var(--d-border); padding: 10px 12px; margin: 8px 0; overflow-x: auto; }
+        .md-pre code { font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; font-size: 12.5px; white-space: pre; }
+        .md-table { border-collapse: collapse; margin: 8px 0; font-size: 13px; }
+        .md-table th, .md-table td { border: 1px solid var(--d-border); padding: 5px 9px; text-align: left; }
+        .md-table th { background: var(--d-surface-soft); }
+        .msg.assistant { white-space: normal; }
+        .msg.assistant p { margin: 6px 0; }
+        .msg.assistant p:first-child { margin-top: 0; }
+        .msg.assistant a { color: var(--d-accent); }
     </style>
 </head>
 <body>
@@ -448,7 +461,7 @@ AGENT_HTML = """
         function addMsg(content, type, tools) {
             const div = document.createElement('div');
             div.className = 'msg ' + type;
-            let html = escapeHtml(content);
+            let html = (type === 'assistant') ? renderMarkdown(content) : escapeHtml(content);
             if (tools && tools.length) {
                 html += '<div class="tools">调用了工具:';
                 tools.forEach(t => {
@@ -522,6 +535,55 @@ AGENT_HTML = """
                     <p>对话已清空<br>输入消息开始新对话</p>
                 </div>
             `;
+        }
+
+        function renderMarkdown(src){
+            function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+            var blocks=[];
+            src=src.replace(/```[ \t]*([\w+\-]*)\r?\n([\s\S]*?)```/g,function(_,lang,code){
+                blocks.push('<pre class="md-pre"><code>'+esc(code.replace(/\r?\n$/,''))+'</code></pre>');
+                return '\x00'+(blocks.length-1)+'\x00';
+            });
+            function inline(t){
+                t=esc(t);
+                t=t.replace(/`([^`]+)`/g,'<code class="md-code">$1</code>');
+                t=t.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+                t=t.replace(/\*([^*\n]+)\*/g,'<em>$1</em>');
+                t=t.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+                return t;
+            }
+            var lines=src.split(/\r?\n/),out=[],i=0;
+            function blank(s){return /^\s*$/.test(s);}
+            function cells(s){var a=s.split('|').map(function(c){return c.trim();});if(a.length&&a[0]==='')a.shift();if(a.length&&a[a.length-1]==='')a.pop();return a;}
+            while(i<lines.length){
+                var line=lines[i];
+                var cb=line.match(/^\x00(\d+)\x00\s*$/);
+                if(cb){out.push(blocks[+cb[1]]);i++;continue;}
+                if(blank(line)){i++;continue;}
+                var h=line.match(/^(#{1,6})\s+(.*)$/);
+                if(h){out.push('<h'+h[1].length+' class="md-h">'+inline(h[2])+'</h'+h[1].length+'>');i++;continue;}
+                if(line.indexOf('|')>=0&&i+1<lines.length&&/^\s*\|?[\s:|-]*-[\s:|-]*\|?\s*$/.test(lines[i+1])){
+                    var header=cells(line);i+=2;var rows=[];
+                    while(i<lines.length&&!blank(lines[i])&&lines[i].indexOf('|')>=0){rows.push(cells(lines[i]));i++;}
+                    var th='<tr>'+header.map(function(c){return '<th>'+inline(c)+'</th>';}).join('')+'</tr>';
+                    var tb=rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+inline(c)+'</td>';}).join('')+'</tr>';}).join('');
+                    out.push('<table class="md-table"><thead>'+th+'</thead><tbody>'+tb+'</tbody></table>');continue;
+                }
+                if(/^\s*[-*+]\s+/.test(line)){
+                    var ul=[];
+                    while(i<lines.length&&/^\s*[-*+]\s+/.test(lines[i])){ul.push('<li>'+inline(lines[i].replace(/^\s*[-*+]\s+/,''))+'</li>');i++;}
+                    out.push('<ul class="md-ul">'+ul.join('')+'</ul>');continue;
+                }
+                if(/^\s*\d+\.\s+/.test(line)){
+                    var ol=[];
+                    while(i<lines.length&&/^\s*\d+\.\s+/.test(lines[i])){ol.push('<li>'+inline(lines[i].replace(/^\s*\d+\.\s+/,''))+'</li>');i++;}
+                    out.push('<ol class="md-ol">'+ol.join('')+'</ol>');continue;
+                }
+                var para=[];
+                while(i<lines.length&&!blank(lines[i])&&!/^\x00\d+\x00/.test(lines[i])&&!/^(#{1,6})\s+/.test(lines[i])&&!/^\s*[-*+]\s+/.test(lines[i])&&!/^\s*\d+\.\s+/.test(lines[i])){para.push(lines[i]);i++;}
+                out.push('<p>'+para.map(inline).join('<br>')+'</p>');
+            }
+            return out.join('');
         }
 
         function escapeHtml(text) {
