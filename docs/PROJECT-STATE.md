@@ -1,37 +1,36 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-06-28(**进行中:`feat/agent-quality-p0` 分支——RAG/FC 回答质量 P0 优化;未合并 master;见下方「⚠️ 当前进行中」**)
+> 最近更新:2026-06-28(**P0 Agent 质量优化 + 监控主题两批改动已合并 master、推 GitHub、并部署生产首尔服务器 `5fd053d`,全 7 路由 HTTPS 200,生产端到端实测通过。无未合并分支。**)
 
 ---
 
-## ⚠️ 当前进行中:`feat/agent-quality-p0` 分支(未合并 master)
+## ✅ 已部署生产:P0 Agent 质量优化(`feat/agent-quality-p0` 已合并 master)
 
-> 新对话恢复的**首要上下文**。配套:`docs/superpowers/specs/2026-06-28-agent-quality-p0-design.md`(spec)、`docs/superpowers/plans/2026-06-28-agent-quality-p0.md`(7 任务计划,逐任务复选框)。
+> 2026-06-28 完成并部署。配套:`docs/superpowers/specs/2026-06-28-agent-quality-p0-design.md`(spec)、`docs/superpowers/plans/2026-06-28-agent-quality-p0.md`(7 任务计划)。**部署方式见记忆 [[ssh-prod-access]]:`ssh shiyuan-prod`(.pem + 7890 代理穿透)。**
 
 **目标**:释放 RAG/FC 两个 demo 的回答质量(详细、结构化、可溯源),靠 prompt 工程 + 检索结果格式化 + 前端 Markdown 渲染 + FC 缺参代码强制反问。不动检索算法/真实 API(P1+)。
 
-**已完成(7 任务全做完,本地实测)✅**
+**已完成(7 任务全做完 + 生产实测)✅**
 - T1 `core/rag_tool.py` 抽 `format_retrieved`:保留换行、带来源 basename、按相关度提示,截断 800(原 500 且 `replace("\n"," ")` 毁码已修)。TDD `tests/test_rag_tool.py` 3 测过。
 - T2 `core/agent.py` RAG system prompt 重写:讲师角色、先结论→分点→例子、`[1]` 引用、不编造、Markdown。smoke 测过。
 - T3 `backends/fc_app/main.py` 加 `missing_required_args` + chat 循环缺参拦截(缺 required 则回插 tool 消息让模型反问,不执行)。TDD `tests/fc/test_missing_args.py` 4 测过。
 - T4 FC system prompt 重写:解释工具→给结果→给建议→缺参反问→Markdown。smoke 测过。
 - T5/T6 `rag_app`+`fc_app` 内联 `renderMarkdown`(~50 行,不依赖 CDN,两端逐字相同)+ `.md-*` 样式;`addMsg` 仅 assistant 走 markdown,user 仍纯文本转义。node 逻辑测 9 项过。
 - **修一个引入的 bug**:两端 HTML 串原是非 raw `"""`,`renderMarkdown` 的 `\x00`/`\r?\n`/`\w` 被 Python 当转义处理会破坏发到浏览器的 JS → 改 `r"""`。
-- 本地 docker 重建 rag/fc + 实测:FC「北京 vs 上海」调两次 get_weather + 表格/建议/markdown;RAG「根据文档…列表元组」调两次 search_docs + 表格/代码/`[1]` 引用。
+- **生产实测(2026-06-28)**:FC「京沪天气」调 get_weather×2 + 表格/建议;RAG「根据文档…列表元组」调 search_docs + 表格/代码/`[1]` 引用 → 证明线上 DeepSeek+Jina 均正常。
 
 **已知/未做 ⚠️**
 - DeepSeek 偶尔输出字面 `\n`(两字符),renderMarkdown 按真实换行分行,故这些会显示成可见的 "\n"——可选 polish(代码块已先抽出,可安全把剩余文本的字面 `\n` 转真换行)。
-- 浏览器**视觉**渲染需用户肉眼复核(逻辑/接线已证;localhost:8080 的 `/rag/` `/fc/`)。
 - 泛问时模型可能不调 search_docs 直接自答(P1「强制检索」解决)。
 
-**收尾待办 🔲**:用户视觉验收 → 合并 `feat/agent-quality-p0` 回 master → 本批与下方主题皮肤批次一并推生产。
+**下一步 = P1**:RAG top_k 加大 + rerank(Jina API)+ hybrid(向量+BM25)+ 强制检索;FC 接真实 API + 提醒持久化 + eval→safe;评估/LLM-as-a-Judge 量化。
 
 ---
 
 ## ✅ 已合并:`feat/machine-hud-skin`(监控主题 + demo 主题同步)
 
-> 已 fast-forward 合并入 master 并推 GitHub(`0f00c74`),分支已删。配套细节:`.superpowers/sdd/progress.md`、`docs/superpowers/specs/2026-06-26-machine-global-theme-a2-design.md`、`2026-06-26-demo-theme-sync-a3-design.md`。**注意:生产尚未部署这批改动**(与上面 P0 一并推)。
+> 已 fast-forward 合并入 master 并推 GitHub(`0f00c74`),分支已删。配套细节:`.superpowers/sdd/progress.md`、`docs/superpowers/specs/2026-06-26-machine-global-theme-a2-design.md`、`2026-06-26-demo-theme-sync-a3-design.md`。**已于 2026-06-28 随 P0 一并部署生产(`5fd053d`)。**
 
 **目标**:给门户加「监控(The Machine)」可选主题(默认仍极简),并让所有 demo 后端 iframe **跟随门户主题配色**。
 
