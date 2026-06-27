@@ -76,7 +76,7 @@ def eval_agent():
     return result
 
 
-HTML_PAGE = """
+HTML_PAGE = r"""
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>

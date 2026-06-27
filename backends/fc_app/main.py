@@ -275,7 +275,7 @@ def execute(tool: str = Body(...), args: dict = Body(default_factory=dict)):
 
 # ==================== 前端页面 ====================
 
-AGENT_HTML = """
+AGENT_HTML = r"""
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
