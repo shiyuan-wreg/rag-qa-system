@@ -8,6 +8,24 @@ export interface ChangelogEntry {
 // 版本约定：大模块更新进 minor（0.3.0 → 0.4.0），其下的细分小更新 / 修复进 patch（0.4.0 → 0.4.1）。
 export const CHANGELOGS: ChangelogEntry[] = [
   {
+    version: '0.6.0',
+    date: '2026-06-28',
+    items: [
+      'RAG / FC 回答全面升级：先给结论，再分点讲清「是什么 / 为什么」，附代码示例并标注引用来源 [1]',
+      '两个 Demo 支持 Markdown 渲染（标题 / 列表 / 代码块 / 表格），回答更专业易读',
+      'Function Calling 缺少必要参数时主动反问，不再瞎猜',
+    ],
+  },
+  {
+    version: '0.5.0',
+    date: '2026-06-26',
+    items: [
+      '新增「监控（The Machine）」可选主题，全站可切换',
+      '所有 Demo 后端跟随门户主题配色（RAG / FC / Nexus / 学习站等）',
+      '全局 3D 视差、HUD 角标等科技质感细节',
+    ],
+  },
+  {
     version: '0.4.1',
     date: '2026-06-26',
     items: [
