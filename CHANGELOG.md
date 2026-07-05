@@ -1,5 +1,26 @@
 # 更新日志
 
+## [v2.1.1] - 2026-07-06
+
+### 新增
+
+- **RAG 强制首轮检索（must-retrieve）**
+  - `core/agent.py` 新增 `require_first_tool` 参数，支持在 Agent 首轮强制调用指定工具
+  - `backends/rag_app/main.py` 启用 `Agent(require_first_tool="search_docs")`
+  - system prompt 追加"强制规则"，代码层兜底：若模型首轮未调用，系统自动伪造 tool_call 并执行
+
+### 文档
+
+- 新增学习文档 `docs/learning/rag-must-retrieve-guide.md` + `.docx`
+- 更新 `docs/dev-log.md`、`docs/PROJECT-STATE.md`
+
+### 验证
+
+- 本地 Docker 实测：英文查询触发 `search_docs`，返回带 `[1]` 引用的详细 Markdown 回答
+- 生产服务器尚未部署本次改动
+
+---
+
 ## [v2.1.0] - 2026-06-22
 
 ### 新增
