@@ -1,5 +1,41 @@
 # Nexus 开发日志
 
+## 2026-07-06
+
+### 今日目标
+
+继续 ai-demos RAG P1,实现**强制首轮检索(must-retrieve)**:让 RAG Agent 在第一次回复前必须调用 `search_docs`,解决 P0 遗留的"泛问时模型可能直接自答"问题。
+
+### 完成内容
+
+- ✅ **`core/agent.py` 新增 `require_first_tool` 机制**:
+  - `Agent.__init__` 增加可选参数 `require_first_tool: Optional[str]`。
+  - 启用时,system prompt 追加"强制规则":必须在第一次回复时调用该工具,否则系统自动补调用一次。
+  - `chat()` 首轮若模型未返回 tool_calls,自动调用 `_force_tool_call()` 并插入完整对话历史(伪造 assistant tool_call + tool result),然后继续让模型基于结果作答。
+  - 新增 `_force_tool_call()` 辅助方法,保持 tool_call_id 与消息历史一致。
+- ✅ **`backends/rag_app/main.py` 启用 must-retrieve**:
+  - `agent = Agent(require_first_tool="search_docs")`。
+- ✅ **本地 Docker 端到端验证**:
+  - 容器已用新代码重启;`/rag/` 首页 200。
+  - 英文查询 `difference between list and tuple in Python` 触发 `search_docs`,返回带 `[1]` 引用的详细 Markdown 回答(3099 字符)。
+  - 中文查询因 Git Bash/Windows 终端编码传给 curl 乱码(测试环境问题),浏览器/生产环境正常 UTF-8,不影响功能。
+- ✅ **提交并推送**:
+  - commit `0adaab6` on master,已 push GitHub `origin/master`。
+
+### 关键决策 / 因果
+
+1. **为什么不用更复杂的 planner,而是简单兜底?** must-retrieve 是 P1 的第一步,目标是"保证检索发生"而不是"优化检索质量"。在 system prompt 强约束 + 代码兜底双重保险下,DeepSeek 实测已主动调用 `search_docs`;兜底逻辑覆盖模型不听话的边界情况,改动最小、可立即上线。
+2. **为什么参数硬编码为 `{"query": user_input}`?** 当前仅 RAG 使用 `require_first_tool`,且 `search_docs` 只接受 `query`。后续若要支持其它工具(如 FC 的 `get_weather`),可扩展为传入参数模板或让模型生成参数;当前保持简单。
+3. **为什么首轮只在 `turn == 0` 强制?** 强制检索只解决"模型跳过第一步"的问题。一旦首轮发生过检索,后续多轮工具链(如模型自己决定再算一次)应交给模型自主,避免过度干预。
+
+### 待改进
+
+- RAG P1 剩余:top_k 加大、rerank(Jina API)、hybrid(向量+BM25)、`chroma_db` 持久化挂卷。
+- 生产部署:本次只改了源码并 push,**生产服务器尚未部署**(需 `ssh shiyuan-prod` → pull → build → compose up)。
+- 中文测试环境:Git Bash 下 curl/Python requests 发送的中文表单会出现乱码,验证时应以浏览器/生产为准;可考虑改用 JSON 接口避免表单编码问题(但会改动 API 契约,需评估)。
+
+---
+
 ## 2026-06-26
 
 ### 今日目标

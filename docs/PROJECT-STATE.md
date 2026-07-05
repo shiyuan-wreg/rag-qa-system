@@ -1,8 +1,8 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-06-28(**P0 Agent 质量优化 + 监控主题两批改动已合并 master、推 GitHub、部署生产。生产现运行 `9cb3531`(含 0.5.0/0.6.0 更新公告),全 7 路由 HTTPS 200,端到端实测通过。无未合并分支。新增 `scripts/drift-check.sh` 开局核对漂移(SOP `继续X` 已纳入)。**)
-> 已知问题(入册防遗忘):① DeepSeek 偶发字面 `\n` 渲染成可见 "\n"(可选 polish);② `renderMarkdown` 两端重复(加第3个 demo 需第3份);③ 本地测试套件因缺 `jinja2` 等只能跑子集(md_converter/nexus 收集失败,容器内正常)。
+> 最近更新:2026-07-06(**RAG P1 must-retrieve 已实现:master `0adaab6`,本地 Docker 实测英文查询触发 search_docs 并给出带 [1] 引用的详细回答,已推 GitHub;生产尚未部署。**)
+> 已知问题(入册防遗忘):① DeepSeek 偶发字面 `\n` 渲染成可见 "\n"(可选 polish);② `renderMarkdown` 两端重复(加第3个 demo 需第3份);③ 本地测试套件因缺 `jinja2` 等只能跑子集(md_converter/nexus 收集失败,容器内正常);④ Git Bash 下 curl/Python 发送中文表单会乱码,验证以浏览器/生产为准。
 
 ---
 
@@ -25,7 +25,7 @@
 - DeepSeek 偶尔输出字面 `\n`(两字符),renderMarkdown 按真实换行分行,故这些会显示成可见的 "\n"——可选 polish(代码块已先抽出,可安全把剩余文本的字面 `\n` 转真换行)。
 - 泛问时模型可能不调 search_docs 直接自答(P1「强制检索」解决)。
 
-**下一步 = P1**:RAG top_k 加大 + rerank(Jina API)+ hybrid(向量+BM25)+ 强制检索;FC 接真实 API + 提醒持久化 + eval→safe;评估/LLM-as-a-Judge 量化。
+**下一步 = P1**:✅ 强制检索已完成(`0adaab6`);待做:RAG top_k 加大 + rerank(Jina API)+ hybrid(向量+BM25);FC 接真实 API + 提醒持久化 + eval→safe;评估/LLM-as-a-Judge 量化。
 
 ---
 
@@ -75,6 +75,8 @@
 ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`**。**Nexus Phase 2 已完成并合并入 `master`**(14 个提交,39 测试通过),新增 `/nexus/` Multi-Agent 工作流助手(FastAPI + SSE + 通义千问)。**DocHub 已完成并合并入 `master`**(19 个提交,59 测试通过),新增 `/doctomd/` Markdown 转 HTML 文档站(上传/路径转换/在线浏览/密码保护/CLI)。**Phase 4 服务器部署已完成**:项目已部署到韩国首尔阿里云轻量服务器(Ubuntu 24.04 LTS + Docker),通过 `https://www.shiyuan-wreg.cloud` 对外提供统一门户,Let's Encrypt SSL 证书已生效,所有子路径(`/rag/`、`/fc/`、`/nexus/`、`/doctomd/`、`/learn/`)及后端代理均验证通过。`master` **已推送**到 GitHub `origin/master`。
 
 **新增:门户「黑白科技风」重构 + IconForge 图标净化器(第 6 个 demo)** 已完成、合并入 `master`,**并于 2026-06-25 部署到首尔生产服务器(HEAD `ee8ff6e`)**。生产 `https://www.shiyuan-wreg.cloud` 全 8 路由 HTTPS 200 验证通过。门户改版:默认主题 `mono-light`,科技 hero(glitch 标题/打字机/假终端)、用户提供的 SVG logo 与 5 个 demo 图标、WorkCard 纯黑白四特效选中态、全局网格/噪点质感、等宽元信息字体。IconForge(`/iconforge/`):无状态 FastAPI 服务(端口 8005,照搬 DocHub 接线),三操作自选(位图转矢量 Pillow+potrace / 去白边 / 彩色转黑),原生 JS 单页 UI(亮暗双预览/下载/复制)。本地起栈用 `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d --build`。
+
+**RAG P1 强制检索(must-retrieve)已合并入 `master`(`0adaab6`,2026-07-06)**:为 `Agent` 新增 `require_first_tool` 参数,RAG 后端启用 `require_first_tool="search_docs"`;system prompt + 代码兜底双重保证模型首轮必检索。本地 Docker 实测 `/rag/chat` 英文查询触发 `search_docs` 并返回带 `[1]` 引用的详细 Markdown 回答。**生产服务器尚未部署本次改动**。
 
 **部署中修复的两个 bug(已提交推送):**
 - `2099d78` fix(portfolio): 补 `/iconforge` SPA 路由(App.tsx 漏了,点卡片空白页)。
