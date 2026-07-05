@@ -34,7 +34,7 @@ init_rag_tool()
 TOOL_MAP["search_docs"] = search_docs
 
 # 全局 Agent 实例（单用户简化版）
-agent = Agent()
+agent = Agent(require_first_tool="search_docs")
 
 
 @app.get("/", response_class=HTMLResponse)

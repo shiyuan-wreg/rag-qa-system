@@ -7,7 +7,7 @@ Agent 核心
 import json
 import os
 import traceback
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
 
@@ -32,11 +32,20 @@ class Agent:
       - 最大循环次数保护，防止死循环
     """
 
-    def __init__(self, model: str = "qwen-turbo"):
+    def __init__(self, model: str = "qwen-turbo", require_first_tool: Optional[str] = None):
         self.model = model
         self.llm = LLMClient.from_config()
         self.messages: List[Dict[str, Any]] = []
         self.max_turns = 5
+        self.require_first_tool = require_first_tool
+
+        forced_retrieval_rule = ""
+        if self.require_first_tool:
+            forced_retrieval_rule = (
+                f"\n强制规则:你必须在第一次回复时调用 '{self.require_first_tool}' 工具,"
+                "基于返回结果再组织答案。如果第一轮没有调用该工具,系统将自动替你调用一次。\n"
+            )
+
         self.system_message = {
             "role": "system",
             "content": (
@@ -52,6 +61,7 @@ class Agent:
                 "不要用它写示例代码、定义函数或演示——这类需求直接用文字说明即可。\n"
                 "查看文件内容或目录结构时,使用 read_file 或 list_files 工具。\n"
                 "如果工具调用失败,向用户说明情况或直接作答,不要反复重试同一个工具。"
+                + forced_retrieval_rule
             )
         }
 
@@ -89,6 +99,18 @@ class Agent:
                     self._handle_tool_calls(message)
                     continue
                 else:
+                    # 首轮强制检索:如果模型未调用要求的工具,自动替它调用一次
+                    if turn == 0 and self.require_first_tool:
+                        forced_result = self._force_tool_call(
+                            self.require_first_tool, user_input
+                        )
+                        tool_calls_log.append({
+                            "name": self.require_first_tool,
+                            "arguments": {"query": user_input},
+                            "result": forced_result,
+                        })
+                        continue
+
                     answer = message["content"]
                     self.messages.append({"role": "assistant", "content": answer})
                     return {
@@ -156,6 +178,51 @@ class Agent:
                 "content": result,
                 "tool_call_id": tool_call["id"],
             })
+
+    def _force_tool_call(self, tool_name: str, user_input: str) -> str:
+        """
+        强制调用指定工具并把结果加入对话历史。
+        用于 require_first_tool:模型首轮未主动调用时,系统替它调用一次。
+        """
+        if tool_name not in TOOL_MAP:
+            raise ValueError(f"强制调用的工具未注册: {tool_name}")
+
+        # 目前 RAG 的 search_docs 接收 query 参数;后续若需支持其它工具可扩展
+        tool_args = {"query": user_input}
+        tool_call_id = f"forced-{tool_name}-{len(self.messages)}"
+
+        print(f"  [强制工具] {tool_name}({json.dumps(tool_args, ensure_ascii=False)})")
+
+        # 伪造 assistant 的 tool_calls,保持对话历史完整
+        self.messages.append({
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "id": tool_call_id,
+                    "type": "function",
+                    "function": {
+                        "name": tool_name,
+                        "arguments": json.dumps(tool_args, ensure_ascii=False),
+                    }
+                }
+            ]
+        })
+
+        try:
+            result = TOOL_MAP[tool_name](**tool_args)
+        except Exception as e:
+            result = f"工具执行失败: {e}"
+            print(f"  [强制工具错误] {result}")
+
+        print(f"  [强制工具返回] {result[:200]}{'...' if len(result) > 200 else ''}")
+
+        self.messages.append({
+            "role": "tool",
+            "content": result,
+            "tool_call_id": tool_call_id,
+        })
+        return result
 
     def get_history(self) -> List[Dict[str, Any]]:
         """获取对话历史（用于调试）。"""
