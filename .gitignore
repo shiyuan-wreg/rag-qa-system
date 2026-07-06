@@ -49,3 +49,5 @@ docs/learning/*.docx
 
 # Prompt exports (optional, keep if you want them tracked)
 # docs/prompts/
+.worktrees/
+worktrees/
