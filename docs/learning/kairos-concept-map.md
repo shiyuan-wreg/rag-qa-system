@@ -30,6 +30,28 @@
 ### 1.2 容器化
 
 #### Docker
+
+- **一句话定义**：把应用和运行环境打包成"容器"，保证在不同机器上运行结果一致。
+- **为什么存在**：解决"在我机器上能跑，到你机器上跑不了"的环境不一致问题；让应用和依赖一起交付。
+- **Kairos 哪里用了**：
+  - 每个 demo 后端都有 Dockerfile（如 `backends/rag_app/Dockerfile`）
+  - `deploy/docker-compose.yml` 把多个容器一起启动
+  - 生产服务器 `/opt/kairos` 用 Docker 部署所有服务
+- **和相邻概念的关系**：
+  - 比虚拟机轻量，共享宿主机内核
+  - Docker Compose 是管理多个 Docker 容器的工具
+  - 镜像 ≈ 类，容器 ≈ 实例
+- **常见面试问法**：
+  - "Docker 和虚拟机有什么区别？"
+  - "Docker 镜像和容器的区别是什么？"
+  - "你们项目为什么用 Docker？"
+- **我踩过的坑 / 注意点**：
+  - 容器 IP 变化后，Nginx 反向代理需要重启
+  - 中国大陆拉 Docker Hub 镜像可能超时，需要预缓存或配加速器
+- **推荐学习资源**：
+  - Docker 官方 Get Started
+  - 项目中的 `deploy/docker-compose.yml`
+
 #### Docker Compose
 
 ### 1.3 Web 服务器与代理
