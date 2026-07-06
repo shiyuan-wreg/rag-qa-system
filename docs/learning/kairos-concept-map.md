@@ -600,4 +600,33 @@
 
 ## 面试问法汇总
 
-（待 Task 8 填充）
+### 基础设施层
+
+- Git：git merge 和 rebase 的区别是什么？
+- Docker：Docker 和虚拟机有什么区别？
+- Docker Compose：docker-compose 和 Dockerfile 的区别是什么？
+- Nginx：Nginx 反向代理的作用是什么？
+
+### 后端服务层
+
+- Python：Python 的 GIL 是什么？它带来了什么限制？
+- FastAPI：FastAPI 和 Flask 的区别是什么？
+- Uvicorn：Uvicorn 和 Gunicorn 的区别是什么？
+- RAG：RAG 和微调（Fine-tuning）的区别是什么？
+- FC：怎么保证模型生成的参数是正确的？
+
+### 前端门户层
+
+- React：useEffect 什么时候执行？依赖数组的作用是什么？
+- Vite：Vite 和 Webpack 的区别是什么？
+- TypeScript：interface 和 type 的区别是什么？
+- TailwindCSS：Tailwind 和传统 CSS 框架（如 Bootstrap）的区别是什么？
+
+### AI / Agent 能力层
+
+- LLM：怎么处理模型幻觉？
+- Function Calling：Function Calling 怎么保证安全性？
+
+### 通用
+
+- HTTP / REST API：GET 和 POST 的区别是什么？
