@@ -402,6 +402,32 @@
 ### 4.1 大模型基础
 
 #### LLM（DeepSeek）
+
+- **一句话定义**：大语言模型（Large Language Model），通过学习海量文本获得的概率模型，能够理解和生成自然语言文本。
+- **为什么存在**：提供通用的语言理解、推理和生成能力，让应用无需自己训练模型就能处理开放域的问答、翻译、摘要、代码生成等任务。
+- **Kairos 哪里用了**：
+  - `core/llm.py` 封装了统一的 `LLMClient`，支持 Qwen 和 OpenAI 兼容接口（DeepSeek 使用 openai 客户端）
+  - `.env` 中配置 `LLM_PROVIDER=openai`、`LLM_MODEL=deepseek-chat`、`LLM_BASE_URL=https://api.deepseek.com`
+  - `core/config.py` 的 `Config` 类从环境变量读取 LLM 配置，向后兼容旧的 `DASHSCOPE_API_KEY`
+  - RAG、FC、Nexus 等 demo 的聊天与推理都通过 `LLMClient.from_config()` 统一调用 DeepSeek
+- **和相邻概念的关系**：
+  - Prompt 是输入给模型的指令和上下文，Completion 是模型生成的输出
+  - Token 是模型处理文本的最小单位，影响计费、上下文长度和生成速度
+  - Temperature 控制生成结果的随机性，值越低越确定，值越高越创意
+  - Function Calling 依赖 LLM 理解工具描述并输出结构化调用请求
+- **常见面试问法**：
+  - "你们为什么选 DeepSeek？"
+  - "怎么处理模型幻觉？"
+  - "LLM 的上下文窗口满了怎么办？"
+  - "Temperature 和 Top-p 有什么区别？"
+- **我踩过的坑 / 注意点**：
+  - 从 DashScope 切换到 DeepSeek 时，由于 `LLMClient` 同时支持两种 provider，配置项命名和 base_url 容易写错，导致请求走到错误端点
+  - DeepSeek 对工具描述非常敏感，描述过宽会让模型把 `calculate`/`safe_execute_python` 当成通用代码执行器使用，需要收紧描述和限制 AST 节点
+  - 生产环境不要把 API Key 写死在代码里，统一通过 `.env` 注入，并避免把 `.env` 提交到仓库
+- **推荐学习资源**：
+  - DeepSeek 官方 API 文档
+  - 项目中的 `core/llm.py`、`.env`、`core/config.py`
+
 #### Token / Prompt / Completion
 #### 温度 / 上下文窗口
 
@@ -414,6 +440,32 @@
 
 #### RAG 流程
 #### Function Calling
+
+- **一句话定义**：Function Calling（函数调用）是一种让大语言模型根据用户意图，输出结构化工具调用请求（工具名 + 参数）的能力。
+- **为什么存在**：纯文本 LLM 无法获取实时信息、执行计算或操作外部系统；Function Calling 让模型能够"使用工具"，从而查天气、做计算、读文件、调用 API 等。
+- **Kairos 哪里用了**：
+  - FC demo 在 `backends/fc_app/main.py` 中定义了 `get_weather`、`calculate`、`set_reminder` 三个工具，模型根据对话选择调用
+  - `core/tools.py` 定义了共享工具 `search_docs`、`safe_execute_python`、`read_file`、`list_files`，供 RAG 等后端复用
+  - `core/agent.py` 将 `TOOLS` schema 传给 `LLMClient`，并解析模型返回的 `tool_calls`，形成"请求模型 -> 执行工具 -> 把结果返回给模型"的多轮循环
+- **和相邻概念的关系**：
+  - tool schema（名称、描述、参数 JSON Schema）定义了工具的输入格式和约束
+  - LLM 负责阅读 schema 并决定是否调用、调用哪个、传入什么参数
+  - Agent 是多轮对话 + 工具调用的整体系统，Function Calling 是 Agent 做决策的关键机制
+  - 与传统 API 调用由程序员硬编码不同，Function Calling 由模型动态决定调用路径
+- **常见面试问法**：
+  - "Function Calling 和传统 API 调用的区别是什么？"
+  - "Function Calling 怎么保证安全性？"
+  - "参数错了或缺失必填参数怎么办？"
+  - "如果模型调用了不存在的工具怎么办？"
+- **我踩过的坑 / 注意点**：
+  - 工具描述必须精确：`safe_execute_python` 曾因描述过宽被模型用来写示例代码、定义函数，已通过收紧描述和限制 AST 节点修复为仅允许纯算术表达式
+  - 缺少必填参数时不要猜测，应主动向用户反问；`backends/fc_app/main.py` 用 `missing_required_args` 检查并提示
+  - 工具执行失败要如实返回给模型，不要让模型编造结果
+  - 工具权限要最小化，避免把文件系统、网络、代码执行等敏感能力无限制地暴露给模型
+- **推荐学习资源**：
+  - DeepSeek / OpenAI Function Calling 官方文档
+  - 项目中的 `backends/fc_app/main.py`、`core/tools.py`、`core/agent.py`
+
 #### Multi-Agent 协作
 
 ### 4.4 评估与监控
@@ -458,6 +510,39 @@
 ### 6.4 AI 辅助开发
 
 #### Claude Code
+
+## 7. 通用协议层
+
+### 7.1 通信协议
+
+#### HTTP / REST API
+
+- **一句话定义**：HTTP 是互联网上应用最广泛的通信协议，REST API 是基于 HTTP 设计的一种资源导向、无状态的接口风格。
+- **为什么存在**：统一前后端、服务与服务之间的通信方式；让不同语言、不同平台能够使用标准方法（GET/POST/PUT/DELETE）和统一资源标识符（URL）进行交互。
+- **Kairos 哪里用了**：
+  - 所有 demo 后端的入口都是 RESTful 风格的 HTTP 接口，例如 `backends/rag_app/main.py` 中的 `@app.post("/chat")`、`@app.post("/clear")`、`@app.post("/eval")`
+  - `backends/fc_app/main.py` 同样提供 `@app.post("/chat")`、`@app.post("/clear")`、`@app.post("/execute")`
+  - 前端门户通过 iframe 加载 demo 页面，页面内再用 `fetch('chat', { method: 'POST', body: form })` 调用后端 HTTP 接口
+  - Nginx 在 `/rag/`、`/fc/` 等路径做反向代理，把外部 HTTPS 请求转发到对应后端容器
+- **和相邻概念的关系**：
+  - GET 用于获取资源，POST 用于提交数据或执行操作，PUT/PATCH 用于更新，DELETE 用于删除
+  - JSON 是目前最常用的请求/响应数据格式，与 HTTP 的 `Content-Type: application/json` 配合使用
+  - Status Code（如 200、400、401、500）表示请求处理结果，前端据此决定成功/失败/重试逻辑
+  - Endpoint 是一个具体的 URL 路径，对应一个后端处理函数；FastAPI 通过装饰器把 endpoint 映射到 Python 函数
+- **常见面试问法**：
+  - "GET 和 POST 的区别是什么？"
+  - "RESTful API 的设计原则是什么？"
+  - "HTTP 状态码 401 和 403 有什么区别？"
+  - "幂等性和安全性是什么意思？"
+- **我踩过的坑 / 注意点**：
+  - iframe 嵌入的 demo 页面要与父站点同源，否则 localStorage 主题同步和 fetch 请求会受跨域限制
+  - 路径拼写和代理规则要一致：开发环境用 `/rag/`、`/fc/` 尾斜杠代理，无斜杠路径可能命中 SPA 路由而不是后端接口
+  - FastAPI 中 `Form(...)` 和 `Body(...)` 用错会导致前端收到 422 错误，要前后端协商好 Content-Type
+  - 后端返回错误时建议携带明确的 status code 和错误信息，不要统一返回 200 再在里面藏错误字段
+- **推荐学习资源**：
+  - MDN HTTP 文档
+  - RESTful API 设计指南
+  - 项目中的 `backends/rag_app/main.py`、`backends/fc_app/main.py`、`deploy/nginx/nginx.conf`
 
 ## 面试问法汇总
 
