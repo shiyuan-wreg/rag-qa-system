@@ -35,7 +35,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 export default function Me() {
-  useDocumentTitle('个人 · 个人集成学习网站')
+  useDocumentTitle('个人 · Kairos')
 
   return (
     <PageTransition>

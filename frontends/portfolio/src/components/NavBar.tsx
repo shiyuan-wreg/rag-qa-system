@@ -50,7 +50,7 @@ export default function NavBar() {
         <div className="flex items-center justify-between h-14">
           <Link to="/" className="flex items-center gap-2.5">
             <Logo className="w-8 h-8 text-primary" />
-            <span className="font-bold text-primary">个人集成学习网站</span>
+            <span className="font-bold text-primary">Kairos</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-6">

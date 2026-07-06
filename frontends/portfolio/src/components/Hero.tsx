@@ -11,7 +11,7 @@ export default function Hero() {
       <span className="hero-box hero-box--tr" aria-hidden="true" />
       <span className="hero-box hero-box--bl" aria-hidden="true" />
       <div className="relative z-10 max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 text-center">
-        <p className="font-mono text-xs tracking-[0.2em] uppercase text-secondary mb-6">个人集成学习网站 · Personal Lab</p>
+        <p className="font-mono text-xs tracking-[0.2em] uppercase text-secondary mb-6">Kairos · Personal Workspace</p>
         <GlitchTitle text="构建可运行的 AI / Agent 应用" />
         <Typewriter
           text="RAG · Function-Calling · Multi-Agent · 已部署生产环境"

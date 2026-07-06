@@ -3,7 +3,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { CHANGELOGS } from '../data/changelogs'
 
 export default function Changelog() {
-  useDocumentTitle('更新公告 · 个人集成学习网站')
+  useDocumentTitle('更新公告 · Kairos')
 
   const notes = CHANGELOGS
 
