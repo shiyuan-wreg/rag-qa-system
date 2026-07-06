@@ -4,6 +4,10 @@
 > 最近更新:2026-07-06(**RAG P1 must-retrieve 已实现并部署生产:master `0adaab6`,英文查询触发 search_docs 并给出带 [1] 引用的详细回答,全 7 路由 200。**)
 > 已知问题(入册防遗忘):① DeepSeek 偶发字面 `\n` 渲染成可见 "\n"(可选 polish);② `renderMarkdown` 两端重复(加第3个 demo 需第3份);③ 本地测试套件因缺 `jinja2` 等只能跑子集(md_converter/nexus 收集失败,容器内正常);④ Git Bash 下 curl/Python 发送中文表单会乱码,验证以浏览器/生产为准。
 
+## 2026-07-06 品牌重命名
+
+项目从 `ai-demos` 重命名为 **Kairos**，定位为个人工具/项目/学习文档统一门户。本地目录 `ai-demos/` 已重命名为 `kairos/`，服务器部署目录同步迁移至 `/opt/kairos`。
+
 ---
 
 ## ✅ 已部署生产:P0 Agent 质量优化(`feat/agent-quality-p0` 已合并 master)
@@ -55,7 +59,7 @@
 - md_converter / DocHub 后端主题同步(`templates/base|home|login.html` + `static/style.css`)。
 - learn 学习站:覆盖层只盖了暗色三主题(deepblue/cyber/machine),浅色主题保持原样;若要精细化需逐组件改。
 
-**机制(demo 跟随主题)**:门户 `setTheme` 写 `localStorage['ai-demos-theme']` → 同源 iframe 收到 `storage` 事件 → 切 `data-demo-theme`(learn 另加 `.demo-dark` class)。5 主题 `--d-*` token 调色板**内联**在各后端 HTML(未抽共享文件,有重复)。
+**机制(demo 跟随主题)**:门户 `setTheme` 写 `localStorage['kairos-theme']` → 同源 iframe 收到 `storage` 事件 → 切 `data-demo-theme`(learn 另加 `.demo-dark` class)。5 主题 `--d-*` token 调色板**内联**在各后端 HTML(未抽共享文件,有重复)。
 
 **⚠️ 部署注意(重要,易踩坑)**
 - 本地 docker 的 rag/fc/nexus 改动是用 `docker cp main.py / index.html` 塞进**运行中容器**的,**没烤进镜像**;容器一旦 recreate 就回退。learn 的 dist 是磁盘重建(nginx 挂卷,实时生效)。
@@ -72,7 +76,7 @@
 
 ## 一句话现状
 
-ai-demos 已重构为 monorepo,「个人集成学习网站」**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`**。**Nexus Phase 2 已完成并合并入 `master`**(14 个提交,39 测试通过),新增 `/nexus/` Multi-Agent 工作流助手(FastAPI + SSE + 通义千问)。**DocHub 已完成并合并入 `master`**(19 个提交,59 测试通过),新增 `/doctomd/` Markdown 转 HTML 文档站(上传/路径转换/在线浏览/密码保护/CLI)。**Phase 4 服务器部署已完成**:项目已部署到韩国首尔阿里云轻量服务器(Ubuntu 24.04 LTS + Docker),通过 `https://www.shiyuan-wreg.cloud` 对外提供统一门户,Let's Encrypt SSL 证书已生效,所有子路径(`/rag/`、`/fc/`、`/nexus/`、`/doctomd/`、`/learn/`)及后端代理均验证通过。`master` **已推送**到 GitHub `origin/master`。
+**Kairos** 已重构为 monorepo，定位为个人工具/项目/学习文档统一门户，**Phase 1 已完成并在本地 docker-compose 跑通**;`feat/portfolio-phase1`(13 个提交,20 测试通过)**已合并入 `master`**。**Nexus Phase 2 已完成并合并入 `master`**(14 个提交,39 测试通过),新增 `/nexus/` Multi-Agent 工作流助手(FastAPI + SSE + 通义千问)。**DocHub 已完成并合并入 `master`**(19 个提交,59 测试通过),新增 `/doctomd/` Markdown 转 HTML 文档站(上传/路径转换/在线浏览/密码保护/CLI)。**Phase 4 服务器部署已完成**:项目已部署到韩国首尔阿里云轻量服务器(Ubuntu 24.04 LTS + Docker),通过 `https://www.shiyuan-wreg.cloud` 对外提供统一门户,Let's Encrypt SSL 证书已生效,所有子路径(`/rag/`、`/fc/`、`/nexus/`、`/doctomd/`、`/learn/`)及后端代理均验证通过。`master` **已推送**到 GitHub `origin/master`。
 
 **新增:门户「黑白科技风」重构 + IconForge 图标净化器(第 6 个 demo)** 已完成、合并入 `master`,**并于 2026-06-25 部署到首尔生产服务器(HEAD `ee8ff6e`)**。生产 `https://www.shiyuan-wreg.cloud` 全 8 路由 HTTPS 200 验证通过。门户改版:默认主题 `mono-light`,科技 hero(glitch 标题/打字机/假终端)、用户提供的 SVG logo 与 5 个 demo 图标、WorkCard 纯黑白四特效选中态、全局网格/噪点质感、等宽元信息字体。IconForge(`/iconforge/`):无状态 FastAPI 服务(端口 8005,照搬 DocHub 接线),三操作自选(位图转矢量 Pillow+potrace / 去白边 / 彩色转黑),原生 JS 单页 UI(亮暗双预览/下载/复制)。本地起栈用 `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d --build`。
 
@@ -165,7 +169,7 @@ docker compose -f deploy/docker-compose.yml up -d --build
 - 无未合并 feature 分支
 - **本地 Docker 验证已通过**（访问 http://127.0.0.1:8080，所有路径 200，后端代理正常）
 - **服务器部署已完成**：`https://www.shiyuan-wreg.cloud` 已对外提供服务，SSL 证书有效，HTTP 自动跳转 HTTPS，所有子路径及后端代理正常
-- **生产环境信息**：服务器 IP `8.213.145.110`（阿里云首尔），OS `Ubuntu 24.04 LTS`，部署目录 `/opt/ai-demos`，DocHub 密码见 `.env`
+- **生产环境信息**：服务器 IP `8.213.145.110`（阿里云首尔），OS `Ubuntu 24.04 LTS`，部署目录 `/opt/kairos`，DocHub 密码见 `.env`
 
 ---
 
@@ -182,7 +186,7 @@ docker compose -f deploy/docker-compose.yml up -d --build
 
 ## 关键环境事实
 
-- 仓库:`C:/Users/hzs17/Desktop/ai-demos`,Windows + Git Bash。
+- 仓库:`C:/Users/hzs17/Desktop/kairos`,Windows + Git Bash。
 - 工具:Node v20、npm v10、Docker 28 + Compose v2(Docker Desktop 需手动启动)。
 - 国内拉 Docker Hub 镜像易超时:先 `docker pull nginx:1.27-alpine` 和 `python:3.12-slim` 预缓存,或配镜像加速器。
 - LLM 用通义千问(dashscope),`DASHSCOPE_API_KEY` 在仓库根 `.env`(未跟踪)。

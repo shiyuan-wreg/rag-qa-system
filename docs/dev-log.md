@@ -40,6 +40,14 @@
 - RAG P1 剩余:top_k 加大、rerank(Jina API)、hybrid(向量+BM25)、`chroma_db` 持久化挂卷。
 - 中文测试环境:Git Bash 下 curl/Python requests 发送的中文表单会出现乱码,验证时应以浏览器/生产为准;可考虑改用 JSON 接口避免表单编码问题(但会改动 API 契约,需评估)。
 
+### 品牌重命名（2026-07-06）
+
+- ✅ 项目更名为 **Kairos**
+- ✅ 前端门户品牌文案、标题、Hero 副标题全部更新
+- ✅ 前后端主题同步 key 从 `ai-demos-theme` 改为 `kairos-theme`
+- ✅ 部署路径从 `/opt/ai-demos` 更新为 `/opt/kairos`
+- ✅ 本地目录从 `ai-demos/` 重命名为 `kairos/`
+
 ---
 
 ## 2026-06-26

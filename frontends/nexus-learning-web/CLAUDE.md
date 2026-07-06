@@ -6,9 +6,9 @@
 
 ## 项目定位
 
-`nexus-learning-web` 是 `ai-demos` 项目的配套交互式学习站点，基于 React + Vite + TypeScript + TailwindCSS 构建。
+`nexus-learning-web` 是 **Kairos** 项目的配套交互式学习站点，基于 React + Vite + TypeScript + TailwindCSS 构建。
 
-它不是独立项目，而是服务于 Nexus（ai-demos）的学习内容：把原本静态的 Word/Markdown 课程文档，转换为有即时测验、代码实验、进度追踪的 Web 学习体验。
+它不是独立项目，而是服务于 Nexus（Kairos）的学习内容：把原本静态的 Word/Markdown 课程文档，转换为有即时测验、代码实验、进度追踪的 Web 学习体验。
 
 ---
 
@@ -213,13 +213,13 @@ CodeLab {
 
 ---
 
-## 与 ai-demos/Nexus 的关系
+## 与 Kairos/Nexus 的关系
 
-`nexus-learning-web` 是 `ai-demos` 的子项目：
+`nexus-learning-web` 是 **Kairos** 的子项目：
 
 - 学习内容对应 Nexus 的技术栈和 Phase 1 ~ 4。
-- 课程代码示例可在 `ai-demos/core/`、`ai-demos/rag/` 中找到对应实现。
-- 学习完课程后，用户应继续推进 `ai-demos` 的 Phase 2 / 3 / 4。
+- 课程代码示例可在 `kairos/core/`、`kairos/rag/` 中找到对应实现。
+- 学习完课程后，用户应继续推进 **Kairos** 的 Phase 2 / 3 / 4。
 
 ---
 

@@ -1,4 +1,4 @@
-# 基于 RAG + Function Calling 的智能文档任务 Agent
+# Kairos — 基于 RAG + Function Calling 的智能文档任务 Agent
 
 一个整合 **检索增强生成（RAG）** 与 **Function Calling** 的智能 Agent 系统，支持基于知识库的问答、代码执行、文件读取等多工具协同，并内置回答质量评估模块。
 
@@ -89,7 +89,7 @@
 ## 项目结构
 
 ```
-ai-demos/
+kairos/
 ├── main.py                 # Nexus 多智能体命令行入口
 ├── requirements.txt
 ├── .env.example
@@ -123,8 +123,8 @@ ai-demos/
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/shiyuan-wreg/ai-demos.git
-cd ai-demos
+git clone https://github.com/shiyuan-wreg/ai-demos.git kairos
+cd kairos
 ```
 
 ### 2. 配置环境
