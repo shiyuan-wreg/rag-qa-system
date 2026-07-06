@@ -1,12 +1,25 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-07-06(**RAG P1 must-retrieve 已实现并部署生产:master `0adaab6`,英文查询触发 search_docs 并给出带 [1] 引用的详细回答,全 7 路由 200。**)
+> 最近更新:2026-07-06(**项目已重命名为 Kairos,本地目录 ai-demos/ → kairos/,服务器目录 /opt/ai-demos → /opt/kairos,生产部署验证通过。最终提交见当前 master HEAD。**)
+> 上一更新:2026-07-06(RAG P1 must-retrieve 已实现并部署生产:master `0adaab6`,英文查询触发 search_docs 并给出带 [1] 引用的详细回答,全 7 路由 200。)
 > 已知问题(入册防遗忘):① DeepSeek 偶发字面 `\n` 渲染成可见 "\n"(可选 polish);② `renderMarkdown` 两端重复(加第3个 demo 需第3份);③ 本地测试套件因缺 `jinja2` 等只能跑子集(md_converter/nexus 收集失败,容器内正常);④ Git Bash 下 curl/Python 发送中文表单会乱码,验证以浏览器/生产为准。
 
-## 2026-07-06 品牌重命名
+## 2026-07-06 品牌重命名 ✅ 已完成并验证
 
 项目从 `ai-demos` 重命名为 **Kairos**，定位为个人工具/项目/学习文档统一门户。本地目录 `ai-demos/` 已重命名为 `kairos/`，服务器部署目录同步迁移至 `/opt/kairos`。
+
+**最终状态**
+- 前端门户品牌文案、标题、Hero 副标题(`Kairos · Personal Workspace`)、页面 metadata 已全部更新
+- 前后端主题同步 key 从 `ai-demos-theme` 统一改为 `kairos-theme`
+- 部署配置与脚本中的路径从 `/opt/ai-demos` 更新为 `/opt/kairos`
+- 最终提交见当前 master HEAD
+
+**验证结果**
+- 本地 Docker 全栈 7 路由 200
+- 生产服务器 7 路由 200
+- RAG must-retrieve 在生产环境正常工作
+- `/learn/` 主题 key 验证为 `kairos-theme`
 
 ---
 

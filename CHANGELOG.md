@@ -6,9 +6,17 @@
 
 - 项目品牌从 `ai-demos` / "个人集成学习网站" 重命名为 **Kairos**
 - 重新定位为个人工具、项目成果与学习文档的统一门户
+- 前端门户品牌文案、标题、Hero 副标题(`Kairos · Personal Workspace`)、页面 metadata 更新
+- 前后端主题同步 key 从 `ai-demos-theme` 统一改为 `kairos-theme`
 - 部署目录从 `/opt/ai-demos` 迁移到 `/opt/kairos`
 
----
+### Verified
+
+- 本地 Docker 全栈 7 路由 200
+- 生产服务器 7 路由 200
+- RAG must-retrieve 在生产环境正常工作
+- `/learn/` 主题 key 验证为 `kairos-theme`
+- 最终提交见当前 master HEAD
 
 ## [v2.1.1] - 2026-07-06
 
