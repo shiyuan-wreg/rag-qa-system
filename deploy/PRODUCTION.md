@@ -4,7 +4,7 @@
 
 ## 环境
 
-- 生产 = 首尔阿里云轻量,`8.213.145.110`,Ubuntu 24.04,部署目录 `/opt/ai-demos`,域名 https://www.shiyuan-wreg.cloud
+- 生产 = 首尔阿里云轻量,`8.213.145.110`,Ubuntu 24.04,部署目录 `/opt/kairos`,域名 https://www.shiyuan-wreg.cloud
 - 代码靠服务器 **`git pull origin master`** 更新(remote = GitHub `shiyuan-wreg/rag-qa-system`),所以本地改动**先合并 master + 推 GitHub**,服务器再 pull。
 - `.env` 在**服务器**上、gitignored、含 DeepSeek(聊天)+ Jina(RAG embedding)密钥,**部署不碰它**。
 
@@ -17,13 +17,13 @@
 ## 增量重部署(一条命令)
 
 ```
-ssh <别名> 'cd /opt/ai-demos && git pull origin master && bash deploy/build-frontends.sh && docker compose -f deploy/docker-compose.yml up -d --build'
+ssh <别名> 'cd /opt/kairos && git pull origin master && bash deploy/build-frontends.sh && docker compose -f deploy/docker-compose.yml up -d --build'
 ```
 
 大构建建议放服务器后台 + 写日志(防 ssh 断线 / 工具超时),再轮询:
 
 ```
-ssh <别名> 'cd /opt/ai-demos && nohup bash -c "bash deploy/build-frontends.sh && docker compose -f deploy/docker-compose.yml up -d --build; echo DONE_\$?" > /tmp/deploy.log 2>&1 & echo started'
+ssh <别名> 'cd /opt/kairos && nohup bash -c "bash deploy/build-frontends.sh && docker compose -f deploy/docker-compose.yml up -d --build; echo DONE_\$?" > /tmp/deploy.log 2>&1 & echo started'
 # 然后:ssh <别名> 'tail -20 /tmp/deploy.log'  直到出现 DONE_0
 ```
 
@@ -43,5 +43,5 @@ ssh <别名> 'D=www.shiyuan-wreg.cloud; for p in "" rag fc nexus doctomd learn i
 ## 回滚
 
 ```
-ssh <别名> 'cd /opt/ai-demos && git reset --hard <旧HEAD> && docker compose -f deploy/docker-compose.yml up -d --build'
+ssh <别名> 'cd /opt/kairos && git reset --hard <旧HEAD> && docker compose -f deploy/docker-compose.yml up -d --build'
 ```

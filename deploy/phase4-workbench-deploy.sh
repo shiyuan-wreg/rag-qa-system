@@ -8,14 +8,14 @@
 #   4. /tmp/phase4-workbench-deploy.sh your-email@example.com
 #
 # 注意：
-#   - 运行前请先在 /opt/ai-demos/.env 写入真实配置（含 DASHSCOPE_API_KEY）
+#   - 运行前请先在 /opt/kairos/.env 写入真实配置（含 DASHSCOPE_API_KEY）
 #   - 建议在 tmux/screen 里执行，防止 Workbench 断开导致部署中断
 
 set -e
 
 DOMAIN="www.shiyuan-wreg.cloud"
 EMAIL="${1:-}"
-DEPLOY_DIR="/opt/ai-demos"
+DEPLOY_DIR="/opt/kairos"
 NODE_VERSION="20.14.0"
 
 if [ -z "$EMAIL" ]; then
