@@ -28,10 +28,16 @@
 2. **为什么参数硬编码为 `{"query": user_input}`?** 当前仅 RAG 使用 `require_first_tool`,且 `search_docs` 只接受 `query`。后续若要支持其它工具(如 FC 的 `get_weather`),可扩展为传入参数模板或让模型生成参数;当前保持简单。
 3. **为什么首轮只在 `turn == 0` 强制?** 强制检索只解决"模型跳过第一步"的问题。一旦首轮发生过检索,后续多轮工具链(如模型自己决定再算一次)应交给模型自主,避免过度干预。
 
+### 生产部署(2026-07-06 晚)
+
+- ✅ **服务器 `ssh shiyuan-prod` 连接正常**,当前 HEAD `9cb3531`。
+- ✅ **后台执行 `git pull origin master && bash deploy/build-frontends.sh && docker compose -f deploy/docker-compose.yml up -d --build`**(pid 212169),约 30 秒完成,`DONE_0`。
+- ✅ **7 路由 200 验证**: `/ /rag/ /fc/ /nexus/ /doctomd/ /learn/ /iconforge/` 全部 200。
+- ✅ **RAG must-retrieve 端到端验证**:POST `/rag/chat` 查询 `What is the difference between Python list and tuple?` 返回 HTTP 200,`tool_calls` 含 `search_docs`,回答含 `[1]` 引用、表格、代码示例,约 3500 字符。
+
 ### 待改进
 
 - RAG P1 剩余:top_k 加大、rerank(Jina API)、hybrid(向量+BM25)、`chroma_db` 持久化挂卷。
-- 生产部署:本次只改了源码并 push,**生产服务器尚未部署**(需 `ssh shiyuan-prod` → pull → build → compose up)。
 - 中文测试环境:Git Bash 下 curl/Python requests 发送的中文表单会出现乱码,验证时应以浏览器/生产为准;可考虑改用 JSON 接口避免表单编码问题(但会改动 API 契约,需评估)。
 
 ---
