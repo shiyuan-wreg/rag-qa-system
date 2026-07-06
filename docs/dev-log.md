@@ -47,6 +47,12 @@
 - ✅ 前后端主题同步 key 从 `ai-demos-theme` 改为 `kairos-theme`
 - ✅ 部署路径从 `/opt/ai-demos` 更新为 `/opt/kairos`
 - ✅ 本地目录从 `ai-demos/` 重命名为 `kairos/`
+- ✅ 本地 Docker 全栈 7 路由 200
+- ✅ 生产服务器 7 路由 200
+- ✅ RAG must-retrieve 在生产环境正常工作
+- ✅ 品牌文案与主题同步 key 验证通过
+- ✅ `/learn/` 主题 key 验证为 `kairos-theme`
+- ✅ 最终提交 `86dacba`
 
 ---
 
