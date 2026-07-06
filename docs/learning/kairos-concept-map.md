@@ -134,16 +134,128 @@
 ### 2.1 语言与运行时
 
 #### Python
+
+- **一句话定义**：后端主要编程语言，解释型、动态类型，拥有丰富的 AI 与 Web 开发生态。
+- **为什么存在**：语法简洁、库生态成熟，FastAPI、LangChain、Chroma 等 AI 工程组件都优先支持 Python，适合快速搭建 LLM 应用原型和生产服务。
+- **Kairos 哪里用了**：
+  - 所有 demo 后端（rag_app、fc_app、nexus_app、md_converter_app、iconforge_app）都基于 Python 实现
+  - `backends/rag_app/main.py`、`backends/fc_app/main.py` 等业务入口均为 Python 文件
+  - `core/agent.py`、`core/rag_tool.py`、`core/tools.py` 等共享核心模块也使用 Python
+- **和相邻概念的关系**：
+  - FastAPI 是 Python Web 框架，Uvicorn 是运行 FastAPI 的 ASGI 服务器
+  - pip 是 Python 包管理器，`requirements.txt` 描述项目依赖
+  - pytest 是 Python 测试框架，Kairos 中用于后端单元测试与评估
+- **常见面试问法**：
+  - "Python 的 GIL 是什么？它带来了什么限制？"
+  - "Python 中异步编程怎么写？async/await 和线程有什么区别？"
+  - "列表和元组的区别是什么？字典的底层实现是什么？"
+- **我踩过的坑 / 注意点**：
+  - Windows 本地开发与 Linux 生产环境的路径分隔、换行符、文件编码可能不一致，提交前注意 `.gitattributes`
+  - 同步阻塞代码（如长时间计算、同步 HTTP 请求）会卡住整个服务，后端应尽量使用异步或放到线程池
+  - 虚拟环境要隔离，不要把系统 Python 和项目依赖混用
+- **推荐学习资源**：
+  - Python 官方教程与标准库文档
+  - 项目中的 `backends/rag_app/main.py`、`requirements.txt`
+
 #### Uvicorn
+
+- **一句话定义**：Python 的 ASGI 服务器，用于运行异步 Web 应用（如 FastAPI）。
+- **为什么存在**：WSGI（如 Gunicorn 默认模式）不支持异步，而现代 Python Web 框架大量使用 async/await；Uvicorn 基于 uvloop 和 httptools，能高效处理并发连接。
+- **Kairos 哪里用了**：
+  - `backends/rag_app/Dockerfile` 中以 `uvicorn backends.rag_app.main:app --host 0.0.0.0 --port 8001 --workers 1` 启动服务
+  - 本地开发命令：`venv/Scripts/python.exe -m uvicorn backends.rag_app.main:app --reload --port 8001`
+  - 所有 FastAPI 后端的容器入口都使用 Uvicorn
+- **和相邻概念的关系**：
+  - ASGI 是 Uvicorn 实现的协议，FastAPI 是构建在 Starlette（ASGI 框架）之上的 Web 框架
+  - WSGI 是上一代同步接口，Gunicorn 可通过 worker class 搭配 Uvicorn 运行 ASGI 应用
+  - Uvicorn 负责监听端口、管理连接、把请求交给 FastAPI 应用处理
+- **常见面试问法**：
+  - "Uvicorn 和 Gunicorn 的区别是什么？"
+  - "ASGI 和 WSGI 有什么区别？"
+  - "生产环境如何部署 Uvicorn？"
+- **我踩过的坑 / 注意点**：
+  - 开发时建议加 `--reload` 实现热重载，但生产环境要关闭 reload，并通过 `--workers` 或 Gunicorn+Uvicorn worker 提高并发
+  - 容器内监听 `0.0.0.0`，本地开发常监听 `127.0.0.1`，直接复制命令可能访问不到
+  - 异步函数里调用同步阻塞库（如某些数据库驱动）会拖垮整个事件循环
+- **推荐学习资源**：
+  - Uvicorn 官方文档
+  - 项目中的 `backends/rag_app/Dockerfile`、`backends/fc_app/main.py` 底部 `uvicorn.run(...)`
 
 ### 2.2 Web 框架
 
 #### FastAPI
 
+- **一句话定义**：现代、高性能的 Python Web 框架，基于 Starlette 和 Pydantic，原生支持异步和自动生成 OpenAPI 文档。
+- **为什么存在**：让开发者用少量代码快速构建类型安全的 REST API；自动校验请求参数、生成 Swagger UI，并把同步/异步路由性能做到极致。
+- **Kairos 哪里用了**：
+  - 所有 demo 后端的 `/chat`、`/clear` 等接口都用 FastAPI 定义，例如 `backends/rag_app/main.py` 中的 `@app.post("/chat")`
+  - `backends/fc_app/main.py` 同样使用 FastAPI 提供 `/chat`、`/clear`、`/execute` 接口
+  - 前端通过 `fetch('chat', { method: 'POST', body: form })` 调用 FastAPI 后端
+- **和相邻概念的关系**：
+  - ASGI 是 FastAPI 运行的协议基础，Uvicorn 是生产常用的 ASGI 服务器
+  - Pydantic 负责请求/响应模型校验，`query: str = Form(...)` 是 Pydantic 风格的使用方式
+  - Starlette 是 FastAPI 的底层 ASGI 工具包，提供路由、中间件、请求响应对象
+- **常见面试问法**：
+  - "FastAPI 和 Flask 的区别是什么？"
+  - "FastAPI 的依赖注入怎么用？"
+  - "路径参数、查询参数、请求体有什么区别？"
+- **我踩过的坑 / 注意点**：
+  - 同步阻塞代码会卡住整个服务：如果路由函数里执行长时间同步任务，所有并发请求都会被阻塞，应使用 `async def` 或 `run_in_threadpool`
+  - 自动生成的 Swagger 文档很方便，但不要为了文档而暴露内部接口或敏感参数
+  - `Form`、`Body`、`Query` 等参数类型用错会导致前端 422 错误
+- **推荐学习资源**：
+  - FastAPI 官方文档
+  - 项目中的 `backends/rag_app/main.py`、`backends/fc_app/main.py`
+
 ### 2.3 各 demo 后端
 
 #### RAG
+
+- **一句话定义**：检索增强生成（Retrieval-Augmented Generation），先在外部知识库中检索相关文档片段，再把检索结果交给 LLM 生成回答。
+- **为什么存在**：大模型训练数据有截止日期，对私有文档或最新信息容易幻觉；RAG 让 LLM 基于检索到的真实资料回答，提高准确性和可溯源性。
+- **Kairos 哪里用了**：
+  - `/rag/chat` 接口在 `backends/rag_app/main.py` 中实现，调用 `Agent(require_first_tool="search_docs")`
+  - `core/rag_tool.py` 封装了 RAG 检索流程：`load_documents` → `split_documents` → `get_or_create_vectorstore` → `retrieve`
+  - `core/agent.py` 通过 `require_first_tool="search_docs"` 强制第一轮必须调用检索工具，避免模型跳过检索直接自答
+- **和相邻概念的关系**：
+  - Embedding（Jina）把文本变成向量，向量数据库（Chroma）存储并相似度检索这些向量
+  - LLM 负责根据检索结果生成最终回答
+  - Function Calling 是触发 `search_docs` 工具的机制，RAG 是「检索+生成」的整体流程
+- **常见面试问法**：
+  - "RAG 和微调（Fine-tuning）的区别是什么？"
+  - "检索不到相关内容时怎么办？"
+  - "如何评估 RAG 的效果？"
+- **我踩过的坑 / 注意点**：
+  - 模型可能跳过检索直接自答，已用 `require_first_tool="search_docs"` 强制首轮检索；若模型仍未调用，Agent 会自动替它调用一次
+  - 检索片段过长会超出上下文窗口，需在 `format_retrieved` 中限制 `max_chars`
+  - Jina API Key 未配置时 RAG 工具无法初始化，要给出明确错误提示而不是静默失败
+- **推荐学习资源**：
+  - 项目中的 `core/agent.py`、`core/rag_tool.py`、`backends/rag_app/main.py`
+  - LangChain RAG 教程
+
 #### FC
+
+- **一句话定义**：Function Calling（函数调用），让 LLM 根据用户意图决定调用哪个外部工具、传入什么参数。
+- **为什么存在**：LLM 只能生成文本，无法获取实时信息或执行动作；FC 让模型不仅能"说话"，还能查天气、做计算、读文件、调用 API 等。
+- **Kairos 哪里用了**：
+  - `/fc/chat` 接口在 `backends/fc_app/main.py` 中实现，工具包括 `get_weather`、`calculate`、`set_reminder`
+  - `core/tools.py` 定义了共享工具 `search_docs`、`safe_execute_python`、`read_file`、`list_files`，供 RAG 等后端使用
+  - `core/agent.py` 中的 Agent 把 `TOOLS` schema 传给 LLM，并处理模型返回的 `tool_calls`
+- **和相邻概念的关系**：
+  - tool call 是 LLM 输出的一种结构化形式，schema（名称、描述、参数）定义了工具长什么样
+  - Agent 是多轮对话 + 工具调用的整体系统，FC 是 Agent 做决策的关键能力
+  - LLM 根据工具描述和对话上下文选择工具，与传统 API 调用由程序员硬编码不同
+- **常见面试问法**：
+  - "Function Calling 和传统 API 调用的区别是什么？"
+  - "怎么保证模型生成的参数是正确的？"
+  - "如果模型调用了不存在的工具怎么办？"
+- **我踩过的坑 / 注意点**：
+  - DeepSeek 等模型可能把 `calculate`/`safe_execute_python` 当成通用代码执行器使用（例如让它写示例代码、定义函数），已通过收紧工具描述和限制 AST 节点修复，只允许纯算术表达式
+  - 缺少必填参数时不要猜测，应主动向用户反问；`backends/fc_app/main.py` 中用 `missing_required_args` 检查并提示
+  - 工具执行失败要如实返回，不要让模型编造结果
+- **推荐学习资源**：
+  - 项目中的 `backends/fc_app/main.py`、`core/tools.py`
+  - DeepSeek / OpenAI Function Calling 官方文档
 #### Nexus
 #### DocHub
 #### IconForge
