@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 
 export type Theme = 'mono-light' | 'mono' | 'light' | 'deepblue' | 'cyber' | 'machine'
 
-const STORAGE_KEY = 'ai-demos-theme'
-const SYNC_EVENT = 'ai-demos-theme-change'
+const STORAGE_KEY = 'kairos-theme'
+const SYNC_EVENT = 'kairos-theme-change'
 const DEFAULT_THEME: Theme = 'mono-light'
 export const ALL_THEMES: Theme[] = ['mono-light', 'light', 'deepblue', 'cyber', 'machine']
 

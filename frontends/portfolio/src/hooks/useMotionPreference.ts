@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-const STORAGE_KEY = 'ai-demos-parallax'
-const SYNC_EVENT = 'ai-demos-parallax-change'
+const STORAGE_KEY = 'kairos-parallax'
+const SYNC_EVENT = 'kairos-parallax-change'
 
 function readEnabled(): boolean {
   if (typeof window === 'undefined') return false

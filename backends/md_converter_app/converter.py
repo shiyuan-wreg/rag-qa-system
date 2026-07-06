@@ -8,7 +8,7 @@ import markdown
 # 跟随门户主题:读 localStorage,监听 storage 事件即时换肤(同源 iframe 自动收到)
 _THEME_SYNC_SCRIPT = """\
 (function(){
-  var KEY='ai-demos-theme', VALID=['mono-light','light','deepblue','cyber','machine'];
+  var KEY='kairos-theme', VALID=['mono-light','light','deepblue','cyber','machine'];
   function apply(t){ if(VALID.indexOf(t)<0)t='mono-light'; document.documentElement.setAttribute('data-demo-theme',t); }
   try{ apply(localStorage.getItem(KEY)); }catch(e){ apply('mono-light'); }
   window.addEventListener('storage', function(e){ if(e.key===KEY) apply(e.newValue); });

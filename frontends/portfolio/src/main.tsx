@@ -15,7 +15,7 @@ import './styles/machine-skin.css'
 import { ALL_THEMES, type Theme } from './hooks/useTheme'
 
 const stored = typeof window !== 'undefined'
-  ? (window.localStorage.getItem('ai-demos-theme') as Theme | null)
+  ? (window.localStorage.getItem('kairos-theme') as Theme | null)
   : null
 if (stored && ALL_THEMES.includes(stored)) {
   document.documentElement.setAttribute('data-theme', stored)
