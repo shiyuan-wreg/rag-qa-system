@@ -271,19 +271,126 @@
 ### 3.1 语言与类型
 
 #### TypeScript
+
+- **一句话定义**：JavaScript 的超集，增加静态类型，让变量、函数、组件在运行前就能被类型系统检查。
+- **为什么存在**：大型前端项目里动态类型容易隐藏错误；TypeScript 把很多运行时 bug 提前到编译期发现，同时提升 IDE 补全、重构和可维护性。
+- **Kairos 哪里用了**：
+  - 门户所有前端代码使用 TypeScript，如 `frontends/portfolio/src/App.tsx`、`frontends/portfolio/src/components/NavBar.tsx`
+  - `frontends/portfolio/tsconfig.json` 配置 `strict: true`、`moduleResolution: bundler`、`noEmit: true`
+  - `frontends/portfolio/package.json` 中 `build` 脚本先执行 `tsc` 类型检查，再执行 `vite build`
+  - 自定义 hook `useTheme` 用联合类型 `Theme` 约束可选主题，避免非法主题值被写入 localStorage
+- **和相邻概念的关系**：
+  - JavaScript 是 TypeScript 的运行时基础，TypeScript 编译后生成 JavaScript
+  - `interface` 和 `type` 都用于定义类型，interface 更适合对象形状和继承，type 更适合联合类型、元组等
+  - 泛型让组件和函数在保持类型安全的同时复用逻辑，如 `useState<Theme>(...)`
+  - Vite 负责构建，TypeScript 负责类型检查，二者通过 `tsc && vite build` 串联
+- **常见面试问法**：
+  - "TypeScript 和 JavaScript 的区别是什么？"
+  - "interface 和 type 的区别是什么？"
+  - "泛型在什么时候使用？"
+  - "`any` 和 `unknown` 有什么区别？"
+- **我踩过的坑 / 注意点**：
+  - `tsconfig.json` 开启 `strict: true` 后，隐式 any、空值、未使用变量都会报错，初期需要逐步修复
+  - `allowImportingTsExtensions: true` 必须配合 `noEmit: true` 使用，否则编译器会拒绝输出 `.ts` 扩展名的导入
+  - 自定义 hook 的返回类型和参数类型要显式声明，否则调用方失去类型保护
+  - 不要滥用 `as` 类型断言，它会让 TypeScript 的静态检查失效
+- **推荐学习资源**：
+  - TypeScript 官方文档（TypeScript Handbook）
+  - 项目中的 `frontends/portfolio/tsconfig.json`、`frontends/portfolio/src/hooks/useTheme.ts`
+
 #### JavaScript（ES6+）
 
 ### 3.2 UI 框架
 
 #### React
 
+- **一句话定义**：用于构建用户界面的 JavaScript 库，通过组件和声明式渲染把 UI 拆成可复用的模块。
+- **为什么存在**：传统命令式 DOM 操作难以维护复杂页面；React 用组件化、状态驱动 UI 和虚拟 DOM，让界面开发更可预测、可复用。
+- **Kairos 哪里用了**：
+  - 门户入口 `frontends/portfolio/src/main.tsx` 用 `ReactDOM.createRoot` 挂载应用
+  - `frontends/portfolio/src/App.tsx` 用 `react-router-dom` 定义首页、RAG、FC、Nexus、Learn、Me、Changelog 等路由
+  - `frontends/portfolio/src/components/NavBar.tsx`、`Hero.tsx`、`ThemeToggle.tsx` 等均为 React 组件
+  - 主题切换、视差滚动、页面过渡动画都通过 React state 和 hook 实现
+- **和相邻概念的关系**：
+  - JSX 是 React 的语法扩展，让 JS 中写 HTML 结构
+  - props 是父组件传给子组件的数据，state 是组件内部可变的状态
+  - hooks（如 `useState`、`useEffect`、`useLocation`）让函数组件拥有状态和副作用能力
+  - React Router 是 React 生态的路由库，Vite 是构建工具，TypeScript 提供类型支持
+- **常见面试问法**：
+  - "useEffect 什么时候执行？依赖数组的作用是什么？"
+  - "React 渲染优化有哪些手段？"
+  - "props 和 state 的区别是什么？"
+  - "React 18 的并发特性你了解吗？"
+- **我踩过的坑 / 注意点**：
+  - 列表渲染必须提供稳定且唯一的 `key`，例如 NavBar 中用 `key={it.to}`，不要用数组索引
+  - `useEffect` 依赖数组要完整，遗漏依赖会导致闭包陷阱或状态不同步
+  - 路由切换动画依赖 `key={pathname}` 触发 `PageTransition` 重新挂载，否则动画不会播放
+  - `React.StrictMode` 会故意双重调用某些函数，开发时要注意副作用是否可重复执行
+- **推荐学习资源**：
+  - React 官方文档（React.dev）
+  - 项目中的 `frontends/portfolio/src/App.tsx`、`frontends/portfolio/src/components/NavBar.tsx`
+
 ### 3.3 样式
 
 #### TailwindCSS
 
+- **一句话定义**：实用类优先（utility-first）的 CSS 框架，通过组合大量细粒度类名来构建界面样式。
+- **为什么存在**：传统手写 CSS 容易出现命名冲突、样式冗余和文件分散；Tailwind 把常见样式封装成类名，让开发者直接在 HTML/JSX 中组合，提高开发效率和一致性。
+- **Kairos 哪里用了**：
+  - 门户几乎所有组件都使用 Tailwind 类名，如 `frontends/portfolio/src/components/NavBar.tsx` 中的 `sticky top-0 z-50 bg-surface/90 backdrop-blur`
+  - `frontends/portfolio/tailwind.config.js` 把设计系统变量（颜色、阴影、圆角、字体等）映射为 Tailwind 主题扩展
+  - `frontends/portfolio/src/styles/theme.css` 定义 CSS 变量，Tailwind 配置中通过 `var(--bg-base)` 等方式引用
+  - 响应式布局通过 `sm:`、`md:`、`lg:` 前缀实现，移动端优先
+- **和相邻概念的关系**：
+  - utility-first 是 Tailwind 的核心思想，用 `flex`、`p-4`、`text-primary` 等类直接描述样式
+  - responsive 通过前缀控制不同断点，dark mode 可通过 `dark:` 变体或自定义主题变量实现
+  - PostCSS 和 autoprefixer 是 Tailwind 构建链路的依赖，Vite 负责整体构建
+  - 自定义 CSS（如 `machine-skin.css`、`texture.css`）与 Tailwind 互补，处理复杂背景和动画
+- **常见面试问法**：
+  - "Tailwind 和传统 CSS 框架（如 Bootstrap）的区别是什么？"
+  - "Tailwind 如何实现主题切换？"
+  - "如何避免 Tailwind 类名过长导致 JSX 可读性下降？"
+  - "Tailwind 的 JIT 模式是什么？"
+- **我踩过的坑 / 注意点**：
+  - 主题通过 CSS 变量实现时，Tailwind 配置中的 colors 必须和 `theme.css` 中的变量名保持一致，否则颜色会失效
+  - 自定义类名（如 `hero-ambient`、`hero-grid`）与 Tailwind 类混用时要职责分离，避免样式覆盖混乱
+  - 响应式前缀是移动端优先，即不写前缀的样式默认作用于最小屏幕
+  - 类名顺序不影响优先级，但 `!important` 变体和自定义 CSS 的加载顺序会影响最终渲染
+- **推荐学习资源**：
+  - TailwindCSS 官方文档
+  - 项目中的 `frontends/portfolio/tailwind.config.js`、`frontends/portfolio/src/components/NavBar.tsx`
+
 ### 3.4 构建与路由
 
 #### Vite
+
+- **一句话定义**：现代前端构建工具，基于原生 ES 模块和 esbuild/Rollup，提供极快的开发服务器和生产打包能力。
+- **为什么存在**：传统 Webpack 项目配置复杂、冷启动慢、热更新慢；Vite 利用浏览器原生 ESM 实现秒级启动，并借助 esbuild 和 Rollup 兼顾开发与生产构建性能。
+- **Kairos 哪里用了**：
+  - `frontends/portfolio/vite.config.ts` 配置 React 插件、开发端口 5180、以及 demo iframe 的反向代理
+  - `frontends/portfolio/package.json` 中 `dev`、`build`、`preview` 脚本都基于 Vite
+  - 生产构建命令为 `tsc && vite build`，输出到 `dist/` 目录，再由 Nginx 托管
+  - 本地开发时把 `/rag/`、`/fc/`、`/nexus/`、`/doctomd/`、`/iconforge/`、`/learn/` 代理到本地 Docker Nginx（:8080）
+- **和相邻概念的关系**：
+  - esbuild 负责 Vite 开发阶段的依赖预构建和转译，速度快
+  - Rollup 负责 Vite 生产阶段的代码打包和 tree-shaking
+  - HMR（热模块替换）让开发时修改代码后页面无刷新更新
+  - bundle 是打包后的产物，Vite 生产构建会生成优化后的静态资源
+  - React 是 Vite 服务的框架，TypeScript 类型检查在 Vite 构建前由 `tsc` 完成
+- **常见面试问法**：
+  - "Vite 和 Webpack 的区别是什么？"
+  - "Vite 为什么启动快？"
+  - "esbuild 和 Rollup 在 Vite 中分别负责什么？"
+  - "Vite 如何处理环境变量？"
+- **我踩过的坑 / 注意点**：
+  - 开发代理配置要用尾斜杠键（如 `/rag/`），避免命中门户 SPA 路由（`/nexus` 无斜杠），配置已注释在 `vite.config.ts` 中
+  - 生产构建由 `tsc && vite build` 完成，类型错误会阻止构建，CI 中要先跑类型检查
+  - `base: '/'` 表示部署到域名根路径，若未来改到子路径需要同步调整 Nginx 配置
+  - 静态资源引用建议使用相对路径或配置 alias，避免开发和生产路径不一致
+- **推荐学习资源**：
+  - Vite 官方文档
+  - 项目中的 `frontends/portfolio/vite.config.ts`、`frontends/portfolio/package.json`
+
 #### React Router
 
 ### 3.5 门户与 demo 集成
