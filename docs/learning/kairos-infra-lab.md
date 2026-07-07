@@ -8,6 +8,7 @@
 
 - [ ] 已安装 Git for Windows，并能打开 Git Bash
 - [ ] 已安装 Docker Desktop，且 Engine 处于 running 状态
+- [ ] 已安装 Node.js LTS（npm 可用），下载地址：https://nodejs.org/
 - [ ] 已完成 `git-basics.md` 中的最小示例
 - [ ] 已完成 `docker-basics.md` 中的最小示例
 - [ ] 已完成 `docker-compose-basics.md` 中的最小示例
@@ -28,6 +29,8 @@ cd /c/Users/$USER/Desktop
 ```bash
 git clone https://github.com/shiyuan-wreg/rag-qa-system.git kairos
 ```
+
+> 如果目录 `kairos/` 已存在，请换一个名字或先删除旧目录。
 
 Expected: 下载完成后出现一个 `kairos/` 目录。
 
@@ -55,10 +58,10 @@ Expected: 三个文件都存在。
 2. 查看 Nginx 配置：
 
 ```bash
-ls deploy/nginx/nginx.conf
+ls deploy/nginx/nginx.local.conf
 ```
 
-Expected: 文件存在。
+Expected: 文件存在。说明：本地实验通过 `deploy/docker-compose.local.yml` 覆盖了生产环境默认的 `deploy/nginx/nginx.conf`，所以实际生效的是 `nginx.local.conf`。
 
 3. 查看 `.env` 文件是否存在：
 
@@ -66,7 +69,7 @@ Expected: 文件存在。
 ls -la .env
 ```
 
-Expected: `.env` 文件存在（如果没有，需要创建并填入 API Key，见 `deploy/README.md`）。
+Expected: `.env` 文件存在（如果没有，可复制 `deploy/.env.example` 并根据说明填写 API Key）。需要关注的主要 Key 包括：`LLM_API_KEY`（DeepSeek 主Key）、`JINA_API_KEY`（用于 RAG 向量化）。旧的 `DASHSCOPE_API_KEY` 仅作为兼容兜底，当前主链路不再优先使用。
 
 ## 4. 构建并启动 Kairos
 
@@ -92,7 +95,7 @@ Expected: 命令执行时间较长，最终所有服务都处于 `Started` 状�
 docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml ps
 ```
 
-Expected: `nginx`、`rag`、`fc`、`nexus` 等服务都显示为 `running`。
+Expected: 至少包含 `nginx`、`rag`、`fc`、`nexus`、`md_converter`、`iconforge` 等服务的 `State` 为 `running`。
 
 ## 5. 验证 Nginx 反向代理
 
@@ -151,12 +154,12 @@ Expected: 所有容器停止并删除。
 
 **故障 1：本地 RAG 无法检索**
 - 原因：本机直连 `api.jina.ai` 可能超时，但容器内应可访问
-- 排查：`docker compose logs rag` 查看日志
+- 排查：`docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml logs rag` 查看日志
 - 解决：确认 `.env` 中 `JINA_API_KEY` 已配置；中国大陆可尝试在容器网络内测试连通性
 
 **故障 2：Nginx 502**
 - 原因：后端容器 IP 变化，Nginx 未重新解析
-- 解决：`docker compose restart nginx`
+- 解决：`docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml restart nginx`
 
 **故障 3：前端构建失败**
 - 原因：Node 依赖未安装或网络问题
