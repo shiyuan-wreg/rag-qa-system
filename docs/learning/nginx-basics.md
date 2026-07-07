@@ -28,19 +28,39 @@ Nginx 解决方式：
 
 ## 3. 安装与准备
 
-本教程通过 Docker 运行 Nginx，不需要在 Windows 上直接安装。
+本教程在 Windows 环境下通过 Docker 运行 Nginx，需要以下工具：
 
-验证 Docker 可用：
+### 3.1 安装 Git for Windows
+
+本教程中的命令使用 Git Bash 语法（例如 `cat << 'EOF'` 和 `$(pwd)`）。
+
+1. 访问 [Git for Windows 下载页](https://git-scm.com/download/win)。
+2. 下载并运行安装程序，保持默认选项即可。
+3. 安装完成后，在任意文件夹空白处右键选择 **Git Bash Here** 即可打开 Git Bash。
+
+### 3.2 安装 Docker Desktop for Windows
+
+1. 访问 [Docker Desktop 下载页](https://www.docker.com/products/docker-desktop/)。
+2. 下载并运行安装程序。
+3. 安装过程中勾选 **Use WSL 2 instead of Hyper-V**（推荐启用 WSL2）。
+4. 安装完成后启动 Docker Desktop，等待左下角状态变为 **Engine running**。
+
+### 3.3 验证环境
+
+在 Git Bash 中执行：
 
 ```bash
 docker --version
+docker ps
 ```
 
-Expected: 已安装 Docker Desktop 并处于 running 状态。
+Expected: `docker --version` 返回版本号，`docker ps` 正常列出容器（可能为空列表），表示 Docker Desktop 正在运行。
 
 ## 4. 最小动手示例
 
 ### 4.1 托管静态页面
+
+> 以下命令需要在 **Git Bash** 中运行（随 Git for Windows 安装）。`$(pwd)` 表示当前目录的绝对路径。
 
 创建练习目录和文件：
 
@@ -101,11 +121,14 @@ http {
 docker run -d -p 8080:80 -v $(pwd)/nginx.conf:/etc/nginx/nginx.conf:ro --name my-nginx nginx:alpine
 ```
 
-访问 http://127.0.0.1:8080/anything 会被转发到 httpbin.org。
+访问 http://127.0.0.1:8080/api/anything 会被转发到 http://httpbin.org/anything。
+
+> Windows 下如果 volume 挂载失败，可能是因为 `$(pwd)` 返回的路径格式不被 Docker 识别。此时可尝试手动写成 Windows 路径，例如 `-v /c/Users/你的用户名/nginx-practice/nginx.conf:/etc/nginx/nginx.conf:ro`。
 
 ## 5. 在 Kairos 项目里哪里用了它
 
 - Kairos 的 Nginx 配置文件位于 `deploy/nginx/nginx.conf`。
+- 实际配置中，Nginx 会把 `/rag/`、`/fc/` 等路径前缀去掉（通过 `rewrite` 规则），再转发给后端服务。
 - 它做了几件事：
   - 托管门户静态文件（`root /usr/share/nginx/html`）
   - 把 `/rag/` 代理到 `rag` 后端服务
