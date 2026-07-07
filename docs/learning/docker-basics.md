@@ -20,10 +20,11 @@ Docker 解决方式：把应用代码 + 依赖 + 运行环境一起打包成镜�
 
 ## 3. 安装与准备
 
-1. 下载 Docker Desktop for Windows：https://www.docker.com/products/docker-desktop/
-2. 安装过程中如果提示启用 WSL 2，选择启用。
-3. 安装完成后启动 Docker Desktop，等待左下角显示 `Engine running`。
-4. 打开 Git Bash，验证安装：
+1. 确保已安装 Git for Windows（因为后面要用 Git Bash 运行命令）。如果还没安装，先下载安装：https://git-scm.com/download/win
+2. 下载 Docker Desktop for Windows：https://www.docker.com/products/docker-desktop/
+3. 安装过程中如果提示启用 WSL 2，选择启用。
+4. 安装完成后启动 Docker Desktop，等待左下角显示 `Engine running`。
+5. 打开 Git Bash，验证安装：
 
 ```bash
 docker --version
