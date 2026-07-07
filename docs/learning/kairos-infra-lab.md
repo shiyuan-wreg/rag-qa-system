@@ -69,7 +69,7 @@ Expected: 文件存在。说明：本地实验通过 `deploy/docker-compose.loca
 ls -la .env
 ```
 
-Expected: `.env` 文件存在（如果没有，可复制 `deploy/.env.example` 并根据说明填写 API Key）。需要关注的主要 Key 包括：`LLM_API_KEY`（DeepSeek 主Key）、`JINA_API_KEY`（用于 RAG 向量化）。旧的 `DASHSCOPE_API_KEY` 仅作为兼容兜底，当前主链路不再优先使用。
+Expected: `.env` 文件存在（如果没有，可复制 `.env.example` 并根据说明填写 API Key）。需要关注的主要 Key 包括：`LLM_API_KEY`（DeepSeek 主Key）、`JINA_API_KEY`（用于 RAG 向量化）。旧的 `DASHSCOPE_API_KEY` 仅作为兼容兜底，当前主链路不再优先使用。
 
 ## 4. 构建并启动 Kairos
 
