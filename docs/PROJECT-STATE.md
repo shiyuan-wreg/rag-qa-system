@@ -9,12 +9,21 @@
 
 新增 `docs/learning/kairos-concept-map.md`：以 Kairos 项目为中心的技术概念地图，覆盖 16 个核心节点（Git、Docker、Docker Compose、Nginx、Python、FastAPI、Uvicorn、RAG、FC、React、Vite、TypeScript、TailwindCSS、LLM、Function Calling、HTTP / REST API），每个节点按 7 字段模板填写，配套使用决策树、学习节奏说明和面试问法汇总。
 
+新增基础设施零基础伴读教程（解决概念地图默认读者已懂技术的问题）：
+- `docs/learning/git-basics.md`：Git 零基础入门
+- `docs/learning/docker-basics.md`：Docker 零基础入门
+- `docs/learning/docker-compose-basics.md`：Docker Compose 零基础入门
+- `docs/learning/nginx-basics.md`：Nginx 零基础入门
+- `docs/learning/kairos-infra-lab.md`：四工具整合练习，把 Kairos 本地栈跑起来
+
 配套文件：
-- 设计文档：`docs/superpowers/specs/2026-07-07-kairos-concept-map-learning-design.md`
-- 实施计划：`docs/superpowers/plans/2026-07-07-kairos-concept-map-learning.md`
+- 概念地图设计文档：`docs/superpowers/specs/2026-07-07-kairos-concept-map-learning-design.md`
+- 概念地图实施计划：`docs/superpowers/plans/2026-07-07-kairos-concept-map-learning.md`
+- 基础设施伴读设计文档：`docs/superpowers/specs/2026-07-07-kairos-infra-basics-design.md`
+- 基础设施伴读实施计划：`docs/superpowers/plans/2026-07-07-kairos-infra-basics.md`
 - CI/CD 独立学习笔记：`docs/learning/ci-cd-basics.md`
 
-**当前局限**：文档默认读者已具备各技术的基础认知，尚未覆盖零基础讲解。后续可基于此骨架逐步扩展基础版本。
+**当前状态**：概念地图 + 基础设施层零基础教程已完成并推送。后续可继续用相同模式补后端/前端/AI 层的基础教程。
 
 ---
 
