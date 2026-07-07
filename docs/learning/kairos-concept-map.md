@@ -70,6 +70,7 @@
 - **推荐学习资源**：
   - Pro Git（官方中文版）
   - 项目 `.git/` 历史与 `deploy/PRODUCTION.md`
+  - 零基础入门：[docs/learning/git-basics.md](git-basics.md)
 
 #### GitHub
 
@@ -99,6 +100,7 @@
 - **推荐学习资源**：
   - Docker 官方 Get Started
   - 项目中的 `deploy/docker-compose.yml`
+  - 零基础入门：[docs/learning/docker-basics.md](docker-basics.md)
 
 #### Docker Compose
 
@@ -124,6 +126,7 @@
 - **推荐学习资源**：
   - Docker Compose 官方文档
   - 项目中的 `deploy/docker-compose.yml` 和 `deploy/PRODUCTION.md`
+  - 零基础入门：[docs/learning/docker-compose-basics.md](docker-compose-basics.md)
 
 ### 1.3 Web 服务器与代理
 
@@ -154,6 +157,7 @@
 - **推荐学习资源**：
   - Nginx 官方文档（Beginner’s Guide、Server names、Location matching）
   - 项目中的 `deploy/nginx/nginx.conf` 和 `deploy/docker-compose.yml`
+  - 零基础入门：[docs/learning/nginx-basics.md](nginx-basics.md)
 
 ### 1.4 服务器与运维
 
