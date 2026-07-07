@@ -5,6 +5,19 @@
 > 上一更新:2026-07-06(RAG P1 must-retrieve 已实现并部署生产:master `0adaab6`,英文查询触发 search_docs 并给出带 [1] 引用的详细回答,全 7 路由 200。)
 > 已知问题(入册防遗忘):① DeepSeek 偶发字面 `\n` 渲染成可见 "\n"(可选 polish);② `renderMarkdown` 两端重复(加第3个 demo 需第3份);③ 本地测试套件因缺 `jinja2` 等只能跑子集(md_converter/nexus 收集失败,容器内正常);④ Git Bash 下 curl/Python 发送中文表单会乱码,验证以浏览器/生产为准。
 
+## 2026-07-07 学习资产 ✅ 已完成
+
+新增 `docs/learning/kairos-concept-map.md`：以 Kairos 项目为中心的技术概念地图，覆盖 16 个核心节点（Git、Docker、Docker Compose、Nginx、Python、FastAPI、Uvicorn、RAG、FC、React、Vite、TypeScript、TailwindCSS、LLM、Function Calling、HTTP / REST API），每个节点按 7 字段模板填写，配套使用决策树、学习节奏说明和面试问法汇总。
+
+配套文件：
+- 设计文档：`docs/superpowers/specs/2026-07-07-kairos-concept-map-learning-design.md`
+- 实施计划：`docs/superpowers/plans/2026-07-07-kairos-concept-map-learning.md`
+- CI/CD 独立学习笔记：`docs/learning/ci-cd-basics.md`
+
+**当前局限**：文档默认读者已具备各技术的基础认知，尚未覆盖零基础讲解。后续可基于此骨架逐步扩展基础版本。
+
+---
+
 ## 2026-07-06 品牌重命名 ✅ 已完成并验证
 
 项目从 `ai-demos` 重命名为 **Kairos**，定位为个人工具/项目/学习文档统一门户。本地目录 `ai-demos/` 已重命名为 `kairos/`，服务器部署目录同步迁移至 `/opt/kairos`。
