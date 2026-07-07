@@ -1,8 +1,8 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-07-06(**项目已重命名为 Kairos,本地目录 ai-demos/ → kairos/,服务器目录 /opt/ai-demos → /opt/kairos,生产部署验证通过。最终提交见当前 master HEAD。**)
-> 上一更新:2026-07-06(RAG P1 must-retrieve 已实现并部署生产:master `0adaab6`,英文查询触发 search_docs 并给出带 [1] 引用的详细回答,全 7 路由 200。)
+> 最近更新:2026-07-08(**完成后端服务层零基础教程:python-basics/uvicorn-basics/fastapi-basics,概念地图已链接。未部署,仅文档更新。**)
+> 上一更新:2026-07-07(新增 Kairos 概念地图 + 基础设施层零基础教程,本地目录已重命名为 kairos/,项目定位为个人工具/项目/学习文档统一门户。)
 > 已知问题(入册防遗忘):① DeepSeek 偶发字面 `\n` 渲染成可见 "\n"(可选 polish);② `renderMarkdown` 两端重复(加第3个 demo 需第3份);③ 本地测试套件因缺 `jinja2` 等只能跑子集(md_converter/nexus 收集失败,容器内正常);④ Git Bash 下 curl/Python 发送中文表单会乱码,验证以浏览器/生产为准。
 
 ## 2026-07-07 学习资产 ✅ 已完成
@@ -24,6 +24,14 @@
 - CI/CD 独立学习笔记：`docs/learning/ci-cd-basics.md`
 
 **当前状态**：概念地图 + 基础设施层零基础教程已完成并推送。后续可继续用相同模式补后端/前端/AI 层的基础教程。
+
+新增后端服务层零基础伴读教程（2026-07-08）：
+- `docs/learning/python-basics.md`：Python 零基础入门，覆盖变量/函数/类/模块、虚拟环境、pip、async/await，结合 Kairos 后端代码
+- `docs/learning/uvicorn-basics.md`：Uvicorn 零基础入门，覆盖 ASGI、启动参数、开发/生产部署，结合 Kairos Dockerfile
+- `docs/learning/fastapi-basics.md`：FastAPI 零基础入门，覆盖路由、路径/查询/表单参数、Pydantic、依赖注入、自动文档，结合 Kairos 后端接口
+- 概念地图 `docs/learning/kairos-concept-map.md` 中 Python/Uvicorn/FastAPI 三个节点已链接到对应零基础教程
+
+**当前状态**：后端服务层零基础教程已完成。下一步继续用相同模式补前端层（TypeScript / React / Vite / TailwindCSS）或 AI 层（LLM / Function Calling / RAG）的基础教程。
 
 ---
 

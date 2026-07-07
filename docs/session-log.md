@@ -38,3 +38,35 @@
 - `master` 最新提交：`f983439`
 - 本地 Docker 全服务 running
 - 所有改动已 push GitHub
+
+## 2026-07-08
+
+### 会话目标
+
+继续 Kairos 基础教程。用户指出此前未按「继续 X」开机仪式执行，要求制定规范确保无缝对接。
+
+### 完成内容
+
+1. 制定并写入 memory：[「继续 X」无缝对接规则](memory/continue-x-seamless-handoff-rule.md)
+2. 基于 PROJECT-STATE 默认推断，完成后端服务层零基础教程：
+   - `docs/learning/python-basics.md`
+   - `docs/learning/uvicorn-basics.md`
+   - `docs/learning/fastapi-basics.md`
+3. 更新 `docs/learning/kairos-concept-map.md`：为 Python/Uvicorn/FastAPI 三个节点添加零基础教程链接
+4. 更新 `docs/PROJECT-STATE.md`：标记后端层教程完成，下一步为前端层或 AI 层
+
+### 遇到的问题
+
+- 无代码问题。本次为文档工作，未跑 Docker/测试。
+
+### 未做事项
+
+- 前端层基础教程（TypeScript / React / Vite / TailwindCSS）
+- AI 层基础教程（LLM / Function Calling / RAG）
+- git add/commit/push（待提交）
+
+### 最终状态
+
+- 新增 3 篇后端零基础教程，1 个概念地图更新，1 个 PROJECT-STATE 更新
+- 工作目录未提交改动：4 个文件
+- **下次继续第一动作**：继续补前端层基础教程（默认）或 AI 层（用户指定）

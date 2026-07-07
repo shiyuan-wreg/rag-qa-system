@@ -1,5 +1,32 @@
 # Nexus 开发日志
 
+## 2026-07-08
+
+### 今日目标
+
+继续 Kairos 基础教程，补后端服务层零基础文档；同时把「继续 X」开机仪式执行规则写进 memory。
+
+### 完成内容
+
+- 制定并写入 memory：`continue-x-seamless-handoff-rule.md`（「继续 X」无缝对接规则）
+- 完成后端服务层零基础伴读教程：
+  - `docs/learning/python-basics.md`
+  - `docs/learning/uvicorn-basics.md`
+  - `docs/learning/fastapi-basics.md`
+- 更新 `docs/learning/kairos-concept-map.md`：Python / Uvicorn / FastAPI 节点链接到对应教程
+- 更新 `docs/PROJECT-STATE.md` 和 `docs/session-log.md`
+
+### 关键决策 / 因果
+
+1. **为什么不再问用户「上次讲到哪」？** 用户明确要求「继续 X」口令必须无缝对接。恢复材料（PROJECT-STATE / session-log / dev-log / lessons-learned）存在就是为了支持冷启动恢复；反问等于让存档仪式失效。
+2. **为什么默认从后端层开始？** PROJECT-STATE 明确记录「基础设施层已完成，后续补后端/前端/AI 层」。在材料无法精确定位到某一节课时，按 PROJECT-STATE 的「下一步」推断是最小摩擦路径。
+3. **为什么教程保持同样结构？** 与 infra 层教程风格一致（一句话定义→为什么存在→安装→最小示例→核心概念→项目实例→常见错误→面试问法→下一步），降低阅读成本。
+
+### 待改进
+
+- 前端层（TypeScript / React / Vite / TailwindCSS）和 AI 层（LLM / Function Calling / RAG）的零基础教程待补。
+- 本次改动未提交，待 `git add` + `commit` + `push`。
+
 ## 2026-07-06
 
 ### 今日目标

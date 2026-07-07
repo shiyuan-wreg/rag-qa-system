@@ -192,6 +192,7 @@
 - **推荐学习资源**：
   - Python 官方教程与标准库文档
   - 项目中的 `backends/rag_app/main.py`、`requirements.txt`
+  - 零基础入门：[docs/learning/python-basics.md](python-basics.md)
 
 #### Uvicorn
 
@@ -218,6 +219,7 @@
 - **推荐学习资源**：
   - Uvicorn 官方文档
   - 项目中的 `backends/rag_app/Dockerfile`、`backends/fc_app/main.py` 底部 `uvicorn.run(...)`
+  - 零基础入门：[docs/learning/uvicorn-basics.md](uvicorn-basics.md)
 
 ### 2.2 Web 框架
 
@@ -246,6 +248,7 @@
 - **推荐学习资源**：
   - FastAPI 官方文档
   - 项目中的 `backends/rag_app/main.py`、`backends/fc_app/main.py`
+  - 零基础入门：[docs/learning/fastapi-basics.md](fastapi-basics.md)
 
 ### 2.3 各 demo 后端
 
