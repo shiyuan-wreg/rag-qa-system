@@ -1,7 +1,7 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-07-08(**完成后端服务层零基础教程:python-basics/uvicorn-basics/fastapi-basics,概念地图已链接。未部署,仅文档更新。**)
+> 最近更新:2026-07-08(**完成前端门户层零基础教程:typescript-basics/react-basics/vite-basics/tailwindcss-basics,概念地图已链接。未部署,仅文档更新。**)
 > 上一更新:2026-07-07(新增 Kairos 概念地图 + 基础设施层零基础教程,本地目录已重命名为 kairos/,项目定位为个人工具/项目/学习文档统一门户。)
 > 已知问题(入册防遗忘):① DeepSeek 偶发字面 `\n` 渲染成可见 "\n"(可选 polish);② `renderMarkdown` 两端重复(加第3个 demo 需第3份);③ 本地测试套件因缺 `jinja2` 等只能跑子集(md_converter/nexus 收集失败,容器内正常);④ Git Bash 下 curl/Python 发送中文表单会乱码,验证以浏览器/生产为准。
 
@@ -32,6 +32,19 @@
 - 概念地图 `docs/learning/kairos-concept-map.md` 中 Python/Uvicorn/FastAPI 三个节点已链接到对应零基础教程
 
 **当前状态**：后端服务层零基础教程已完成。下一步继续用相同模式补前端层（TypeScript / React / Vite / TailwindCSS）或 AI 层（LLM / Function Calling / RAG）的基础教程。
+
+## 2026-07-08 前端门户层零基础教程 ✅ 已完成
+
+新增前端门户层零基础伴读教程：
+- `docs/learning/typescript-basics.md`：TypeScript 零基础入门，覆盖类型、接口、泛型、tsconfig，结合 Kairos 门户类型声明
+- `docs/learning/react-basics.md`：React 零基础入门，覆盖 JSX、组件、props、state、hooks，结合 Kairos 门户组件结构
+- `docs/learning/vite-basics.md`：Vite 零基础入门，覆盖开发服务器、生产构建、HMR、代理配置，结合 Kairos vite.config.ts
+- `docs/learning/tailwindcss-basics.md`：TailwindCSS 零基础入门，覆盖 utility-first、主题扩展、响应式、CSS 变量，结合 Kairos tailwind.config.js
+
+配套更新：
+- `docs/learning/kairos-concept-map.md`：TypeScript / React / Vite / TailwindCSS 四个节点已链接到对应零基础教程
+
+**当前状态**：前端门户层零基础教程已完成。下一步继续用相同模式补 AI 层（LLM / Function Calling / RAG）基础教程，或按用户指定方向继续。
 
 ---
 

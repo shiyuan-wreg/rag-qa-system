@@ -346,6 +346,7 @@
 - **推荐学习资源**：
   - TypeScript 官方文档（TypeScript Handbook）
   - 项目中的 `frontends/portfolio/tsconfig.json`、`frontends/portfolio/src/hooks/useTheme.ts`
+  - 零基础入门：[docs/learning/typescript-basics.md](typescript-basics.md)
 
 #### JavaScript（ES6+）
 
@@ -380,6 +381,7 @@
 - **推荐学习资源**：
   - React 官方文档（React.dev）
   - 项目中的 `frontends/portfolio/src/App.tsx`、`frontends/portfolio/src/components/NavBar.tsx`
+  - 零基础入门：[docs/learning/react-basics.md](react-basics.md)
 
 ### 3.3 样式
 
@@ -412,6 +414,7 @@
 - **推荐学习资源**：
   - TailwindCSS 官方文档
   - 项目中的 `frontends/portfolio/tailwind.config.js`、`frontends/portfolio/src/components/NavBar.tsx`
+  - 零基础入门：[docs/learning/tailwindcss-basics.md](tailwindcss-basics.md)
 
 ### 3.4 构建与路由
 
@@ -445,6 +448,7 @@
 - **推荐学习资源**：
   - Vite 官方文档
   - 项目中的 `frontends/portfolio/vite.config.ts`、`frontends/portfolio/package.json`
+  - 零基础入门：[docs/learning/vite-basics.md](vite-basics.md)
 
 #### React Router
 
