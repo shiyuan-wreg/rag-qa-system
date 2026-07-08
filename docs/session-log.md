@@ -1,5 +1,35 @@
 # 会话日志（Session Log）
 
+## 2026-07-08（生产部署）
+
+### 会话目标
+
+用户要求先把改动推到服务器端，执行生产部署。
+
+### 完成内容
+
+1. 确认本地 `master` 与 `origin/master` 同步，工作区干净。
+2. 通过 `ssh shiyuan-prod` 在服务器后台执行 `git pull origin master && bash deploy/build-frontends.sh && docker compose -f deploy/docker-compose.yml up -d --build`。
+3. 轮询 `/tmp/deploy.log` 直到出现 `DONE_0`。
+4. 从服务器本机验证 8 条 HTTPS 路径全部 200：`/ /rag/ /fc/ /nexus/ /doctomd/ /learn/ /iconforge/`。
+5. 端到端 smoke 测试 `POST /rag/chat`（form `query=What is the difference between Python list and tuple?`），返回带 `[1]` 引用的 Markdown 回答，RAG must-retrieve 在线正常。
+6. 更新 `docs/PROJECT-STATE.md` 与 `docs/session-log.md` 并推送。
+
+### 遇到的问题
+
+- 无。SSH 别名正常，代理已开，构建与容器重建一次通过。
+
+### 未做事项
+
+- AI 层基础教程（LLM / Function Calling / RAG）仍待补。
+- 如需继续调整音乐/动画体验，可基于生产实测反馈迭代。
+
+### 最终状态
+
+- 生产服务器 `https://www.shiyuan-wreg.cloud` 已运行最新 `master`。
+- `origin/master` 已同步（含本次日志更新）。
+- 本地 Docker stack 未启动（本次只操作服务器）。
+
 ## 2026-07-06
 
 ### 会话目标

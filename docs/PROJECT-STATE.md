@@ -1,8 +1,8 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-07-08(**完成前端门户层零基础教程:typescript-basics/react-basics/vite-basics/tailwindcss-basics,概念地图已链接。未部署,仅文档更新。**)
-> 上一更新:2026-07-07(新增 Kairos 概念地图 + 基础设施层零基础教程,本地目录已重命名为 kairos/,项目定位为个人工具/项目/学习文档统一门户。)
+> 最近更新:2026-07-08(**前端门户层零基础教程、背景音乐/开场动画/静音记忆修复均已部署生产;8 路由 HTTPS 200,RAG 端到端实测正常。**)
+> 上一更新:2026-07-08(完成前端门户层零基础教程:typescript-basics/react-basics/vite-basics/tailwindcss-basics,概念地图已链接。未部署,仅文档更新。)
 > 已知问题(入册防遗忘):① DeepSeek 偶发字面 `\n` 渲染成可见 "\n"(可选 polish);② `renderMarkdown` 两端重复(加第3个 demo 需第3份);③ 本地测试套件因缺 `jinja2` 等只能跑子集(md_converter/nexus 收集失败,容器内正常);④ Git Bash 下 curl/Python 发送中文表单会乱码,验证以浏览器/生产为准。
 
 ## 2026-07-07 学习资产 ✅ 已完成

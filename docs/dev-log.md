@@ -1,5 +1,28 @@
 # Nexus 开发日志
 
+## 2026-07-08（生产部署）
+
+### 今日目标
+
+按用户要求，将 Kairos 最新改动（前端零基础教程、背景音乐/开场动画/静音记忆修复等）部署到首尔生产服务器。
+
+### 完成内容
+
+- ✅ 生产服务器 `ssh shiyuan-prod` 连通，本地代理正常。
+- ✅ 执行 `git pull origin master && bash deploy/build-frontends.sh && docker compose -f deploy/docker-compose.yml up -d --build`，`DONE_0`。
+- ✅ 8 路由 HTTPS 200 验证通过：`/ /rag/ /fc/ /nexus/ /doctomd/ /learn/ /iconforge/`。
+- ✅ RAG 端到端 smoke 测试通过，返回带 `[1]` 引用的 Markdown 回答。
+
+### 关键决策 / 因果
+
+1. **为什么用后台 `nohup` + 轮询日志？** 生产服务器在韩国，构建/拉镜像可能耗时数分钟，SSH 直接前台等待易因工具超时被中断；后台运行 + `tail /tmp/deploy.log` 更稳定。
+2. **为什么从服务器本机做 HTTPS 验证？** 大陆本机直连公网 443 可能被 GFW 影响；用 `--resolve www.shiyuan-wreg.cloud:443:127.0.0.1` 走服务器本地 loopback，绕过网络波动，结果可信。
+
+### 待改进
+
+- AI 层基础教程仍待补。
+- 如需继续优化网页体验，可在生产实测后迭代。
+
 ## 2026-07-08
 
 ### 今日目标
