@@ -143,3 +143,36 @@
 - 本地 `master`：`30ed41f`
 - `origin/master` 已同步
 - **下次继续第一动作**：本地 `npm run dev` 体验效果，或部署到生产服务器
+
+## 2026-07-08（网页体验调整·修复）
+
+### 会话目标
+
+根据用户本地体验反馈，修复两个问题：
+1. 黑屏后网页不应先白屏再闪现，而应由黑屏遮罩淡出自然 revealing 网页；Hero 打字机效果应在黑屏结束后才开始。
+2. 刷新网页后音乐静音状态应被记住，不要自动重置为开启。
+
+### 完成内容
+
+1. 修改 `Typewriter.tsx`：新增 `delay` prop，支持延迟启动。
+2. 修改 `Hero.tsx`：将 `TOTAL_SPLASH_MS` 作为 `delay` 传给 Typewriter，使打字机在黑屏完全结束后再开始。
+3. 修改 `App.tsx`：
+   - 移除页面内容的 `opacity-0` 初始状态，让网页在黑屏期间已渲染，仅被黑屏遮罩遮挡；遮罩淡出时网页自然浮现。
+   - 使用 `localStorage.setItem('kairos-music-muted', ...)` 持久化用户静音选择；刷新后从 localStorage 恢复。
+4. 本地 dev server 重启：端口因旧进程占用变为 5181。
+5. 推送 `origin/master`：`ac29009`
+
+### 遇到的问题
+
+- 旧 dev server 进程释放有延迟，新 server 自动切换到 5181 端口。
+
+### 未做事项
+
+- 生产服务器部署
+
+### 最终状态
+
+- 本地 `master`：`ac29009`
+- `origin/master` 已同步
+- 本地 dev server 运行在 http://localhost:5181
+- **下次继续第一动作**：用户体验后确认是否还有调整，或部署生产
