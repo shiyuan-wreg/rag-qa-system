@@ -103,3 +103,43 @@
 - git commit/push 成功：`abc10a2`
 - `master` 已推送到 `origin/master`
 - **下次继续第一动作**：继续补 AI 层基础教程，或按用户指定方向继续
+
+## 2026-07-08（网页体验调整）
+
+### 会话目标
+
+用户希望暂停教程，对 Kairos 门户网页增加背景音乐和开场载入动画。
+
+### 完成内容
+
+1. 通过 brainstorming 明确需求：
+   - 背景音乐使用 `C:\Users\hzs17\Downloads\Shattered Dream.mp3`
+   - 自动循环播放，浏览器阻止时等首次交互后恢复
+   - 音符样式开关放在 `NavBar` 左上角
+   - 开场：0.5s 全黑 + 1.5–2s 缓入，时长常量可调
+2. 编写设计文档：`docs/superpowers/specs/2026-07-08-portfolio-bg-music-splash-design.md`
+3. 编写实现计划：`docs/superpowers/plans/2026-07-08-portfolio-bg-music-splash.md`
+4. 实现并推送：
+   - 复制音乐文件到 `frontends/portfolio/public/music/shattered-dream.mp3`
+   - 新增 `MusicToggle` 组件（内联 SVG 音符图标）
+   - 新增 `SplashOverlay` 组件（`BLACK_HOLD_MS` / `FADE_DURATION_MS` 常量）
+   - 修改 `App.tsx` 集成音频管理、自动播放恢复、页面淡入
+   - 修改 `NavBar.tsx` 在桌面/移动端控制区渲染 `MusicToggle`
+5. 验证：`npx tsc --noEmit` 通过，`npm run build` 成功，`dist/music/shattered-dream.mp3` 存在
+6. 推送 `origin/master`：`30ed41f`
+
+### 遇到的问题
+
+- `lucide-react` v1.21.0 没有 `MusicOff` 图标，改用内联 SVG 音符带斜杠图标解决。
+- 工作目录在 `frontends/portfolio` 和项目根之间切换时，`git add` 路径容易重复，已注意用 `cd /c/Users/hzs17/Desktop/kairos` 统一。
+
+### 未做事项
+
+- 生产服务器部署（需用户确认后执行 `deploy/PRODUCTION.md` 流程）
+- 本地 `npm run dev` 手动体验动画时长微调
+
+### 最终状态
+
+- 本地 `master`：`30ed41f`
+- `origin/master` 已同步
+- **下次继续第一动作**：本地 `npm run dev` 体验效果，或部署到生产服务器
