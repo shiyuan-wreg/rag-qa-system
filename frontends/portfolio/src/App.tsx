@@ -9,21 +9,26 @@ import Changelog from './pages/Changelog'
 import PageTransition from './components/PageTransition'
 import GlobalHud from './components/GlobalHud'
 import ParallaxViewport from './components/ParallaxViewport'
-import SplashOverlay, { TOTAL_SPLASH_MS } from './components/SplashOverlay'
+import SplashOverlay from './components/SplashOverlay'
 
 const MUSIC_SRC = '/music/shattered-dream.mp3'
 const MUSIC_VOLUME = 0.5
+const MUSIC_MUTED_KEY = 'kairos-music-muted'
 
 function DemoRoute({ slug, src }: { slug: string; src: string }) {
   return <Demo slug={slug} src={src} />
+}
+
+function getInitialMuted(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.localStorage.getItem(MUSIC_MUTED_KEY) === 'true'
 }
 
 export default function App() {
   const { pathname } = useLocation()
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
-  const [splashDone, setSplashDone] = useState(false)
+  const [isMuted, setIsMuted] = useState(getInitialMuted)
 
   // Initialize audio and attempt autoplay
   useEffect(() => {
@@ -32,20 +37,22 @@ export default function App() {
     audio.volume = MUSIC_VOLUME
     audioRef.current = audio
 
-    audio
-      .play()
-      .then(() => setIsPlaying(true))
-      .catch(() => {
-        // Browser blocked autoplay; wait for first user interaction
-        setIsPlaying(false)
-      })
+    if (!isMuted) {
+      audio
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => {
+          // Browser blocked autoplay; wait for first user interaction
+          setIsPlaying(false)
+        })
+    }
 
     return () => {
       audio.pause()
       audio.src = ''
       audioRef.current = null
     }
-  }, [])
+  }, [isMuted])
 
   // Resume audio on first user interaction if autoplay was blocked
   useEffect(() => {
@@ -67,12 +74,6 @@ export default function App() {
     }
   }, [isMuted])
 
-  // Splash overlay lifecycle
-  useEffect(() => {
-    const timer = window.setTimeout(() => setSplashDone(true), TOTAL_SPLASH_MS)
-    return () => window.clearTimeout(timer)
-  }, [])
-
   const handleMusicToggle = () => {
     const audio = audioRef.current
     if (!audio) return
@@ -81,12 +82,14 @@ export default function App() {
       audio.pause()
       setIsPlaying(false)
       setIsMuted(true)
+      localStorage.setItem(MUSIC_MUTED_KEY, 'true')
     } else {
       audio
         .play()
         .then(() => {
           setIsPlaying(true)
           setIsMuted(false)
+          localStorage.setItem(MUSIC_MUTED_KEY, 'false')
         })
         .catch(() => {})
     }
@@ -95,12 +98,7 @@ export default function App() {
   return (
     <>
       <SplashOverlay />
-      <div
-        className={`min-h-screen bg-base transition-opacity ease-out ${
-          splashDone ? 'opacity-100' : 'opacity-0'
-        }`}
-        style={{ transitionDuration: `${TOTAL_SPLASH_MS}ms` }}
-      >
+      <div className="min-h-screen bg-base">
         <NavBar isPlaying={isPlaying} onMusicToggle={handleMusicToggle} />
         <ParallaxViewport>
           <PageTransition key={pathname}>
