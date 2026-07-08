@@ -1,5 +1,39 @@
 # 会话日志（Session Log）
 
+## 2026-07-08（生产部署·修正）
+
+### 会话目标
+
+用户要求先把改动推到服务器端。第一次操作后用户反馈未看到改动，经排查是部署命令遗漏了 `git pull`，导致服务器只重建了旧代码。本次修正后重新部署并验证。
+
+### 完成内容
+
+1. 排查：服务器 `HEAD` 停留在 `d945b17`（Kairos rebrand 旧提交），而 `origin/master` 已是 `9697492`；确认第一次部署命令漏写了 `git pull`。
+2. 修正：在服务器执行 `git fetch origin && git reset --hard origin/master` 切换到最新代码。
+3. 重新后台执行完整部署：`git pull origin master && bash deploy/build-frontends.sh && docker compose -f deploy/docker-compose.yml up -d --build`。
+4. 轮询 `/tmp/deploy2.log` 直到 `DONE_0`。
+5. 验证服务器 `frontends/portfolio/dist/music/shattered-dream.mp3` 存在（4.3M），且 `dist/assets/*.js` 包含 `MusicToggle` / `SplashOverlay` / `shattered-dream`。
+6. 从服务器本机验证 8 条 HTTPS 路径全部 200。
+7. 端到端 smoke 测试 `POST /rag/chat` 正常，返回带 `[1]` 引用的 Markdown 回答。
+8. 更新日志并推送。
+
+### 遇到的问题
+
+- **第一次部署命令遗漏 `git pull`**：我发送的服务器命令只包含 `bash deploy/build-frontends.sh && docker compose ...`，没有先拉取最新代码，导致服务器在旧提交 `d945b17` 上重建，用户自然看不到改动。根因是命令拼接时漏掉了 `git pull origin master &&`。
+- 浏览器缓存：即使服务器已更新，用户侧仍可能显示旧版本，需强制刷新（Ctrl+Shift+R / Cmd+Shift+R）或无痕窗口确认。
+
+### 未做事项
+
+- AI 层基础教程（LLM / Function Calling / RAG）仍待补。
+- 如需继续调整音乐/动画体验，可基于生产实测反馈迭代。
+
+### 最终状态
+
+- 生产服务器 `https://www.shiyuan-wreg.cloud` 现在确实运行最新 `master`（`9697492`）。
+- 服务器 `dist` 已包含 `MusicToggle`、`SplashOverlay`、背景音乐资源。
+- `origin/master` 已同步（含本次日志修正）。
+- 本地 Docker stack 未启动。
+
 ## 2026-07-08（生产部署）
 
 ### 会话目标

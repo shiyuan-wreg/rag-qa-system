@@ -1,5 +1,30 @@
 # Nexus 开发日志
 
+## 2026-07-08（生产部署·修正）
+
+### 今日目标
+
+按用户要求把 Kairos 最新改动部署到首尔生产服务器。第一次部署后用户反馈未看到改动，排查发现部署命令遗漏 `git pull`，本次修正并重新部署。
+
+### 完成内容
+
+- ✅ 排查：服务器本地 `HEAD` 为 `d945b17`，`origin/master` 为 `9697492`，确认第一次命令漏写 `git pull`。
+- ✅ 修正：执行 `git fetch origin && git reset --hard origin/master` 更新到最新提交。
+- ✅ 重新执行完整部署：`git pull origin master && bash deploy/build-frontends.sh && docker compose -f deploy/docker-compose.yml up -d --build`，`DONE_0`。
+- ✅ 验证 `frontends/portfolio/dist/music/shattered-dream.mp3` 存在，且打包后的 JS 包含 `MusicToggle` / `SplashOverlay` / `shattered-dream`。
+- ✅ 8 路由 HTTPS 200 验证通过。
+- ✅ RAG 端到端 smoke 测试通过。
+
+### 关键决策 / 因果
+
+1. **为什么第一次部署失败？** 发送的服务器命令漏掉了 `git pull origin master`，导致 `build-frontends.sh` 只是在旧提交上重新打包，新代码根本没到服务器。后续必须严格核对命令包含 `git pull`。
+2. **如何确认服务器真的更新了？** 除了路由 200，还检查了 `dist/assets/*.js` 是否包含新组件名、音乐文件是否存在，确保不是旧版本在缓存中。
+
+### 待改进
+
+- AI 层基础教程仍待补。
+- 用户侧若仍看不到改动，需提醒强制刷新或无痕窗口。
+
 ## 2026-07-08（生产部署）
 
 ### 今日目标
