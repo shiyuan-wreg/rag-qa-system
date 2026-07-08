@@ -1,5 +1,5 @@
 interface MusicToggleProps {
-  isPlaying: boolean
+  isMuted: boolean
   onToggle: () => void
 }
 
@@ -32,19 +32,19 @@ function MusicNoteOffIcon({ className }: { className?: string }) {
   )
 }
 
-export default function MusicToggle({ isPlaying, onToggle }: MusicToggleProps) {
+export default function MusicToggle({ isMuted, onToggle }: MusicToggleProps) {
   return (
     <button
       type="button"
       onClick={onToggle}
-      aria-label={isPlaying ? '关闭背景音乐' : '播放背景音乐'}
-      title={isPlaying ? '关闭背景音乐' : '播放背景音乐'}
+      aria-label={isMuted ? '开启背景音乐' : '关闭背景音乐'}
+      title={isMuted ? '背景音乐已关闭' : '背景音乐已开启'}
       className="p-2 rounded-md text-tertiary hover:text-primary hover:bg-surface-hover transition-colors active:scale-95"
     >
-      {isPlaying ? (
-        <MusicNoteIcon className="w-5 h-5" />
-      ) : (
+      {isMuted ? (
         <MusicNoteOffIcon className="w-5 h-5" />
+      ) : (
+        <MusicNoteIcon className="w-5 h-5" />
       )}
     </button>
   )

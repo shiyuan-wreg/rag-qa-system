@@ -34,11 +34,11 @@ function MenuIcon({ open }: { open: boolean }) {
 }
 
 interface NavBarProps {
-  isPlaying?: boolean
+  isMuted?: boolean
   onMusicToggle?: () => void
 }
 
-export default function NavBar({ isPlaying = false, onMusicToggle }: NavBarProps) {
+export default function NavBar({ isMuted = false, onMusicToggle }: NavBarProps) {
   const { pathname } = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
   const scrolled = useScrolled()
@@ -74,13 +74,13 @@ export default function NavBar({ isPlaying = false, onMusicToggle }: NavBarProps
                 }`} />
               </Link>
             ))}
-            <MusicToggle isPlaying={isPlaying} onToggle={onMusicToggle ?? (() => {})} />
+            <MusicToggle isMuted={isMuted} onToggle={onMusicToggle ?? (() => {})} />
             <ParallaxToggle />
             <ThemeToggle />
           </div>
 
           <div className="flex md:hidden items-center gap-3">
-            <MusicToggle isPlaying={isPlaying} onToggle={onMusicToggle ?? (() => {})} />
+            <MusicToggle isMuted={isMuted} onToggle={onMusicToggle ?? (() => {})} />
             <ParallaxToggle />
             <ThemeToggle />
             <button

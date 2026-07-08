@@ -19,7 +19,7 @@ function DemoRoute({ slug, src }: { slug: string; src: string }) {
   return <Demo slug={slug} src={src} />
 }
 
-function getInitialMuted(): boolean {
+function getInitialUserMuted(): boolean {
   if (typeof window === 'undefined') return false
   return window.localStorage.getItem(MUSIC_MUTED_KEY) === 'true'
 }
@@ -27,17 +27,17 @@ function getInitialMuted(): boolean {
 export default function App() {
   const { pathname } = useLocation()
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [userMuted, setUserMuted] = useState(getInitialUserMuted)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isMuted, setIsMuted] = useState(getInitialMuted)
 
-  // Initialize audio and attempt autoplay
+  // Initialize audio and attempt autoplay unless user has muted
   useEffect(() => {
     const audio = new Audio(MUSIC_SRC)
     audio.loop = true
     audio.volume = MUSIC_VOLUME
     audioRef.current = audio
 
-    if (!isMuted) {
+    if (!userMuted) {
       audio
         .play()
         .then(() => setIsPlaying(true))
@@ -52,11 +52,11 @@ export default function App() {
       audio.src = ''
       audioRef.current = null
     }
-  }, [isMuted])
+  }, [userMuted])
 
   // Resume audio on first user interaction if autoplay was blocked
   useEffect(() => {
-    if (isMuted) return
+    if (userMuted) return
 
     const tryResume = () => {
       const audio = audioRef.current
@@ -72,26 +72,28 @@ export default function App() {
       window.removeEventListener('click', tryResume)
       window.removeEventListener('keydown', tryResume)
     }
-  }, [isMuted])
+  }, [userMuted])
 
   const handleMusicToggle = () => {
     const audio = audioRef.current
     if (!audio) return
 
-    if (isPlaying) {
-      audio.pause()
-      setIsPlaying(false)
-      setIsMuted(true)
-      localStorage.setItem(MUSIC_MUTED_KEY, 'true')
-    } else {
+    if (userMuted) {
+      // User wants to unmute
       audio
         .play()
         .then(() => {
           setIsPlaying(true)
-          setIsMuted(false)
+          setUserMuted(false)
           localStorage.setItem(MUSIC_MUTED_KEY, 'false')
         })
         .catch(() => {})
+    } else {
+      // User wants to mute
+      audio.pause()
+      setIsPlaying(false)
+      setUserMuted(true)
+      localStorage.setItem(MUSIC_MUTED_KEY, 'true')
     }
   }
 
@@ -99,7 +101,7 @@ export default function App() {
     <>
       <SplashOverlay />
       <div className="min-h-screen bg-base">
-        <NavBar isPlaying={isPlaying} onMusicToggle={handleMusicToggle} />
+        <NavBar isMuted={userMuted} onMusicToggle={handleMusicToggle} />
         <ParallaxViewport>
           <PageTransition key={pathname}>
             <Routes>
