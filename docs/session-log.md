@@ -176,3 +176,36 @@
 - `origin/master` 已同步
 - 本地 dev server 运行在 http://localhost:5181
 - **下次继续第一动作**：用户体验后确认是否还有调整，或部署生产
+
+## 2026-07-08（网页体验调整·修复二）
+
+### 会话目标
+
+用户反馈：刷新网页后仍然会自动静音/显示静音图标。
+
+### 完成内容
+
+1. 诊断：之前的 `MusicToggle` 根据 `isPlaying` 显示图标，但 `isPlaying=false` 可能是因为浏览器阻止自动播放，不一定表示用户主动静音。刷新后若上次处于播放状态但浏览器阻止 autoplay，图标会错误显示静音。
+2. 重构状态：
+   - `userMuted`：用户主动选择的静音状态，写入 `localStorage.setItem('kairos-music-muted', ...)`。
+   - `isPlaying`：音频实际播放状态，不用于图标显示。
+3. 修改 `MusicToggle.tsx`：props 改为 `isMuted`，图标和 title 只反映用户主动选择。
+4. 修改 `App.tsx`：用 `userMuted` 管理持久化静音状态和自动播放行为。
+5. 修改 `NavBar.tsx`：传递 `isMuted={userMuted}` 给 `MusicToggle`。
+6. 本地 dev server 重启：端口因旧进程占用变为 5182。
+7. 推送 `origin/master`：`3f1c0f4`
+
+### 遇到的问题
+
+- 旧 dev server 进程仍在占用端口，新 server 自动切换到 5182。
+
+### 未做事项
+
+- 生产服务器部署
+
+### 最终状态
+
+- 本地 `master`：`3f1c0f4`
+- `origin/master` 已同步
+- 本地 dev server 运行在 http://localhost:5182
+- **下次继续第一动作**：用户体验后确认静音状态是否被正确记忆
