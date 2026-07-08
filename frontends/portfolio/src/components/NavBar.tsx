@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
 import ParallaxToggle from './ParallaxToggle'
 import Logo from './Logo'
+import MusicToggle from './MusicToggle'
 import { useScrolled } from '../hooks/useScrolled'
 
 const ITEMS = [
@@ -32,7 +33,12 @@ function MenuIcon({ open }: { open: boolean }) {
   )
 }
 
-export default function NavBar() {
+interface NavBarProps {
+  isPlaying?: boolean
+  onMusicToggle?: () => void
+}
+
+export default function NavBar({ isPlaying = false, onMusicToggle }: NavBarProps) {
   const { pathname } = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
   const scrolled = useScrolled()
@@ -68,11 +74,13 @@ export default function NavBar() {
                 }`} />
               </Link>
             ))}
+            <MusicToggle isPlaying={isPlaying} onToggle={onMusicToggle ?? (() => {})} />
             <ParallaxToggle />
             <ThemeToggle />
           </div>
 
           <div className="flex md:hidden items-center gap-3">
+            <MusicToggle isPlaying={isPlaying} onToggle={onMusicToggle ?? (() => {})} />
             <ParallaxToggle />
             <ThemeToggle />
             <button
@@ -94,9 +102,7 @@ export default function NavBar() {
               to={it.to}
               onClick={() => setMobileOpen(false)}
               className={`block text-base font-medium ${
-                isActive(it.to)
-                  ? 'text-primary'
-                  : 'text-secondary'
+                isActive(it.to) ? 'text-primary' : 'text-secondary'
               }`}
             >
               {it.label}
