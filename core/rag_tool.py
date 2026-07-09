@@ -11,33 +11,47 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from rag.loader import load_documents
+from rag.cleaner import clean_chunks, deduplicate_documents
+from rag.enricher import enrich_chunks
+from rag.loader import load_directory
+from rag.retriever import retrieve
 from rag.splitter import split_documents
 from rag.vectorstore import get_or_create_vectorstore
-from rag.retriever import retrieve
+
+
+# RAG 数据工程 pipeline 版本号。升级此版本会触发向量库重建。
+RAG_PIPELINE_VERSION = "2026-07-09-v1"
 
 
 def format_retrieved(query: str, docs: list, max_chars: int = 800) -> str:
-    """把检索到的片段格式化为带来源、保留原始换行的文本。"""
+    """把检索到的片段格式化为带来源、章节、关键词、质量分的文本。"""
     parts = [f"用户问题:{query}", "以下是按相关度排序的相关片段:"]
     for i, doc in enumerate(docs, 1):
-        source = doc.metadata.get("source") if getattr(doc, "metadata", None) else None
+        meta = getattr(doc, "metadata", {}) or {}
+        source = meta.get("source")
         label = os.path.basename(source) if source else "未知来源"
+        section = meta.get("section") or "未分类"
+        keywords = meta.get("keywords", [])
+        quality = meta.get("quality_score", "未知")
         content = doc.page_content.strip()
         if len(content) > max_chars:
             content = content[:max_chars] + "…"
-        parts.append(f"[{i}] 来源:{label}\n{content}")
+        parts.append(
+            f"[{i}] 来源:{label} | 章节:{section} | 质量分:{quality}"
+            f"{(' | 关键词:' + ', '.join(keywords)) if keywords else ''}\n{content}"
+        )
     return "\n\n".join(parts)
 
 
 # RAG 向量检索的 embedding 用 Jina(海外可达)
 JINA_API_KEY = os.environ.get("JINA_API_KEY", "")
-DOCS_PATH = os.environ.get("DOCS_PATH", "docs/python_guide.txt")
+DOCS_PATH = os.environ.get("DOCS_PATH", "docs")
 VECTOR_DB_DIR = os.environ.get("VECTOR_DB_DIR", "./chroma_db")
+RAG_ENRICH_WITH_LLM = os.environ.get("RAG_ENRICH_WITH_LLM", "1") == "1"
 
 
 class RAGTool:
-    """RAG 检索工具，封装文档加载、切分、建库、检索流程。"""
+    """RAG 检索工具，封装文档加载、清洗、元数据增强、切分、建库、检索流程。"""
 
     def __init__(self, docs_path: str = DOCS_PATH, vector_db_dir: str = VECTOR_DB_DIR):
         self.docs_path = docs_path
@@ -56,14 +70,38 @@ class RAGTool:
             return
 
         try:
-            raw_docs = load_documents(self.docs_path)
-            chunks = split_documents(raw_docs)
+            # 1. 加载目录/文件
+            raw_docs = load_directory(self.docs_path)
+            print(f"[+] 加载文档: {len(raw_docs)} 个")
+
+            # 2. 文档级去重
+            deduped_docs = deduplicate_documents(raw_docs)
+            print(f"[+] 去重后: {len(deduped_docs)} 个")
+
+            # 3. 切分
+            chunks = split_documents(deduped_docs)
+            print(f"[+] 切分后: {len(chunks)} 个 chunk")
+
+            # 4. chunk 级清洗 + 质量评分
+            cleaned_chunks = clean_chunks(chunks)
+            print(f"[+] 清洗后: {len(cleaned_chunks)} 个 chunk")
+
+            # 5. 元数据增强
+            enriched_chunks = enrich_chunks(cleaned_chunks, use_llm=RAG_ENRICH_WITH_LLM)
+            print(f"[+] 元数据增强完成")
+
+            # 6. 入库（带 pipeline 版本管理，代码升级自动重建）
             self.vectorstore = get_or_create_vectorstore(
-                chunks, self.vector_db_dir, api_key=JINA_API_KEY
+                enriched_chunks,
+                self.vector_db_dir,
+                api_key=JINA_API_KEY,
+                pipeline_version=RAG_PIPELINE_VERSION,
             )
-            print(f"[+] RAG 工具初始化完成: {len(chunks)} 个文本块")
+            print(f"[+] RAG 工具初始化完成")
         except Exception as e:
             print(f"[错误] RAG 工具初始化失败: {e}")
+            import traceback
+            traceback.print_exc()
 
     def search(self, query: str, top_k: int = 3) -> str:
         """执行检索，返回格式化的文本片段。"""

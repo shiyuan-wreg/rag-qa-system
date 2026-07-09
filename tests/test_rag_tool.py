@@ -9,20 +9,37 @@ from core.rag_tool import format_retrieved
 
 
 class _Doc:
-    def __init__(self, content, source=None):
+    def __init__(self, content, source=None, section=None, keywords=None, quality_score=None):
         self.page_content = content
-        self.metadata = {"source": source} if source else {}
+        self.metadata = {}
+        if source:
+            self.metadata["source"] = source
+        if section:
+            self.metadata["section"] = section
+        if keywords:
+            self.metadata["keywords"] = keywords
+        if quality_score is not None:
+            self.metadata["quality_score"] = quality_score
 
 
 def test_format_preserves_newlines_and_source():
-    docs = [_Doc("def add(a, b):\n    return a + b", source="/app/docs/python_guide.txt")]
+    docs = [_Doc(
+        "def add(a, b):\n    return a + b",
+        source="/app/docs/python_guide.txt",
+        section="函数",
+        keywords=["函数", "def"],
+        quality_score=0.92,
+    )]
     out = format_retrieved("什么是函数", docs)
     assert "什么是函数" in out                      # 含 query
-    assert "python_guide.txt" in out                # 含来源 basename(非全路径)
+    assert "python_guide.txt" in out                # 含来源 basename
     assert "/app/docs" not in out                   # 只取 basename
-    assert "    return a + b" in out                # 保留换行+缩进(未被压成空格)
+    assert "    return a + b" in out                # 保留换行+缩进
     assert "[1]" in out
-    print("[OK] format preserves newlines and source")
+    assert "章节:函数" in out
+    assert "质量分:0.92" in out
+    assert "关键词:函数, def" in out
+    print("[OK] format preserves metadata, newlines and source")
 
 
 def test_format_truncates_long_chunk():

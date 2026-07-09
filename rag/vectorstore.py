@@ -6,6 +6,7 @@ embed_documents / embed_query 接口),避免依赖 langchain 的 Jina 集成版�
 """
 
 import os
+import shutil
 from typing import List
 
 import requests
@@ -45,20 +46,48 @@ class JinaEmbeddings:
         return self._embed([text], task="retrieval.query")[0]
 
 
-def get_or_create_vectorstore(docs, persist_dir: str, api_key: str):
-    """获取或创建向量数据库。api_key 为 Jina embedding key。"""
+def _read_pipeline_version(persist_dir: str) -> str:
+    version_file = os.path.join(persist_dir, ".pipeline_version")
+    if os.path.exists(version_file):
+        with open(version_file, encoding="utf-8") as f:
+            return f.read().strip()
+    return ""
+
+
+def _write_pipeline_version(persist_dir: str, version: str):
+    version_file = os.path.join(persist_dir, ".pipeline_version")
+    with open(version_file, "w", encoding="utf-8") as f:
+        f.write(version)
+
+
+def get_or_create_vectorstore(
+    docs,
+    persist_dir: str,
+    api_key: str,
+    pipeline_version: str = "1",
+):
+    """获取或创建向量数据库。
+
+    如果本地已有数据库且 pipeline_version 一致，直接加载；
+    否则清空重建，保证新数据工程 pipeline 生效。
+    """
     embedding = JinaEmbeddings(api_key=api_key)
 
-    # 如果已有数据库，直接加载
-    if os.path.exists(persist_dir) and os.listdir(persist_dir):
-        print("[+] 加载已有向量数据库")
-        return Chroma(
-            persist_directory=persist_dir,
-            embedding_function=embedding,
-        )
+    existing_version = _read_pipeline_version(persist_dir)
 
-    # 否则新建
+    if os.path.exists(persist_dir) and os.listdir(persist_dir):
+        if existing_version == pipeline_version:
+            print("[+] 加载已有向量数据库")
+            return Chroma(
+                persist_directory=persist_dir,
+                embedding_function=embedding,
+            )
+        print(f"[*] pipeline 版本从 {existing_version} 升级到 {pipeline_version}，重建向量数据库")
+        shutil.rmtree(persist_dir)
+
     print("[+] 构建向量数据库...")
+    os.makedirs(persist_dir, exist_ok=True)
+    _write_pipeline_version(persist_dir, pipeline_version)
     return Chroma.from_documents(
         documents=docs,
         embedding=embedding,
