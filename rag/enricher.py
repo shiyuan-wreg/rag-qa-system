@@ -210,14 +210,20 @@ def enrich_chunks(
 
     if llm_results and len(llm_results) == len(chunks):
         for chunk, meta in zip(chunks, llm_results):
-            chunk.metadata["keywords"] = meta.get("keywords", [])
-            chunk.metadata["entities"] = meta.get("entities", [])
-            chunk.metadata["summary"] = meta.get("summary", "")
+            keywords = meta.get("keywords", [])
+            entities = meta.get("entities", [])
+            summary = meta.get("summary", "")
+            chunk.metadata["keywords"] = keywords if keywords else None
+            chunk.metadata["entities"] = entities if entities else None
+            chunk.metadata["summary"] = summary if summary else None
     else:
         for chunk in chunks:
             text = chunk.page_content
-            chunk.metadata["keywords"] = _heuristic_keywords(text)
-            chunk.metadata["entities"] = _heuristic_entities(text)
-            chunk.metadata["summary"] = _heuristic_summary(text)
+            keywords = _heuristic_keywords(text)
+            entities = _heuristic_entities(text)
+            summary = _heuristic_summary(text)
+            chunk.metadata["keywords"] = keywords if keywords else None
+            chunk.metadata["entities"] = entities if entities else None
+            chunk.metadata["summary"] = summary if summary else None
 
     return chunks

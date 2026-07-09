@@ -87,9 +87,10 @@ def get_or_create_vectorstore(
 
     print("[+] 构建向量数据库...")
     os.makedirs(persist_dir, exist_ok=True)
-    _write_pipeline_version(persist_dir, pipeline_version)
-    return Chroma.from_documents(
+    store = Chroma.from_documents(
         documents=docs,
         embedding=embedding,
         persist_directory=persist_dir,
     )
+    _write_pipeline_version(persist_dir, pipeline_version)
+    return store
