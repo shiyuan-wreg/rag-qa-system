@@ -1,8 +1,8 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-07-08(**前端门户层零基础教程、背景音乐/开场动画/静音记忆修复均已部署生产;8 路由 HTTPS 200,RAG 端到端实测正常。**)
-> 上一更新:2026-07-08(完成前端门户层零基础教程:typescript-basics/react-basics/vite-basics/tailwindcss-basics,概念地图已链接。未部署,仅文档更新。)
+> 最近更新:2026-07-09(**完成 RAG 数据工程第一阶段:数据清洗+元数据增强 pipeline 已上线生产;加载 docs/ 目录 70 个文件,生成 2572 个 chunk,清洗后 2528 个入库;检索结果已带 section/keywords/entities/quality_score;8 路由 HTTPS 200。**)
+> 上一更新:2026-07-08(前端门户层零基础教程、背景音乐/开场动画/静音记忆修复均已部署生产;8 路由 HTTPS 200,RAG 端到端实测正常。)
 > 已知问题(入册防遗忘):① DeepSeek 偶发字面 `\n` 渲染成可见 "\n"(可选 polish);② `renderMarkdown` 两端重复(加第3个 demo 需第3份);③ 本地测试套件因缺 `jinja2` 等只能跑子集(md_converter/nexus 收集失败,容器内正常);④ Git Bash 下 curl/Python 发送中文表单会乱码,验证以浏览器/生产为准。
 
 ## 2026-07-07 学习资产 ✅ 已完成
@@ -45,6 +45,41 @@
 - `docs/learning/kairos-concept-map.md`：TypeScript / React / Vite / TailwindCSS 四个节点已链接到对应零基础教程
 
 **当前状态**：前端门户层零基础教程已完成。下一步继续用相同模式补 AI 层（LLM / Function Calling / RAG）基础教程，或按用户指定方向继续。
+
+## 2026-07-09 RAG 数据工程第一阶段 ✅ 已部署生产
+
+新增 RAG 数据清洗 + 元数据增强 pipeline，把 Kairos RAG 从 demo 级四步流程升级到七步工程化流程：
+
+- 新增 `rag/loader.py` 目录批量加载：支持 `.txt` / `.md` / `.pdf`。
+- 新增 `rag/cleaner.py`：
+  - 文档级 MD5 精确去重
+  - chunk 级长度/信息密度过滤
+  - 跨 chunk 重复噪声（页眉页脚）检测
+  - chunk 质量评分（`info_density`、`completeness`、`quality_score`）
+- 新增 `rag/enricher.py`：
+  - Markdown 章节标题解析
+  - 关键词/实体/摘要抽取（LLM + 启发式降级）
+  - 文档类型、入库时间元数据
+- 更新 `rag/splitter.py`：保留 `start_index` 用于章节映射。
+- 更新 `rag/retriever.py`：按 `quality_score` 过滤检索。
+- 更新 `rag/vectorstore.py`：引入 `pipeline_version`，代码升级自动重建向量库。
+- 更新 `core/rag_tool.py`： orchestration 新流程。
+- 更新 `core/agent.py`：system prompt 使用元数据判断权威性和冲突。
+- 新增/更新测试：`tests/test_rag_cleaner.py`、`tests/test_rag_enricher.py`、`tests/test_rag_tool.py`。
+- 新增设计文档：`docs/superpowers/specs/2026-07-09-rag-data-engineering-design.md`。
+- 新增学习文档：`docs/learning/rag-data-engineering-basics.md`（从零讲解）。
+
+**生产验证**：
+- 部署到首尔服务器，`https://www.shiyuan-wreg.cloud` 8 路由 200。
+- RAG 容器启动加载 `docs/` 目录 70 个文件，切分 2572 个 chunk，清洗后 2528 个入库。
+- 检索结果包含 `source`、`section`、`keywords`、`entities`、`quality_score`。
+- 当前生产配置 `RAG_ENRICH_WITH_LLM=0`，使用启发式元数据抽取以保证启动速度和成本。
+
+**当前状态**：RAG 数据工程第一阶段已完成。下一步可继续：
+- PDF 表格/图片深度解析（第 3 问）
+- 增量更新与 embedding 版本管理（第 5 问）
+- 冲突检测与消解（第 6 问）
+- 版本控制、审核、回滚（第 7 问）
 
 ---
 

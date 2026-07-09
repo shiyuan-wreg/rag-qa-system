@@ -1,5 +1,37 @@
 # Nexus 开发日志
 
+## 2026-07-09（RAG 数据工程第一阶段）
+
+### 今日目标
+
+按用户要求把 Kairos RAG 从 demo 级提升到生产级数据工程水平，本阶段落地数据清洗 + 元数据增强（对应《RAG 七连问》第 1-4 问）。
+
+### 完成内容
+
+- ✅ 梳理当前 RAG 架构，明确 loader/splitter/vectorstore/retriever/agent 各模块现状。
+- ✅ 编写设计文档 `docs/superpowers/specs/2026-07-09-rag-data-engineering-design.md`。
+- ✅ 编写学习文档 `docs/learning/rag-data-engineering-basics.md`，从零讲解数据清洗与元数据增强。
+- ✅ 实现 `rag/loader.py` 目录批量加载。
+- ✅ 实现 `rag/cleaner.py`：文档去重、chunk 噪声过滤、质量评分。
+- ✅ 实现 `rag/enricher.py`：章节解析、关键词/实体/摘要抽取、LLM+启发式降级。
+- ✅ 更新 `rag/splitter.py`、`rag/retriever.py`、`rag/vectorstore.py`、`core/rag_tool.py`、`core/agent.py`。
+- ✅ 新增/更新测试 `tests/test_rag_cleaner.py`、`tests/test_rag_enricher.py`、`tests/test_rag_tool.py`，全部通过。
+- ✅ 部署到生产服务器：8 路由 HTTPS 200，RAG 容器成功加载 70 个文件、切分 2572 个 chunk、清洗后 2528 个入库，检索结果带完整 metadata。
+
+### 关键决策 / 因果
+
+1. **为什么先只做精确去重而不是 SimHash？** SimHash/MinHash 效果更好但实现复杂，本阶段优先保证性能（O(n)）和可解释性；近似去重作为后续扩展点记录在设计文档中。
+2. **为什么用启发式元数据作为生产默认？** LLM 抽取在启动时需对全部 chunk 调用 DeepSeek，成本高、启动慢；启发式（词频、正则、章节解析）零成本、速度快，已能满足教学和生产演示，LLM 抽取保留为可配置开关。
+3. **为什么遇到 Chroma 空 list 报错？** Chroma metadata 校验不允许空列表，说明“本地测试通过”不等于“容器环境通过”，必须在生产容器里跑一遍才能暴露数据序列化问题。
+4. **为什么第一次部署后 RAG 容器 CPU 99% 卡住？** `detect_repeated_noise` 用了 O(n²) 的 SequenceMatcher，docs/ 目录 2572 个 chunk 导致启动时计算量爆炸。改成精确标准化频率统计后秒级完成。
+
+### 待改进
+
+- PDF 表格/图片结构化提取。
+- 增量更新与 embedding 版本管理。
+- 冲突检测与消解。
+- 版本控制、审核、回滚。
+
 ## 2026-07-08（生产部署·修正）
 
 ### 今日目标

@@ -1,5 +1,49 @@
 # 会话日志（Session Log）
 
+## 2026-07-09（RAG 数据工程第一阶段）
+
+### 会话目标
+
+按用户要求把 Kairos RAG 按生产级标准重构，本阶段聚焦数据清洗 + 元数据增强，同时产出设计文档、学习文档、测试和验证。
+
+### 完成内容
+
+1. 梳理当前 RAG 数据流，产出架构图和关键修改点清单。
+2. 编写 Design Spec：`docs/superpowers/specs/2026-07-09-rag-data-engineering-design.md`。
+3. 编写 Learning Doc：`docs/learning/rag-data-engineering-basics.md`（从零讲解，附 Kairos 代码位置）。
+4. 实现代码：
+   - `rag/loader.py` 支持目录批量加载
+   - `rag/cleaner.py` 文档去重、chunk 噪声过滤、质量评分
+   - `rag/enricher.py` 章节/关键词/实体/摘要抽取
+   - `rag/retriever.py` 按 quality_score 过滤
+   - `rag/vectorstore.py` pipeline_version 自动重建
+   - `core/rag_tool.py` 新 orchestration 流程
+   - `core/agent.py` system prompt 使用元数据
+5. 编写测试：`tests/test_rag_cleaner.py`、`tests/test_rag_enricher.py`、`tests/test_rag_tool.py`，本地全部通过。
+6. 部署到生产服务器，验证 8 路由 200。
+7. 修复生产部署中出现的问题：
+   - O(n²) SequenceMatcher 导致启动卡死 → 改为精确频率统计
+   - Chroma 不接受空 list metadata → 空列表存 None
+   - pipeline_version 文件应在 DB 创建成功后写入
+8. 验证 RAG 容器加载 docs/ 70 文件、2572 chunk、清洗后 2528 入库，检索结果带完整 metadata。
+9. 更新 `docs/PROJECT-STATE.md`、`docs/dev-log.md`、`docs/session-log.md` 并推送。
+
+### 遇到的问题
+
+- 本地 Docker Desktop 未启动，无法做本地 Docker 端到端验证，只能直接在生产服务器验证并修复问题。
+- 第一次上线后因 O(n²) 相似度计算和空 list metadata 导致 RAG 容器启动失败/卡死，已修复。
+
+### 未做事项
+
+- PDF 表格/图片深度解析、增量更新、冲突处理、版本控制（留到下一阶段）。
+
+### 最终状态
+
+- 生产服务器 `https://www.shiyuan-wreg.cloud` 8 路由 200。
+- RAG 数据工程第一阶段已上线，检索结果带 section/keywords/entities/quality_score。
+- `origin/master` 已同步（含本次全部提交）。
+- 生产配置 `RAG_ENRICH_WITH_LLM=0`，使用启发式元数据抽取。
+
 ## 2026-07-08（生产部署·修正）
 
 ### 会话目标
