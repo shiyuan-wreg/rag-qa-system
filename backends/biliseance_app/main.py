@@ -56,6 +56,42 @@ def _http_get(url: str, params: dict | None = None) -> str:
         return resp.content.decode("utf-8", errors="replace")
 
 
+_BROWSER_UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0"}
+_EM_RE = re.compile(r"</?em[^>]*>")
+
+
+def _search_videos(keyword: str, limit: int = 6) -> list[dict]:
+    """B站站内搜索昵称,返回相关视频(注销账号的本体视频已消失,搜到的是
+    补档/录播/提及,恰好是确认身份的线索)。直连会被风控,走 tor 出口+先取
+    buvid cookie 可通过。best-effort:失败返回空列表。"""
+    try:
+        with httpx.Client(timeout=20.0, headers=_BROWSER_UA, follow_redirects=True) as client:
+            client.get("https://www.bilibili.com")  # 拿 buvid3 cookie 过风控
+            resp = client.get(
+                "https://api.bilibili.com/x/web-interface/search/type",
+                params={"search_type": "video", "keyword": keyword},
+            )
+            data = resp.json()
+        if data.get("code") != 0:
+            return []
+        videos = []
+        for item in (data.get("data", {}).get("result") or []):
+            if item.get("type") != "video" or not item.get("bvid"):
+                continue
+            videos.append({
+                "title": _EM_RE.sub("", item.get("title", "")),
+                "bvid": item["bvid"],
+                "author": item.get("author", ""),
+                "pubdate": item.get("pubdate", 0),
+                "play": item.get("play", 0),
+            })
+            if len(videos) >= limit:
+                break
+        return videos
+    except Exception:  # noqa: BLE001 - 搜索是增强项,挂了不影响主结果
+        return []
+
+
 @app.get("/healthz")
 def healthz():
     return {"status": "ok"}
@@ -84,6 +120,10 @@ async def api_dig(request: Request, uid: str = ""):
         result = await run_in_threadpool(digger.dig, uid, _http_get)
     except digger.DigError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    # 拿到昵称后附站内搜索结果,帮助确认身份(补档/录播/相关视频)
+    if result.get("status") in ("sealed", "alive") and result.get("nickname"):
+        result["videos"] = await run_in_threadpool(_search_videos, result["nickname"])
 
     with _lock:
         _cache[uid] = (now + CACHE_TTL, result)

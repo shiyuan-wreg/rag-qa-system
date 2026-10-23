@@ -106,3 +106,12 @@ button:disabled { opacity:.4; cursor:not-allowed; }
 
 footer { margin-top:48px; font-size:.75rem; color:var(--d-dim); line-height:1.8; }
 @media (max-width:560px){ .who{font-size:1.4rem;} .query{flex-direction:column;} }
+
+.vitem { padding:8px 0; border-bottom:1px dashed var(--d-border); }
+.vitem:last-child { border-bottom:none; }
+.vitem .vtitle {
+  display:block; font-size:.9rem; color:var(--d-text); text-decoration:none;
+  border:none; padding:0; margin-bottom:3px; font-family:var(--d-font);
+}
+.vitem .vtitle:hover { text-decoration:underline; }
+.vitem .vmeta { font-family:"JetBrains Mono",ui-monospace,Consolas,monospace; font-size:.72rem; color:var(--d-dim); }

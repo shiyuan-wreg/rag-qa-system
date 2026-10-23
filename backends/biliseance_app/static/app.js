@@ -23,9 +23,27 @@
   }
 
   function reset() {
-    ["window-box", "note-box", "timeline", "links"].forEach(function (id) { $(id).hidden = true; });
+    ["window-box", "note-box", "timeline", "links", "videos-box"].forEach(function (id) { $(id).hidden = true; });
     $("snaps").innerHTML = "";
     $("link-row").innerHTML = "";
+    $("video-list").innerHTML = "";
+  }
+
+  function renderVideos(videos) {
+    if (!videos || !videos.length) return;
+    $("videos-box").hidden = false;
+    var box = $("video-list");
+    videos.forEach(function (v) {
+      var row = el("div", "vitem");
+      var a = link("https://www.bilibili.com/video/" + v.bvid, v.title);
+      a.className = "vtitle";
+      row.appendChild(a);
+      var meta = "UP:" + (v.author || "?");
+      if (v.pubdate) meta += " · " + new Date(v.pubdate * 1000).toISOString().slice(0, 10);
+      if (v.play) meta += " · " + (v.play > 10000 ? (v.play / 10000).toFixed(1) + "万" : v.play) + "播放";
+      row.appendChild(el("span", "vmeta", meta));
+      box.appendChild(row);
+    });
   }
 
   function render(r) {
@@ -42,6 +60,7 @@
       $("window-box").hidden = false;
       $("window-range").textContent = r.window.last_named + " — " + r.window.first_blank;
       renderTimeline(r.snaps);
+      renderVideos(r.videos);
       renderLinks("继续深挖(以昵称反搜)", searchLinks(r.nickname));
     } else if (r.status === "sealed_early") {
       tag.textContent = "已注销 · 身份不可考";
@@ -60,6 +79,7 @@
       $("note-text").textContent =
         "最新快照(" + r.last_seen + ")里昵称仍然完好,存档时这个账号没有注销迹象。如果你看到的是「账号已注销」,说明注销发生在最新存档之后。";
       renderTimeline(r.snaps);
+      renderVideos(r.videos);
       renderLinks("以昵称反搜", searchLinks(r.nickname));
     } else { // none
       tag.textContent = "无法招魂";

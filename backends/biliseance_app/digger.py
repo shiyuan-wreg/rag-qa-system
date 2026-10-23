@@ -10,6 +10,7 @@ Wayback 的历史快照保留了注销前的标题,二分定位"最后一个有�
 from __future__ import annotations
 
 import re
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 
 CDX_API = "https://web.archive.org/cdx/search/cdx"
@@ -95,20 +96,28 @@ def dig(uid: str, http_get) -> dict:
 
     probed: dict[str, Snap] = {}
 
-    def probe(ts: str) -> Snap:
-        if ts in probed:
-            return probed[ts]
+    def probe_one(ts: str) -> Snap:
         try:
             html = _get_with_retry(http_get, SNAPSHOT.format(ts=ts, uid=uid))
         except Exception as exc:  # noqa: BLE001
             raise DigError(f"抓取快照 {_fmt_ts(ts)} 失败: {exc}") from exc
         nick = parse_nickname(html)
-        snap = Snap(ts=ts, named=nick is not None, nick=nick)
-        probed[ts] = snap
-        return snap
+        return Snap(ts=ts, named=nick is not None, nick=nick)
 
-    first = probe(timestamps[0])
-    last = probe(timestamps[-1])
+    def probe_many(indices: list[int]) -> None:
+        """并行抓取一批快照(Tor 单请求 3-15s,串行二分是大存档的性能杀手)。"""
+        todo = list(dict.fromkeys(timestamps[i] for i in indices if timestamps[i] not in probed))
+        if not todo:
+            return
+        with ThreadPoolExecutor(max_workers=min(6, len(todo))) as pool:
+            for snap in pool.map(probe_one, todo):
+                probed[snap.ts] = snap
+
+    def snap(i: int) -> Snap:
+        return probed[timestamps[i]]
+
+    probe_many([0, len(timestamps) - 1])
+    first, last = snap(0), snap(len(timestamps) - 1)
 
     if last.named:
         return {
@@ -121,17 +130,22 @@ def dig(uid: str, http_get) -> dict:
             "first_blank": _fmt_ts(first.ts), "snaps": sorted(probed.values(), key=lambda s: s.ts),
         }
 
-    # 二分:在 timestamps 中定位 [named ... | blank ...] 边界
-    lo, hi = 0, len(timestamps) - 1  # probe(lo) named, probe(hi) blank 恒成立
+    # 分层并行收窄:lo 指向 named,hi 指向 blank,每轮在 (lo,hi) 内均布采样并行抓取
+    lo, hi = 0, len(timestamps) - 1
     while hi - lo > 1:
-        mid = (lo + hi) // 2
-        if probe(timestamps[mid]).named:
-            lo = mid
-        else:
-            hi = mid
-    boundary_named = probe(timestamps[lo])
+        span = hi - lo - 1
+        step = max(1, span // 6)
+        mids = list(range(lo + step, hi, step))[:6]
+        probe_many(mids)
+        # 在已探测点中找新的最右 named / 最左 blank
+        known = sorted(i for i in range(lo, hi + 1) if timestamps[i] in probed)
+        for i in known:
+            if snap(i).named:
+                lo = max(lo, i)
+            else:
+                hi = min(hi, i)
     return {
-        "status": "sealed", "uid": uid, "nickname": boundary_named.nick,
+        "status": "sealed", "uid": uid, "nickname": snap(lo).nick,
         "window": {"last_named": _fmt_ts(timestamps[lo]), "first_blank": _fmt_ts(timestamps[hi])},
         "snaps": sorted(probed.values(), key=lambda s: s.ts),
     }

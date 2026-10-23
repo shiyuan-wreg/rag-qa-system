@@ -80,7 +80,7 @@ def test_binary_search_larger_archive():
     r = digger.dig("123", http)
     assert r["status"] == "sealed"
     assert r["window"] == {"last_named": "2024-05-01", "first_blank": "2024-06-01"}
-    assert len([c for c in calls if "/web/" in c]) <= 5  # log2(10)≈3.3 + 首尾
+    assert len([c for c in calls if "/web/" in c]) <= 8  # 首尾2 + 一轮并行采样6,远少于逐个串行
 
 
 def test_cdx_non_json_raises_digerror():
