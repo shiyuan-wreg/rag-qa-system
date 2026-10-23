@@ -1,8 +1,8 @@
 # 项目状态与交接文档(PROJECT STATE)
 
 > **重进会话先读这份。** 它告诉你:现在到哪了、分支状态、下一步做什么、关键路径、已定决策。
-> 最近更新:2026-07-09(**完成 RAG 数据工程第一阶段:数据清洗+元数据增强 pipeline 已上线生产;加载 docs/ 目录 70 个文件,生成 2572 个 chunk,清洗后 2528 个入库;检索结果已带 section/keywords/entities/quality_score;8 路由 HTTPS 200。**)
-> 上一更新:2026-07-08(前端门户层零基础教程、背景音乐/开场动画/静音记忆修复均已部署生产;8 路由 HTTPS 200,RAG 端到端实测正常。)
+> 最近更新:2026-10-23(**第 7 个 demo「招魂台 BiliSéance」上线:输 UID 经 Wayback 快照恢复已注销 B 站账号昵称+注销时间窗,二分定位边界;archive.org 封全部机房 IP,生产走 tor 容器出口(compose 内网 socks5),取数带 3 次重试;23 tests 全绿,sealed/alive/none 生产实测通过。**)
+> 上一更新:2026-08-14(按 2026-08-13 代码审查报告修复一批安全/可靠性问题,全量 pytest 104 passed/1 skipped。)
 > 已知问题(入册防遗忘):① DeepSeek 偶发字面 `\n` 渲染成可见 "\n"(可选 polish);② `renderMarkdown` 两端重复(加第3个 demo 需第3份);③ 本地测试套件因缺 `jinja2` 等只能跑子集(md_converter/nexus 收集失败,容器内正常);④ Git Bash 下 curl/Python 发送中文表单会乱码,验证以浏览器/生产为准。
 
 ## 2026-07-07 学习资产 ✅ 已完成
