@@ -97,3 +97,30 @@ def test_cdx_network_error_raises_digerror():
 
     with pytest.raises(digger.DigError):
         digger.dig("123", dead_http)
+
+
+def test_retry_recovers_from_transient_tor_failure():
+    """前两次抓取失败、第三次成功(Tor 出口抖动场景),dig 应正常返回。"""
+    ts = ["20240910102533"]
+    attempts = []
+
+    def flaky(url, params=None):
+        if "cdx" in url:
+            return json.dumps([["timestamp"]] + [[t] for t in ts])
+        attempts.append(url)
+        if len(attempts) < 3:
+            raise OSError("General SOCKS server failure")
+        return NAMED
+
+    r = digger.dig("123", flaky)
+    assert r["status"] == "alive"
+    assert len(attempts) == 3
+
+
+def test_retry_exhausted_raises_digerror():
+    """持续失败应在 3 次尝试后抛 DigError,而不是无限重试。"""
+    def always_dead(url, params=None):
+        raise OSError("SOCKS failure")
+
+    with pytest.raises(digger.DigError):
+        digger.dig("123", always_dead)

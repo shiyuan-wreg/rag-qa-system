@@ -25,6 +25,20 @@ class DigError(Exception):
     """上游(archive.org)不可用或返回异常。"""
 
 
+def _get_with_retry(http_get, url: str, params: dict | None = None, attempts: int = 3) -> str:
+    """Tor 出口抖动是常态(部分出口被 archive.org 间歇限制),失败换电路重试。"""
+    import time
+    last: Exception | None = None
+    for i in range(attempts):
+        try:
+            return http_get(url, params=params)
+        except Exception as exc:  # noqa: BLE001 - 统一由上层归类
+            last = exc
+            if i < attempts - 1:
+                time.sleep(2 * (i + 1))
+    raise last  # type: ignore[misc]
+
+
 @dataclass
 class Snap:
     ts: str          # CDX 时间戳 yyyyMMddHHmmss
@@ -59,7 +73,7 @@ def dig(uid: str, http_get) -> dict:
       none         Wayback 无任何存档
     """
     try:
-        cdx_text = http_get(CDX_API, params={
+        cdx_text = _get_with_retry(http_get, CDX_API, params={
             "url": f"space.bilibili.com/{uid}",
             "output": "json",
             "fl": "timestamp",
@@ -85,7 +99,7 @@ def dig(uid: str, http_get) -> dict:
         if ts in probed:
             return probed[ts]
         try:
-            html = http_get(SNAPSHOT.format(ts=ts, uid=uid))
+            html = _get_with_retry(http_get, SNAPSHOT.format(ts=ts, uid=uid))
         except Exception as exc:  # noqa: BLE001
             raise DigError(f"抓取快照 {_fmt_ts(ts)} 失败: {exc}") from exc
         nick = parse_nickname(html)
