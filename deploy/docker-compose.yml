@@ -50,6 +50,19 @@ services:
     env_file: ../.env
     restart: always
     expose: ["8006"]
+    depends_on: [mihomo]
+    environment:
+      # 服务器机房 IP 被 archive.org 拉黑,必须经住宅代理出口
+      - HTTP_PROXY=http://mihomo:7890
+      - HTTPS_PROXY=http://mihomo:7890
+
+  # mihomo(Clash 内核)出站代理:仅 biliseance 使用;订阅配置在 deploy/mihomo/config.yaml(gitignored)
+  mihomo:
+    image: metacubex/mihomo:v1.18.7
+    restart: always
+    expose: ["7890"]
+    volumes:
+      - ./mihomo/config.yaml:/root/.config/mihomo/config.yaml:ro
 
   nginx:
     image: nginx:1.27-alpine

@@ -54,3 +54,6 @@ worktrees/
 
 # nginx basic-auth password file lives only on the server
 deploy/nginx/.htpasswd
+
+# mihomo subscription config lives only on the server (contains private URL)
+deploy/mihomo/config.yaml
