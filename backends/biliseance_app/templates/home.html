@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>招魂台 BiliSéance</title>
+<script>
+// 跟随门户主题:读 localStorage,监听 storage 事件即时换肤(同源 iframe 自动收到)
+(function(){
+  var KEY='kairos-theme', VALID=['mono-light','light','deepblue','cyber','machine'];
+  function apply(t){ if(VALID.indexOf(t)<0)t='mono-light'; document.documentElement.setAttribute('data-demo-theme',t); }
+  try{ apply(localStorage.getItem(KEY)); }catch(e){ apply('mono-light'); }
+  window.addEventListener('storage', function(e){ if(e.key===KEY) apply(e.newValue); });
+})();
+</script>
+<link rel="stylesheet" href="static/style.css" />
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="num">DEMO 07</span>
+    <h1>招魂台 <span class="mono dim-h">BiliSéance</span></h1>
+    <p class="sub">输入已注销 B 站账号的 UID,通过 Wayback Machine 历史快照恢复它的真实昵称与注销时间窗口,<br>并给出继续深挖历史投稿的反搜入口。</p>
+  </header>
+
+  <div class="query">
+    <input id="uid" spellcheck="false" placeholder="输入 UID,如 3493135860631798" />
+    <button id="go">开始招魂</button>
+  </div>
+  <p class="hint">UID 获取方式:关注列表里点开「账号已注销」,地址栏 <code>space.bilibili.com/</code> 后面那串数字。</p>
+  <p class="msg" id="msg"></p>
+
+  <section class="result" id="result" hidden>
+    <div class="result-head">
+      <span class="ghost-tag" id="tag"></span>
+      <h2 class="who" id="who"></h2>
+      <div class="uid-line" id="uidline"></div>
+    </div>
+    <div class="window" id="window-box" hidden>
+      <div class="label">注销时间窗口</div>
+      <div class="range" id="window-range"></div>
+      <div class="note">最后一个留有昵称的快照与第一个昵称已清空的快照之间,即注销行为发生的时间窗。窗口大小取决于存档密度,不保证覆盖全部账号。</div>
+    </div>
+    <div class="window" id="note-box" hidden>
+      <div class="note note-flat" id="note-text"></div>
+    </div>
+    <div class="timeline" id="timeline" hidden>
+      <div class="label" id="timeline-label"></div>
+      <div id="snaps"></div>
+    </div>
+    <div class="links" id="links" hidden>
+      <div class="label" id="links-label"></div>
+      <div class="link-row" id="link-row"></div>
+    </div>
+  </section>
+
+  <footer>
+    数据来源:Internet Archive Wayback Machine 公开快照。本工具不存储任何查询记录,不接触 B 站登录态。<br>
+    恢复出的昵称与历史投稿痕迹仅用于个人怀旧用途。
+  </footer>
+
+</div>
+<script src="static/app.js"></script>
+</body>
+</html>

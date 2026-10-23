@@ -64,4 +64,13 @@ export const WORKS: Work[] = [
     path: '/iconforge',
     icon: '/icons/iconforge.svg',
   },
+  {
+    slug: 'bili-seance',
+    index: '07',
+    title: '招魂台 BiliSéance',
+    desc: '输入已注销 B 站账号的 UID,经 Wayback 历史快照恢复真实昵称与注销时间窗。',
+    tech: ['FastAPI', 'Wayback CDX', 'httpx'],
+    path: '/bili-seance',
+    icon: '/icons/bili-seance.svg',
+  },
 ]
