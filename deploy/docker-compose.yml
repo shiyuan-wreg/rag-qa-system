@@ -50,19 +50,19 @@ services:
     env_file: ../.env
     restart: always
     expose: ["8006"]
-    depends_on: [mihomo]
+    depends_on: [tor]
     environment:
-      # 服务器机房 IP 被 archive.org 拉黑,必须经住宅代理出口
-      - HTTP_PROXY=http://mihomo:7890
-      - HTTPS_PROXY=http://mihomo:7890
+      # 服务器机房 IP 被 archive.org 拉黑,Tor 出口为住宅/混合 IP 可通
+      - HTTP_PROXY=socks5://tor:9050
+      - HTTPS_PROXY=socks5://tor:9050
 
-  # mihomo(Clash 内核)出站代理:仅 biliseance 使用;订阅配置在 deploy/mihomo/config.yaml(gitignored)
-  mihomo:
-    image: metacubex/mihomo:v1.18.7
+  # Tor 出站代理:仅 biliseance 使用,compose 内网,不发布宿主机端口
+  tor:
+    build:
+      context: ..
+      dockerfile: deploy/tor/Dockerfile
     restart: always
-    expose: ["7890"]
-    volumes:
-      - ./mihomo/config.yaml:/root/.config/mihomo/config.yaml:ro
+    expose: ["9050"]
 
   nginx:
     image: nginx:1.27-alpine

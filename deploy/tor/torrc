@@ -1,0 +1,4 @@
+# 仅作 compose 内网 SOCKS5 出口,不发布到宿主机端口
+SocksPort 0.0.0.0:9050
+Log notice stdout
+DataDirectory /tmp/tor
