@@ -51,3 +51,6 @@ docs/learning/*.docx
 # docs/prompts/
 .worktrees/
 worktrees/
+
+# nginx basic-auth password file lives only on the server
+deploy/nginx/.htpasswd

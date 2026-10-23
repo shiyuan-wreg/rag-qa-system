@@ -60,6 +60,7 @@ services:
     depends_on: [rag, fc, nexus, md_converter, iconforge, biliseance]
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ../frontends/portfolio/dist:/usr/share/nginx/html:ro
       - ../frontends/nexus-learning-web/dist:/usr/share/nginx/learn:ro
@@ -71,3 +72,16 @@ services:
       - /var/lib/letsencrypt:/var/lib/letsencrypt
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --quiet; sleep 12h & wait $${!}; done;'"
     restart: always
+
+  # lab-terminal 实验网关：读者在书页点「跑一下」→ 白名单实验在一次性容器里真跑
+  # 挂载 docker.sock = 网关持有宿主机 root 级能力，安全性依赖网关的口令+白名单设计
+  lab:
+    build:
+      context: ../lab-terminal
+      dockerfile: gateway/Dockerfile
+    env_file: ../.env
+    restart: always
+    expose: ["8090"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../lab-terminal/data:/data
